@@ -49,6 +49,7 @@ public class JavaChatClientMain extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
+		//배경이미지
 		ImageIcon icon = new ImageIcon(getClass().getResource("login.png"));
         Image scaledImage = icon.getImage().getScaledInstance(420, 570, Image.SCALE_SMOOTH);
         ImageIcon scaledIcon = new ImageIcon(scaledImage);

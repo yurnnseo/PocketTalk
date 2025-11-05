@@ -43,7 +43,7 @@ public class JavaChatClientMain extends JFrame {
 	 */
 	public JavaChatClientMain() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 420, 570);
+		setBounds(100, 100, 400, 570);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);

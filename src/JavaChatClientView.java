@@ -37,14 +37,14 @@ public class JavaChatClientView extends JFrame {
 	 */
 	public JavaChatClientView(String username, String ip_addr, String port_no) {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 392, 462);
+		setBounds(100, 100, 420, 600);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(12, 10, 352, 340);
+		scrollPane.setBounds(12, 10, 355, 440);
 		contentPane.add(scrollPane);
 
 		textArea = new JTextArea();
@@ -52,17 +52,17 @@ public class JavaChatClientView extends JFrame {
 		scrollPane.setViewportView(textArea);
 
 		txtInput = new JTextField();
-		txtInput.setBounds(91, 365, 185, 40);
+		txtInput.setBounds(60, 493, 232, 30);
 		contentPane.add(txtInput);
 		txtInput.setColumns(10);
 
 		btnSend = new JButton("Send");
-		btnSend.setBounds(288, 364, 76, 40);
+		btnSend.setBounds(291, 492, 76, 30);
 		contentPane.add(btnSend);
 		
 		lblUserName = new JLabel("Name");
 		lblUserName.setHorizontalAlignment(SwingConstants.CENTER);
-		lblUserName.setBounds(12, 364, 67, 40);
+		lblUserName.setBounds(0, 487, 79, 40);
 		contentPane.add(lblUserName);
 		setVisible(true);
 	

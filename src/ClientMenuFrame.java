@@ -38,4 +38,11 @@ public class ClientMenuFrame extends JFrame {
         revalidate();
         repaint();
     }
+    
+    //ip랑port는 받을 필요 없으니까 없애도 되나?
+    public void showeditprofile() {
+        setContentPane(new EditProfile(this, username, ip_addr, port_no));
+        revalidate();
+        repaint();
+    }
 }

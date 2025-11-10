@@ -21,7 +21,7 @@ public class ClientMenuFrame extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
-        // 처음엔 친구목록 패널 표시
+        // 처음엔 친구 목록 패널 표시
         setContentPane(new ClientFriendsMenuPanel(this, username, ip_addr, port_no));
         setVisible(true);
     }
@@ -35,13 +35,6 @@ public class ClientMenuFrame extends JFrame {
 
     public void showChattingMenu() {
         setContentPane(new ClientChatingMenuPanel(this, username, ip_addr, port_no));
-        revalidate();
-        repaint();
-    }
-    
-    //ip랑port는 받을 필요 없으니까 없애도 되나?
-    public void showeditprofile() {
-        setContentPane(new EditProfile(this, username, ip_addr, port_no));
         revalidate();
         repaint();
     }

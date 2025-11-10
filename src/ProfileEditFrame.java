@@ -1,14 +1,12 @@
-// ProfileEditFrame.java
 import java.awt.Window;
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 
 public class ProfileEditFrame extends JFrame {
 
     // 논리적 부모(생성 트리 상의 부모 패널)
-    private final ClientFriendsMenuPanel parentPanel;
+    private final MyProfileViewPanel parentPanel;
 
-    public ProfileEditFrame(ClientFriendsMenuPanel parentPanel, String username, String ip_addr, String port_no) {
+    public ProfileEditFrame(MyProfileViewPanel parentPanel, String username, String ip_addr, String port_no) {
         this.parentPanel = parentPanel;
 
         setTitle("프로필 편집");
@@ -19,8 +17,8 @@ public class ProfileEditFrame extends JFrame {
         setSize(330, 490);
     }
 
-    // 필요시 외부에서 parentPanel을 얻고 싶을 때 쓸 수 있음
-    public ClientFriendsMenuPanel getParentPanel() {
+    // 필요 시 외부에서 parentPanel을 얻고 싶을 때 쓸 수 있음
+    public MyProfileViewPanel getParentPanel() {
         return parentPanel;
     }
 }

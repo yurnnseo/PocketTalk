@@ -13,7 +13,7 @@ public class ClientFriendsMenuPanel extends JPanel {
         setLayout(null);
 
         // 배경 이미지 로드
-        backgroundImg = new ImageIcon(getClass().getResource("/friendsbackscreen.png")).getImage();
+        backgroundImg = new ImageIcon(getClass().getResource("/friendsbackscreen1.png")).getImage();
 
         // 아이콘
         metaicon  = new ImageIcon(getClass().getResource("/metaIcon.png"));
@@ -26,8 +26,8 @@ public class ClientFriendsMenuPanel extends JPanel {
         edit.setBounds(100,120,70,30);
         
         // 버튼 생성
-        metabutton = makeButton(metaicon, 23, 40);
-        chatbutton = makeButton(chaticon, 23, 120);
+        metabutton = makeButton(metaicon, 13, 40);
+        chatbutton = makeButton(chaticon, 13, 120);
         
         add(metabutton);
         add(chatbutton);

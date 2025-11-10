@@ -12,7 +12,7 @@ public class ClientChatingMenuPanel extends JPanel {
         setLayout(null);
 
         // 배경 이미지 로드
-        backgroundImg = new ImageIcon(getClass().getResource("/chatingbackscreen.png")).getImage();
+        backgroundImg = new ImageIcon(getClass().getResource("/chatingbackscreen1.png")).getImage();
 
         // 아이콘
         metaicon  = new ImageIcon(getClass().getResource("/metaIcon.png"));
@@ -21,8 +21,8 @@ public class ClientChatingMenuPanel extends JPanel {
         chaticon2 = new ImageIcon(getClass().getResource("/chatIcon2.png"));
 
         // 버튼 생성
-        metabutton = makeButton(metaicon2, 23, 40);
-        chatbutton = makeButton(chaticon2, 23, 120);
+        metabutton = makeButton(metaicon2, 13, 40);
+        chatbutton = makeButton(chaticon2, 13, 120);
         add(metabutton);
         add(chatbutton);
 

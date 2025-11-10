@@ -17,7 +17,7 @@ public class ClientMenuFrame extends JFrame {
 
         setTitle("PocketTalk");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(420, 600);
+        setSize(380, 560);
         setLocationRelativeTo(null);
         setResizable(false);
 

@@ -64,8 +64,8 @@ public class ChoosePerson extends JFrame{
         okbutton = makeButton(okicon1, 40, 30, 120, 280);
         cancelbutton = makeButton(cancel, 40, 30, 180, 280);
         
-        add(okbutton);
-        add(cancelbutton);
+        contentPane.add(okbutton);
+        contentPane.add(cancelbutton);
 	}
 	
 	 private JButton makeButton(ImageIcon icon, int width, int height, int x, int y) {

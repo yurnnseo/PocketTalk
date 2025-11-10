@@ -52,8 +52,8 @@ public class ClientChatingMenuPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
             	//대화 상대 고르는 팝업창띄우고 고르면 그 사람이랑 대화하는 뷰 떠야함
-            	ChoosePerson cp = new ChoosePerson();
-            	cp.setVisible(true);
+            	//ChoosePerson cp = new ChoosePerson();
+            	//cp.setVisible(true);
             }
         });
     }

@@ -10,15 +10,11 @@
  * 1:1 미니게임 (사과 게임)
 
 ### 📄 코드 간단 설명
-StartPocketTalk -> 시작 프레임
-
-StartPocketTalkPanel -> 로그인 배경사진, 텍스트 필드, 로그인 버튼 패널에다가 부착함
-
-ClientMenuFrame -> StartPocketTalkPanel에서 버튼 누르면 새로운 창 띄워야 해서 이걸로 프레임 설정하고
-
-ClientChatingMenuPanel -> 채팅 목록 보여주는 패널
-
-ClientFriendsMenuPanel -> 친구 목록 보여주는 패널
+* StartPocketTalk -> 시작 프레임
+* StartPocketTalkPanel -> 로그인 배경사진, 텍스트 필드, 로그인 버튼 패널에다가 부착함
+* ClientMenuFrame -> StartPocketTalkPanel에서 버튼 누르면 새로운 창 띄워야 해서 이걸로 프레임 설정하고
+* ClientChatingMenuPanel -> 채팅 목록 보여주는 패널
+* ClientFriendsMenuPanel -> 친구 목록 보여주는 패널    
 
 ### 💀 해야될 것들..
 1. 서버 프레임에 입장하는 사람 정보 띄우기(근데 이걸 꼭 해야되나?)

@@ -2,30 +2,20 @@
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
-
-
 
 public class ChoosePerson extends JFrame{
 	private JPanel contentPane;
@@ -41,20 +31,16 @@ public class ChoosePerson extends JFrame{
     private DataOutputStream dos;
     private JLabel lblUserName;
     
-    private JList<String> userList;
-    private JScrollPane userListScrollPane;
-    
     private Image backgroundImg = null;
     private ImageIcon okicon1, cancel;
     private JButton okbutton, cancelbutton;
     
-	public ChoosePerson(String username, String ip_addr, String port_no) {
-		this.UserName = username;
-		
+	public ChoosePerson() {
+	
 		// 배경 이미지 로드
         backgroundImg = new ImageIcon(getClass().getResource("/selecting.png")).getImage();
         
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 260, 370); // 크기 조정
         setResizable(false);
         
@@ -71,20 +57,7 @@ public class ChoosePerson extends JFrame{
         contentPane.setLayout(null);
         setContentPane(contentPane);
         
-        //참여자 목록 추가
-        userListScrollPane = new JScrollPane();
-        userListScrollPane.setBounds(30, 50, 200, 200);
-        contentPane.add(userListScrollPane);
-
-        userList = new JList<>();
-        //다중선택 모드
-        userList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        userListScrollPane.setViewportView(userList);
-        if (users != null) {
-            userList.setListData(users);
-        }
-        
-        // 아이콘 생성
+     // 아이콘
         okicon1  = new ImageIcon(getClass().getResource("/okicon1.png"));
         cancel = new ImageIcon(getClass().getResource("/cancelicon1.png"));
         
@@ -93,9 +66,6 @@ public class ChoosePerson extends JFrame{
         
         contentPane.add(okbutton);
         contentPane.add(cancelbutton);
-        
-       
-        setVisible(true);
 	}
 	
 	 private JButton makeButton(ImageIcon icon, int width, int height, int x, int y) {
@@ -113,5 +83,4 @@ public class ChoosePerson extends JFrame{
 	        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 	        return btn;
 	    }
-	   
 }

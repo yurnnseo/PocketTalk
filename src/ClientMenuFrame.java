@@ -13,7 +13,7 @@ public class ClientMenuFrame extends JFrame {
     private Socket socket;
     private DataInputStream dis;
     private DataOutputStream dos;
-    private String[] currentUserList = new String[0];
+    private String[] currentUserList; //서버에게서 받은 최신 목록
     
     public ClientMenuFrame(String username, String ip_addr, String port_no) {
         this.username = username;
@@ -28,10 +28,10 @@ public class ClientMenuFrame extends JFrame {
 
         // 처음엔 친구 목록 패널 표시
         setContentPane(new ClientFriendsMenuPanel(this, username, ip_addr, port_no));
-        //setVisible(true);
+        setVisible(true);
         
         try {
-            // (중요) 메인 프레임이 생성될 때 연결합니다.
+            //메인 프레임이 생성될 때 연결
             socket = new Socket(ip_addr, Integer.parseInt(port_no));
             dis = new DataInputStream(socket.getInputStream());
             dos = new DataOutputStream(socket.getOutputStream());
@@ -46,32 +46,25 @@ public class ClientMenuFrame extends JFrame {
             JOptionPane.showMessageDialog(null, "서버 연결 실패!");
             System.exit(0);
         }
-        
-        setVisible(true);
     }
-
+    
+    // 이 프레임이 직접 리스너를 가짐
     class ListenNetwork extends Thread {
         public void run() {
             while (true) {
                 try {
                     String msg = dis.readUTF();
-                    
                     if (msg.startsWith("/userlist ")) {
-                        // (중요) 서버가 보낸 목록을 멤버 변수에 저장
-                        String[] users = msg.substring(10).split(",");
-                        currentUserList = users;
+                        //멤버 변수에 저장
+                        currentUserList = msg.substring(10).split(",");
                     }
-                    // (여기에 나중에 /whisper, /groupchat 등 다른 메시지 처리 로직 추가)
-                    
                 } catch (IOException e) {
-                    JOptionPane.showMessageDialog(null, "서버 연결이 끊겼습니다.");
-                    System.exit(0); // 연결 끊기면 종료
                     break;
                 }
             }
         }
     }
-    
+
     // 화면 전환용 메소드
     public void showFriendsMenu() {
         setContentPane(new ClientFriendsMenuPanel(this, username, ip_addr, port_no));
@@ -83,19 +76,5 @@ public class ClientMenuFrame extends JFrame {
         setContentPane(new ClientChatingMenuPanel(this, username, ip_addr, port_no));
         revalidate();
         repaint();
-    }
-    
-    public String[] getCurrentUserList() {
-        return currentUserList;
-    }
-    
-    /** 현재 로그인한 내 사용자 이름을 반환합니다. */
-    public String getUsername() {
-        return username;
-    }
-    
-    /** 서버로 메시지를 보내는 DataOutputStream을 반환합니다. */
-    public DataOutputStream getDos() {
-        return dos;
     }
 }

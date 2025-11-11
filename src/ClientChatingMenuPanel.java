@@ -8,8 +8,6 @@ public class ClientChatingMenuPanel extends JPanel {
     private ImageIcon metaicon, metaicon2, chaticon, chaticon2, pluschaticon;
     private JButton metabutton, chatbutton, newchatbutton;
 
-    private ChoosePerson lobby = null;
-    
     public ClientChatingMenuPanel(ClientMenuFrame parentFrame, String username, String ip_addr, String port_no) {
         setLayout(null);
 
@@ -31,7 +29,6 @@ public class ClientChatingMenuPanel extends JPanel {
         add(chatbutton);
         add(newchatbutton);
 
-       
         // 친구 목록으로 돌아가기
         metabutton.addActionListener(new ActionListener() {
             @Override
@@ -54,17 +51,9 @@ public class ClientChatingMenuPanel extends JPanel {
         newchatbutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            	if (lobby == null) {
-                    lobby = new ChoosePerson(username, ip_addr, port_no);
-                }
-                
-                // 3. 'lobbyWindow'가 현재 화면에 보이지 않을 때만 보여줍니다.
-                if (!lobby.isVisible()) {
-                    lobby.setVisible(true);
-                } else {
-                    // (추천) 이미 창이 떠있으면, 그 창을 맨 앞으로 가져옵니다.
-                    lobby.toFront();
-                }
+            	//대화 상대 고르는 팝업창띄우고 고르면 그 사람이랑 대화하는 뷰 떠야함
+            	ChoosePerson cp = new ChoosePerson();
+            	cp.setVisible(true);
             }
         });
     }

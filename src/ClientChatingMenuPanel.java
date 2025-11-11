@@ -52,6 +52,8 @@ public class ClientChatingMenuPanel extends JPanel {
             	cp.setVisible(true);
             }
         });
+        
+        System.out.println("푸시하고 싶어");
     }
 
     private JButton makeButton(ImageIcon icon, int x, int y) {

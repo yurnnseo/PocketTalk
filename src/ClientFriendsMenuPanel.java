@@ -58,6 +58,8 @@ public class ClientFriendsMenuPanel extends JPanel {
                 parentFrame.showChattingMenu();
             }
         });
+        
+        System.out.println("푸시하고 싶어");
        
     }
 
@@ -79,4 +81,6 @@ public class ClientFriendsMenuPanel extends JPanel {
         g.fillRect(0, 0, 75, getHeight());
         g.drawImage(backgroundImg, 0, 0, getWidth(), getHeight(), this);
     }
+    
+    
 }

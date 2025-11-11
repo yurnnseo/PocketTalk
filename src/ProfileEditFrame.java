@@ -6,7 +6,7 @@ public class ProfileEditFrame extends JFrame {
     // 논리적 부모(생성 트리 상의 부모 패널)
     private final MyProfileViewPanel parentPanel;
 
-    public ProfileEditFrame(MyProfileViewPanel parentPanel, String username, String ip_addr, String port_no) {
+    public ProfileEditFrame(MyProfileViewPanel parentPanel, String username, String ip_addr, String port_no, String profileImagePath) {
         this.parentPanel = parentPanel;
 
         setTitle("프로필 편집");

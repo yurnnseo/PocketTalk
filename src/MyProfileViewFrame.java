@@ -6,14 +6,14 @@ public class MyProfileViewFrame extends JFrame {
     // 논리적 부모(생성 트리 상의 부모 패널)
     private final ClientFriendsMenuPanel parentPanel;
 
-    public MyProfileViewFrame(ClientFriendsMenuPanel parentPanel, String username, String ip_addr, String port_no) {
+    public MyProfileViewFrame(ClientFriendsMenuPanel parentPanel, String username, String ip_addr, String port_no, String profileImagePath) {
         this.parentPanel = parentPanel;
 
         setTitle("나의 프로필");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(false);
         // MyProfileViewPanel의 부모는 이 프레임
-        setContentPane(new MyProfileViewPanel(this, username, ip_addr, port_no));
+        setContentPane(new MyProfileViewPanel(this, username, ip_addr, port_no, profileImagePath));
         setSize(330, 490);
     }
 

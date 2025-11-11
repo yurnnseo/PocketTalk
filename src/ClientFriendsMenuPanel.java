@@ -7,6 +7,8 @@ public class ClientFriendsMenuPanel extends JPanel {
     private Image backgroundImg;
     private ImageIcon metaicon, metaicon2, chaticon, chaticon2;
     private JButton metabutton, chatbutton;
+    
+    private final String profileImagePath = "/defaultprofileimage.png";
 
     public ClientFriendsMenuPanel(ClientMenuFrame parentFrame, String username, String ip_addr, String port_no) {
         setLayout(null);
@@ -28,8 +30,7 @@ public class ClientFriendsMenuPanel extends JPanel {
         add(metabutton);
         add(chatbutton);
         
-        ProfileHeaderPanel header = new ProfileHeaderPanel(username, "/defaultprofileimage.png", 50, 50);
-        // 이 패널은 null-layout이므로 위치/크기는 여기서 자유롭게 지정
+        ProfileHeaderView header = new ProfileHeaderView(username, "/defaultprofileimage.png", 50, 50, ProfileHeaderView.Orientation.HORIZONTAL);
         header.setBounds(95, 80, header.getPreferredSize().width, header.getPreferredSize().height);
         add(header);
 
@@ -37,8 +38,8 @@ public class ClientFriendsMenuPanel extends JPanel {
         header.getProfileButton().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-	            MyProfileViewFrame pef = new MyProfileViewFrame(ClientFriendsMenuPanel.this, username, ip_addr, port_no);
-	            pef.setVisible(true);
+                MyProfileViewFrame pef = new MyProfileViewFrame(ClientFriendsMenuPanel.this, username, ip_addr, port_no, profileImagePath);
+                pef.setVisible(true);
             }
         });
         

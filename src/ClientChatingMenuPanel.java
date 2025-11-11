@@ -7,28 +7,33 @@ public class ClientChatingMenuPanel extends JPanel {
     private Image backgroundImg;
     private ImageIcon metaicon, metaicon2, chaticon, chaticon2, pluschaticon;
     private JButton metabutton, chatbutton, newchatbutton;
+    private JLabel chatingLabel;
+    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
 
     public ClientChatingMenuPanel(ClientMenuFrame parentFrame, String username, String ip_addr, String port_no) {
         setLayout(null);
+        setBackground(Color.decode("#F9F9F9"));
 
-        // 배경 이미지 로드
-        backgroundImg = new ImageIcon(getClass().getResource("/chatingbackscreen1.png")).getImage();
-
-        // 아이콘
+        chatingLabel = new JLabel("채팅", SwingConstants.LEFT);
+        chatingLabel.setFont(fontSource.getFont(20f));
+        chatingLabel.setForeground(Color.BLACK);
+        chatingLabel.setBounds(97, 20, 50, 50);
+        add(chatingLabel);
+        
         metaicon  = new ImageIcon(getClass().getResource("/metaIcon.png"));
         metaicon2 = new ImageIcon(getClass().getResource("/metaIcon2.png"));
         chaticon  = new ImageIcon(getClass().getResource("/chatIcon.png"));
         chaticon2 = new ImageIcon(getClass().getResource("/chatIcon2.png"));
         pluschaticon = new ImageIcon(getClass().getResource("/pluschaticon.png"));
-
-        // 버튼 생성
+        
         metabutton = makeButton(metaicon2, 13, 40);
         chatbutton = makeButton(chaticon2, 13, 120);
         newchatbutton = makeButton(pluschaticon, 310 ,30);
+        
         add(metabutton);
         add(chatbutton);
         add(newchatbutton);
-
+        
         // 친구 목록으로 돌아가기
         metabutton.addActionListener(new ActionListener() {
             @Override
@@ -38,15 +43,6 @@ public class ClientChatingMenuPanel extends JPanel {
                 parentFrame.showFriendsMenu();
             }
         });
-
-        // 채팅 버튼 (현재 화면 유지)
-        /*chatbutton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                metabutton.setIcon(metaicon2);
-                chatbutton.setIcon(chaticon2);
-            }
-        });*/
         
         newchatbutton.addActionListener(new ActionListener() {
             @Override
@@ -72,6 +68,8 @@ public class ClientChatingMenuPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        g.setColor(Color.decode("#E3D6F0"));
+        g.fillRect(0, 0, 75, getHeight());
         g.drawImage(backgroundImg, 0, 0, getWidth(), getHeight(), this);
     }
 }

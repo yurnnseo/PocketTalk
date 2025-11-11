@@ -12,6 +12,7 @@ public class ClientFriendsMenuPanel extends JPanel {
 
     public ClientFriendsMenuPanel(ClientMenuFrame parentFrame, String username, String ip_addr, String port_no) {
         setLayout(null);
+        setBackground(Color.decode("#F9F9F9"));
 
         // 배경 이미지 로드
         backgroundImg = new ImageIcon(getClass().getResource("/friendsbackscreen1.png")).getImage();

@@ -7,6 +7,7 @@ public class ProfileHeaderView extends JPanel {
 
     private final JButton profileButton;
     private final JLabel nameLabel;
+    private FontSource fontSource = new FontSource("/Dovemayo_gothic.ttf"); // 폰트
 
     public ProfileHeaderView(String username, String imagePath, int imgW, int imgH, Orientation orientation) {
         setLayout(null);
@@ -32,13 +33,12 @@ public class ProfileHeaderView extends JPanel {
 
         // 이름 라벨
         nameLabel = new JLabel(username, SwingConstants.LEFT);
-        nameLabel.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+        nameLabel.setFont(fontSource.getFont(16f));
         nameLabel.setForeground(Color.BLACK);
         add(nameLabel);
 
         // 배치
         if (orientation == Orientation.HORIZONTAL) {
-            // [이미지][ 15px ][이름]  → 친구목록용
             int gap = 15;
             profileButton.setBounds(0, 0, imgW, imgH);
             nameLabel.setHorizontalAlignment(SwingConstants.LEFT);
@@ -47,7 +47,9 @@ public class ProfileHeaderView extends JPanel {
             int totalW = imgW + gap + 150;
             int totalH = Math.max(imgH, 25);
             setPreferredSize(new Dimension(totalW, totalH));
-        } else {
+        } 
+        
+        else {
             // 세로 정렬  → 내 프로필용
             // 너비 살짝 여유를 두고 가운데 정렬
             int width = Math.max(imgW + 40, 180);

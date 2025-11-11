@@ -53,6 +53,7 @@ public class ClientFriendsMenuPanel extends JPanel {
             }
         });
 
+
     }
 
     private JButton makeButton(ImageIcon icon, int x, int y) {

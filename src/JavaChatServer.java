@@ -109,9 +109,8 @@ public class JavaChatServer extends JFrame {
                     // User 당 하나씩 Thread 생성
                     UserService new_user = new UserService(client_socket);
                     UserVec.add(new_user); // 새로운 참가자 배열에 추가
-                    new_user.start();
                     AppendText("사용자 입장. 현재 참가자 수 " + UserVec.size());
-                    BroadCastUserList();
+                    new_user.start(); // 만든 객체의 스레드 실행
                 } catch (IOException e) {
                     AppendText("!!!! accept 에러 발생... !!!!");
                 }
@@ -130,26 +129,7 @@ public class JavaChatServer extends JFrame {
         textArea.setCaretPosition(textArea.getText().length());  // textArea의 커서(캐럿) 위치를 텍스트 영역의 마지막으로 이동
     }
 
-  //모든 다중 클라이언트에게 순차적으로 채팅 메시지 전달
-    public void WriteAll(String str) {  
-        for (int i = 0; i < UserVec.size(); i++) {
-        	UserService user = UserVec.get(i);     // get(i) 메소드는 user_vc 컬렉션의 i번째 요소를 반환
-            user.WriteOne(str);
-        }
-    }
     
-    public void BroadCastUserList() {
-    	String userListStr = "/userist";
-    	for(int i=0; i<UserVec.size(); i++) {
-    		userListStr += UserVec.get(i).getUserName();
-    		if(i<UserVec.size() - 1) {
-    			userListStr += ",";
-    		}
-    	}
-    	
-    	//클라이언트에게 사용자 목록 전송
-    	WriteAll(userListStr);
-    }
     // User 당 생성되는 Thread, 유저의 수만큼 스레스 생성
     // 이 UserService 스레드는 '소켓 객체'를 이용해서 실제 특정 유저와 메시지를 주고 받는 기능을 수행하는 스레드
     // 이 스레드 클래스의 run() 메소드 안의 dis.readUTF()에서 대기하다가 메시지가 들어오면 -> Write All로 전체 접속한 사용자한테 전송(단톡방) 
@@ -163,37 +143,30 @@ public class JavaChatServer extends JFrame {
         private DataInputStream dis;
         private DataOutputStream dos;
         private Socket client_socket;
-        //private Vector<UserService> user_vc; // 제네릭 타입 사용
+        private Vector<UserService> user_vc; // 제네릭 타입 사용
         private String UserName = "";
 
-        public String getUserName() {
-        	return UserName;
-        }
         public UserService(Socket client_socket) {
             // 매개변수로 넘어온 소켓 객체 저장 
             this.client_socket = client_socket;
-            //this.user_vc = UserVec;
+            this.user_vc = UserVec;
             try {
                 is = client_socket.getInputStream();
                 dis = new DataInputStream(is);
                 os = client_socket.getOutputStream();
                 dos = new DataOutputStream(os);
-                
                 String line1 = dis.readUTF();      // 제일 처음 연결되면 클라이언트의 SendMessage("/login " + UserName);에 의해 "/login UserName" 문자열이 들어옴
                 String[] msg = line1.split(" ");   //line1이라는 문자열을 공백(" ")을 기준으로 분할
                 UserName = msg[1].trim();          //분할된 문자열 배열 msg의 두 번째 요소(인덱스 1)를 가져와 trim 메소드를 사용하여 앞뒤의 공백을 제거
                 AppendText("새로운 참가자 " + UserName + " 입장.");
-                WriteOne("Welcome to Java chat server\n");     
+                WriteOne("Welcome to Java chat server\n");
                 WriteOne(UserName + "님 환영합니다.\n"); // 연결된 사용자에게 정상접속을 알림
-                
-                
             } catch (Exception e) {
                 AppendText("userService error");
             }
         }
 
 
-       
         // 클라이언트로 메시지 전송
         public void WriteOne(String msg) {
             try {
@@ -209,13 +182,19 @@ public class JavaChatServer extends JFrame {
                 }
                 UserVec.removeElement(this); // 에러가난 현재 객체를 벡터에서 지운다
                 AppendText("사용자 퇴장. 현재 참가자 수 " + UserVec.size());
-                
-                //변경 갱신
-                BroadCastUserList();
             }
         }
 
-       
+        
+        //모든 다중 클라이언트에게 순차적으로 채팅 메시지 전달
+        public void WriteAll(String str) {  
+            for (int i = 0; i < user_vc.size(); i++) {
+            	UserService user = user_vc.get(i);     // get(i) 메소드는 user_vc 컬렉션의 i번째 요소를 반환
+                user.WriteOne(str);
+            }
+        }
+        
+        
         public void run() {
         	// dis.readUTF()에서 대기하다가 메시지가 들어오면 -> Write All로 전체 접속한 사용자한테 메시지 전송(단톡방), 이걸 클라이언트별로 무한히 실행
         	// 추가적으로 지금은 dis.readUTF()에서 예외가 발생하면 '예외처리에 의해 정상적으로 스레드가 종료하게 작성'되었으나
@@ -235,8 +214,6 @@ public class JavaChatServer extends JFrame {
                         client_socket.close();
                         UserVec.removeElement(this); // 에러가 난 현재 객체를 벡터에서 지운다
                         AppendText("사용자 퇴장. 남은 참가자 수 " + UserVec.size());
-                        //변경 갱신
-                        BroadCastUserList();
                         break;
                     } catch (Exception ee) {
                         break;

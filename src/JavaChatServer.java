@@ -146,6 +146,9 @@ public class JavaChatServer extends JFrame {
         private Vector<UserService> user_vc; // 제네릭 타입 사용
         private String UserName = "";
 
+        public String getUserName() {
+        	return UserName;
+        }
         public UserService(Socket client_socket) {
             // 매개변수로 넘어온 소켓 객체 저장 
             this.client_socket = client_socket;
@@ -159,14 +162,30 @@ public class JavaChatServer extends JFrame {
                 String[] msg = line1.split(" ");   //line1이라는 문자열을 공백(" ")을 기준으로 분할
                 UserName = msg[1].trim();          //분할된 문자열 배열 msg의 두 번째 요소(인덱스 1)를 가져와 trim 메소드를 사용하여 앞뒤의 공백을 제거
                 AppendText("새로운 참가자 " + UserName + " 입장.");
-                WriteOne("Welcome to Java chat server\n");
+                WriteOne("Welcome to Java chat server\n");     
                 WriteOne(UserName + "님 환영합니다.\n"); // 연결된 사용자에게 정상접속을 알림
+                
+                //유저 입장 전체 목록 갱신
+                BroadCastUserList();
+                
             } catch (Exception e) {
                 AppendText("userService error");
             }
         }
 
 
+        public void BroadCastUserList() {
+        	String userListStr = "/userList";
+        	for(int i=0; i<user_vc.size(); i++) {
+        		userListStr += user_vc.get(i).getUserName();
+        		if(i<user_vc.size() - 1) {
+        			userListStr += ",";
+        		}
+        	}
+        	
+        	//클라이언트에게 사용자 목록 전송
+        	WriteAll(userListStr);
+        }
         // 클라이언트로 메시지 전송
         public void WriteOne(String msg) {
             try {
@@ -182,6 +201,9 @@ public class JavaChatServer extends JFrame {
                 }
                 UserVec.removeElement(this); // 에러가난 현재 객체를 벡터에서 지운다
                 AppendText("사용자 퇴장. 현재 참가자 수 " + UserVec.size());
+                
+                //변경 갱신
+                BroadCastUserList();
             }
         }
 
@@ -214,6 +236,8 @@ public class JavaChatServer extends JFrame {
                         client_socket.close();
                         UserVec.removeElement(this); // 에러가 난 현재 객체를 벡터에서 지운다
                         AppendText("사용자 퇴장. 남은 참가자 수 " + UserVec.size());
+                        //변경 갱신
+                        BroadCastUserList();
                         break;
                     } catch (Exception ee) {
                         break;

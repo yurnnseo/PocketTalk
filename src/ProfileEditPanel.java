@@ -14,15 +14,22 @@ public class ProfileEditPanel extends JPanel {
 
     // 부모는 ProfileEditFrame
     private final ProfileEditFrame parentFrame;
-
+    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
+    private JLabel editProfileLabel;
+    
     public ProfileEditPanel(ProfileEditFrame parentFrame, String username, String ip_addr, String port_no) {
         this.parentFrame = parentFrame;
 
         setLayout(null);
         setOpaque(true);
 
-        // 배경 이미지 로드
-        backgroundImg = new ImageIcon(getClass().getResource("/profileeditbackscreen.png")).getImage();
+        setBackground(Color.decode("#F9F9F9"));
+        
+        editProfileLabel = new JLabel("프로필 수정", SwingConstants.LEFT);
+        editProfileLabel.setFont(fontSource.getFont(16f));
+        editProfileLabel.setForeground(Color.BLACK);
+        editProfileLabel.setBounds(25, 20, 100, 20);
+        add(editProfileLabel);
 
         // 아이콘 로드
         okicon1 = new ImageIcon(getClass().getResource("/okicon1.png"));

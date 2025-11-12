@@ -1,4 +1,5 @@
 //대화상대 선택
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -15,7 +16,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
 public class ChoosePerson extends JFrame{
 	private JPanel contentPane;
@@ -29,18 +32,19 @@ public class ChoosePerson extends JFrame{
     private OutputStream os;
     private DataInputStream dis;
     private DataOutputStream dos;
-    private JLabel lblUserName;
+    private JLabel lblUserName, choiceLabel, okLabel, cancelLabel;
+    private Image backgroundImg;
     
-    private Image backgroundImg = null;
-    private ImageIcon okicon1, cancel;
+    //private ImageIcon okicon1, cancel;
     private JButton okbutton, cancelbutton;
     
+    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
+    
 	public ChoosePerson() {
-	
-		// 배경 이미지 로드
-        backgroundImg = new ImageIcon(getClass().getResource("/selecting.png")).getImage();
-        
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setLayout(null);
+		setBackground(Color.decode("#F9F9F9"));
+
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 260, 370); // 크기 조정
         setResizable(false);
         
@@ -49,6 +53,8 @@ public class ChoosePerson extends JFrame{
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
+            g.setColor(Color.decode("#E3D6F0"));
+            g.fillRect(0, 0, getWidth(), 40);
             g.drawImage(backgroundImg, 0, 0, getWidth(), getHeight(), this);
         	}
         };
@@ -57,28 +63,28 @@ public class ChoosePerson extends JFrame{
         contentPane.setLayout(null);
         setContentPane(contentPane);
         
-     // 아이콘
-        okicon1  = new ImageIcon(getClass().getResource("/okicon1.png"));
-        cancel = new ImageIcon(getClass().getResource("/cancelicon1.png"));
+        choiceLabel = new JLabel("대화상대 선택", SwingConstants.CENTER);
+        choiceLabel.setFont(fontSource.getFont(12f));
+        choiceLabel.setForeground(Color.BLACK);
+        choiceLabel.setBounds(85, 5, 80, 30);
+        add(choiceLabel);
         
-        okbutton = makeButton(okicon1, 40, 30, 120, 280);
-        cancelbutton = makeButton(cancel, 40, 30, 180, 280);
-        
+        //버튼 생성
+        okbutton = makeButton("확인", 40, 28, 135, 295);
+        cancelbutton = makeButton("취소", 40, 28, 185, 295);
+      
         contentPane.add(okbutton);
         contentPane.add(cancelbutton);
+        
+        
 	}
 	
-	 private JButton makeButton(ImageIcon icon, int width, int height, int x, int y) {
-		 	Image img = icon.getImage();
-
-	        // 크기 조정
-	        Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-	        icon.setImage(scaledImg);
-	        
-	        JButton btn = new JButton(icon);
-	        btn.setBounds(x, y, icon.getIconWidth(), icon.getIconHeight());
-	        btn.setContentAreaFilled(false);
-	        btn.setBorderPainted(false);
+	 private JButton makeButton(String text, int width, int height, int x, int y) {
+	        JButton btn = new JButton(text);
+	        btn.setBounds(x, y, width, height);
+	        btn.setBackground(Color.WHITE); 
+	        btn.setBorder(new LineBorder(Color.BLACK));
+	        btn.setFont(fontSource.getFont(10f));
 	        btn.setFocusPainted(false);
 	        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 	        return btn;

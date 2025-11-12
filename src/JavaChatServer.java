@@ -220,11 +220,12 @@ public class JavaChatServer extends JFrame {
                     WriteOne(UserName + "님 환영합니다.\n"); // 연결된 사용자에게 정상접속을 알림
                     //새로운 사용자 접속 시 알리기
                     BroadcastUserList();
+                    
                     while(true) {
-                    String chat_msg = dis.readUTF(); 
-                    chat_msg =chat_msg.trim();   //msg를 가져와 trim 메소드를 사용하여 앞뒤의 공백을 제거
-                    AppendText(chat_msg); // server 화면에 출력
-                    WriteAll(msg + "\n"); // Write All
+	                    String chat_msg = dis.readUTF(); 
+	                    chat_msg =chat_msg.trim();   //msg를 가져와 trim 메소드를 사용하여 앞뒤의 공백을 제거
+	                    AppendText(chat_msg); // server 화면에 출력
+	                    WriteAll(msg + "\n"); // Write All
                     }
                 } catch (IOException e) {
                     AppendText("dis.readUTF() error");

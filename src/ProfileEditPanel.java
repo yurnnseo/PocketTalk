@@ -168,6 +168,7 @@ public class ProfileEditPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.setColor(Color.BLACK); // 선 색상
-        g.fillRect(50, 200, getWidth() - 100, 2);
+        g.fillRect(29, 206, getWidth() - 65, 1);
+        g.fillRect(29, 262, getWidth() - 65, 1);
     }
 }

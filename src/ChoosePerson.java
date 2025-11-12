@@ -3,6 +3,8 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -32,11 +34,9 @@ public class ChoosePerson extends JFrame{
     private OutputStream os;
     private DataInputStream dis;
     private DataOutputStream dos;
-    private JLabel lblUserName, choiceLabel, okLabel, cancelLabel;
-    private Image backgroundImg;
-    
-    //private ImageIcon okicon1, cancel;
-    private JButton okbutton, cancelbutton;
+    private JLabel lblUserName, choiceLabel, okLabel; 
+     
+    private JButton okbutton;
     
     private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
     
@@ -54,8 +54,7 @@ public class ChoosePerson extends JFrame{
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             g.setColor(Color.decode("#E3D6F0"));
-            g.fillRect(0, 0, getWidth(), 40);
-            g.drawImage(backgroundImg, 0, 0, getWidth(), getHeight(), this);
+            g.fillRect(0, 0, getWidth(), 40); 
         	}
         };
         
@@ -70,13 +69,10 @@ public class ChoosePerson extends JFrame{
         add(choiceLabel);
         
         //버튼 생성
-        okbutton = makeButton("확인", 40, 28, 135, 295);
-        cancelbutton = makeButton("취소", 40, 28, 185, 295);
-      
-        contentPane.add(okbutton);
-        contentPane.add(cancelbutton);
-        
-        
+        okbutton = makeButton("선택 완료", 60, 28, 165, 290);
+
+        add(okbutton);
+        //취소는 창닫기 버튼 누르면 됨
 	}
 	
 	 private JButton makeButton(String text, int width, int height, int x, int y) {
@@ -85,8 +81,28 @@ public class ChoosePerson extends JFrame{
 	        btn.setBackground(Color.WHITE); 
 	        btn.setBorder(new LineBorder(Color.BLACK));
 	        btn.setFont(fontSource.getFont(10f));
+	        
 	        btn.setFocusPainted(false);
+	        btn.setContentAreaFilled(false);
+	        btn.setOpaque(true);
 	        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+	        
+	        Color hoverColor = Color.decode("#E3D6F0"); // 연보라
+	        Color normalColor = Color.WHITE;
+
+	        btn.addMouseListener(new MouseAdapter() {
+	            @Override
+	            public void mouseEntered(MouseEvent e) {
+	                btn.setBackground(hoverColor);
+	            }
+
+	            @Override
+	            public void mouseExited(MouseEvent e) {
+	                btn.setBackground(normalColor);
+	            }
+	        });
+	        
 	        return btn;
 	    }
+	 
 }

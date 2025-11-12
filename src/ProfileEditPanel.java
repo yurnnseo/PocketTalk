@@ -167,6 +167,7 @@ public class ProfileEditPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.drawImage(backgroundImg, 0, 0, getWidth(), getHeight(), this);
+        g.setColor(Color.BLACK); // 선 색상
+        g.fillRect(50, 200, getWidth() - 100, 2);
     }
 }

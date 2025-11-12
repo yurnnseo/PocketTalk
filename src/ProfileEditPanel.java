@@ -28,7 +28,7 @@ public class ProfileEditPanel extends JPanel {
         editProfileLabel = new JLabel("나의 프로필 편집", SwingConstants.LEFT);
         editProfileLabel.setFont(fontSource.getFont(16f));
         editProfileLabel.setForeground(Color.BLACK);
-        editProfileLabel.setBounds(25, 20, 100, 20);
+        editProfileLabel.setBounds(25, 20, 500, 20);
         add(editProfileLabel);
 
         // 아이콘 로드

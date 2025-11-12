@@ -4,9 +4,11 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class ClientFriendsMenuPanel extends JPanel {
-    private Image backgroundImg;
-    private ImageIcon metaicon, metaicon2, chaticon, chaticon2;
+	private ImageIcon metaicon, metaicon2, chaticon, chaticon2;
     private JButton metabutton, chatbutton;
+	private Image backgroundImg;
+    private JLabel friendsLabel;
+    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
     
     private final String profileImagePath = "/defaultprofileimage.png";
 
@@ -14,10 +16,7 @@ public class ClientFriendsMenuPanel extends JPanel {
         setLayout(null);
         setBackground(Color.decode("#F9F9F9"));
 
-        // 배경 이미지 로드
-        backgroundImg = new ImageIcon(getClass().getResource("/friendsbackscreen1.png")).getImage();
-
-        // 아이콘
+     // 아이콘
         metaicon  = new ImageIcon(getClass().getResource("/metaIcon.png"));
         metaicon2 = new ImageIcon(getClass().getResource("/metaIcon2.png"));
         chaticon  = new ImageIcon(getClass().getResource("/chatIcon.png"));
@@ -30,6 +29,12 @@ public class ClientFriendsMenuPanel extends JPanel {
         
         add(metabutton);
         add(chatbutton);
+        
+        friendsLabel = new JLabel("친구", SwingConstants.LEFT);
+        friendsLabel.setFont(fontSource.getFont(20f));
+        friendsLabel.setForeground(Color.BLACK);
+        friendsLabel.setBounds(97, 20, 50, 50);
+        add(friendsLabel);
         
         ProfileHeaderView header = new ProfileHeaderView(username, "/defaultprofileimage.png", 50, 50, ProfileHeaderView.Orientation.HORIZONTAL);
         header.setBounds(95, 80, header.getPreferredSize().width, header.getPreferredSize().height);
@@ -53,8 +58,9 @@ public class ClientFriendsMenuPanel extends JPanel {
                 parentFrame.showChattingMenu();
             }
         });
-
-
+        
+        System.out.println("푸시하고 싶어");
+       
     }
 
     private JButton makeButton(ImageIcon icon, int x, int y) {
@@ -71,6 +77,10 @@ public class ClientFriendsMenuPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        g.setColor(Color.decode("#E3D6F0"));
+        g.fillRect(0, 0, 75, getHeight());
         g.drawImage(backgroundImg, 0, 0, getWidth(), getHeight(), this);
     }
+    
+    
 }

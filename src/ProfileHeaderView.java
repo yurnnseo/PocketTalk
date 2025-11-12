@@ -7,7 +7,7 @@ public class ProfileHeaderView extends JPanel {
 
     private final JButton profileButton;
     private final JLabel nameLabel;
-    private FontSource fontSource = new FontSource("/Dovemayo_gothic.ttf"); // 폰트
+    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
 
     public ProfileHeaderView(String username, String imagePath, int imgW, int imgH, Orientation orientation) {
         setLayout(null);

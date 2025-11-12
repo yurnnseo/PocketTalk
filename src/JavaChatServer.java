@@ -179,7 +179,6 @@ public class JavaChatServer extends JFrame {
                 AppendText("사용자 퇴장. 현재 참가자 수 " + UserVec.size());
             }
         }
-
         
         //모든 다중 클라이언트에게 순차적으로 채팅 메시지 전달
         public void WriteAll(String str) {  

@@ -155,12 +155,7 @@ public class JavaChatServer extends JFrame {
                 dis = new DataInputStream(is);
                 os = client_socket.getOutputStream();
                 dos = new DataOutputStream(os);
-                String line1 = dis.readUTF();      // 제일 처음 연결되면 클라이언트의 SendMessage("/login " + UserName);에 의해 "/login UserName" 문자열이 들어옴
-                String[] msg = line1.split(" ");   //line1이라는 문자열을 공백(" ")을 기준으로 분할
-                UserName = msg[1].trim();          //분할된 문자열 배열 msg의 두 번째 요소(인덱스 1)를 가져와 trim 메소드를 사용하여 앞뒤의 공백을 제거
-                AppendText("새로운 참가자 " + UserName + " 입장.");
-                WriteOne("Welcome to Java chat server\n");
-                WriteOne(UserName + "님 환영합니다.\n"); // 연결된 사용자에게 정상접속을 알림
+                
             } catch (Exception e) {
                 AppendText("userService error");
             }
@@ -194,6 +189,21 @@ public class JavaChatServer extends JFrame {
             }
         }
         
+        //사용자 이름 목록을 만들어서 "/list " 프로토콜과 함께 모두에게 전달
+        public void BroadcastUserList() {
+            StringBuilder sb = new StringBuilder("/list ");
+            
+            //리스트를 읽는 동안 변경 없게 만듦(vector때문에)
+            synchronized (user_vc) {
+                for (int i = 0; i < user_vc.size(); i++) {
+                    sb.append(user_vc.get(i).UserName).append(" "); // 유저 이름을 공백으로 구분
+                }
+            }
+            
+            String userListMsg = sb.toString().trim() + "\n";
+            AppendText("현재 접속자 목록 전송: " + userListMsg); // 서버 로그에 출력
+            WriteAll(userListMsg);
+        }
         
         public void run() {
         	// dis.readUTF()에서 대기하다가 메시지가 들어오면 -> Write All로 전체 접속한 사용자한테 메시지 전송(단톡방), 이걸 클라이언트별로 무한히 실행
@@ -202,10 +212,20 @@ public class JavaChatServer extends JFrame {
         	// 지금은 다양한 사용자 프로토콜(/list, /to, /exit 등)을 정의하고 있지 않지만 추후 /exit 프로토콜 등의 정의시 추가
             while (true) {
                 try {
-                    String msg = dis.readUTF(); 
-                    msg = msg.trim();   //msg를 가져와 trim 메소드를 사용하여 앞뒤의 공백을 제거
-                    AppendText(msg); // server 화면에 출력
+                	String line1 = dis.readUTF();      // 제일 처음 연결되면 클라이언트의 SendMessage("/login " + UserName);에 의해 "/login UserName" 문자열이 들어옴
+                    String[] msg = line1.split(" ");   //line1이라는 문자열을 공백(" ")을 기준으로 분할
+                    UserName = msg[1].trim();          //분할된 문자열 배열 msg의 두 번째 요소(인덱스 1)를 가져와 trim 메소드를 사용하여 앞뒤의 공백을 제거
+                    AppendText("새로운 참가자 " + UserName + " 입장.");
+                    WriteOne("Welcome to Java chat server\n");
+                    WriteOne(UserName + "님 환영합니다.\n"); // 연결된 사용자에게 정상접속을 알림
+                    //새로운 사용자 접속 시 알리기
+                    BroadcastUserList();
+                    while(true) {
+                    String chat_msg = dis.readUTF(); 
+                    chat_msg =chat_msg.trim();   //msg를 가져와 trim 메소드를 사용하여 앞뒤의 공백을 제거
+                    AppendText(chat_msg); // server 화면에 출력
                     WriteAll(msg + "\n"); // Write All
+                    }
                 } catch (IOException e) {
                     AppendText("dis.readUTF() error");
                     try {
@@ -214,6 +234,8 @@ public class JavaChatServer extends JFrame {
                         client_socket.close();
                         UserVec.removeElement(this); // 에러가 난 현재 객체를 벡터에서 지운다
                         AppendText("사용자 퇴장. 남은 참가자 수 " + UserVec.size());
+                        //사용자 나감 알리기
+                        BroadcastUserList();
                         break;
                     } catch (Exception ee) {
                         break;

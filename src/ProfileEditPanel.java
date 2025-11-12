@@ -25,7 +25,7 @@ public class ProfileEditPanel extends JPanel {
 
         setBackground(Color.decode("#F9F9F9"));
         
-        editProfileLabel = new JLabel("프로필 수정", SwingConstants.LEFT);
+        editProfileLabel = new JLabel("나의 프로필 편집", SwingConstants.LEFT);
         editProfileLabel.setFont(fontSource.getFont(16f));
         editProfileLabel.setForeground(Color.BLACK);
         editProfileLabel.setBounds(25, 20, 100, 20);

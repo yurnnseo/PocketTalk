@@ -59,8 +59,6 @@ public class ClientFriendsMenuPanel extends JPanel {
             }
         });
         
-        System.out.println("푸시하고 싶어");
-       
     }
 
     private JButton makeButton(ImageIcon icon, int x, int y) {

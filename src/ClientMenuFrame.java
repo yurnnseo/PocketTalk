@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.*;
 
@@ -57,6 +59,9 @@ public class ClientMenuFrame extends JFrame {
                     if (msg.startsWith("/userlist ")) {
                         //멤버 변수에 저장
                         currentUserList = msg.substring(10).split(",");
+                        
+                        //List<String> usernames = Arrays.asList(currentUserList);
+                        
                     }
                 } catch (IOException e) {
                     break;

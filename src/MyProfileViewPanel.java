@@ -17,13 +17,13 @@ public class MyProfileViewPanel extends JPanel {
         setBackground(Color.decode("#F9F9F9"));
 
         // 프로필 헤더 (친구목록과 동일)
-        ProfileHeaderView header = new ProfileHeaderView(username, "/defaultprofileimage.png", 60, 60, ProfileHeaderView.Orientation.VERTICAL);
+        ProfileHeaderView header = new ProfileHeaderView(username, "/Images/defaultprofileimage.png", 60, 60, ProfileHeaderView.Orientation.VERTICAL);
         header.setBounds(66, 250, header.getPreferredSize().width, header.getPreferredSize().height);
         add(header);
 
 
         // 이미지 버튼 (필요 시 hover/pressed 이미지는 선택) 
-        ImageIcon normal = new ImageIcon(getClass().getResource("/profileeditbutton.png"));
+        ImageIcon normal = new ImageIcon(getClass().getResource("/Images/profileeditbutton.png"));
         Image scaled = normal.getImage().getScaledInstance(400, 50, Image.SCALE_SMOOTH);
         ImageIcon editIcon = new ImageIcon(scaled);
 

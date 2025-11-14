@@ -12,7 +12,7 @@ public class FontSource {
 
             base = Font.createFont(Font.TRUETYPE_FONT, is);
             GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(base); // 안정화
-            System.out.println("[FontSource] loaded: " + base.getFontName());
+            //System.out.println("[FontSource] loaded: " + base.getFontName());
         } 
         
         catch (Exception e) {

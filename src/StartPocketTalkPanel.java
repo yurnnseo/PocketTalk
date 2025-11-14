@@ -10,7 +10,7 @@ public class StartPocketTalkPanel extends JPanel {
     private Image backgroundImg = null;
     private JTextField txtUserName, txtIpAddress, txtPortNumber = null;
     private JButton loginButton = null;
-    private ImageIcon customIcon = new ImageIcon("metamong.png"); // 사용자 정의 아이콘 (다이얼로그에서 사용)
+    private ImageIcon customIcon = new ImageIcon("/Images/metamong.png"); // 사용자 정의 아이콘 (다이얼로그에서 사용)
 
     // 생성자
     public StartPocketTalkPanel(JFrame mainFrame, String initialBackground) {

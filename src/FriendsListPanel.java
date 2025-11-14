@@ -1,3 +1,4 @@
+//친구메뉴패널에 뜨는 친구 목록
 import java.util.List;
 import javax.swing.JPanel;
 
@@ -14,18 +15,16 @@ public class FriendsListPanel extends JPanel{
 	 public void updateList(List<String> friendsName) {
 		removeAll(); //목록 갱신 시 중복 방지
 		 
-		 int y = 0; //시작위치
+		 int y = 15; //시작위치
 		 
 		 for(String name : friendsName) {
 			 if(name.equals(myname)) continue;
 			 
 			 ProfileHeaderView header = new ProfileHeaderView(name,profileImagePath,50,50,ProfileHeaderView.Orientation.HORIZONTAL);
-			 
-			 header.setBounds(0, y, header.getPreferredSize().width, header.getPreferredSize().height);
-			 
+			 header.setBounds(20, y, header.getPreferredSize().width, header.getPreferredSize().height);
 			 add(header);
 
-	         y += header.getPreferredSize().height + 10; // 다음 친구 위치
+	         y += header.getPreferredSize().height + 15; // 다음 친구 위치
 		 }
 		
 		 revalidate();

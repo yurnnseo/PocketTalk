@@ -56,6 +56,7 @@ public class ClientMenuFrame extends JFrame {
             while (true) {
                 try {
                     String msg = dis.readUTF();
+                    //여기를 서버랑 일치하게 /list로 바꾸라는데 그러면 오류남..왜지
                     if (msg.startsWith("/userlist ")) {
                         //멤버 변수에 저장
                         currentUserList = msg.substring(10).split(",");

@@ -25,7 +25,7 @@ public class ClientFriendsMenuPanel extends JPanel {
         int contentX = 75;
         int contentY = 151; 
         int contentWidth = 295; 
-        int contentHeight = 400; 
+        int contentHeight = 375; 
         scrollPane.setBounds(contentX, contentY, contentWidth, contentHeight);
         scrollPane.getViewport().setOpaque(false); //배경 투명화
         scrollPane.setOpaque(false);

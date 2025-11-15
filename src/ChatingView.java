@@ -32,9 +32,6 @@ public class ChatingView extends JFrame {
     private DataOutputStream dos;
     private JLabel lblUserName;
 
-	/**
-	 * Create the frame.
-	 */
 	public ChatingView(String username, String ip_addr, String port_no) {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 392, 462);

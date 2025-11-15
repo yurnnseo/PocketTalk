@@ -8,21 +8,46 @@ public class MyProfileViewPanel extends JPanel {
     private final MyProfileViewFrame parentFrame;
     private JButton editButton;
     private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
+    
+    private String username;          
+    private String statusMessage = ""; 
+    private String profileImagePath;  
 
+    private ProfileHeaderView header;  
+    private JLabel statusLabel; 
+    
     public MyProfileViewPanel(MyProfileViewFrame parentFrame, String username, String ip_addr, String port_no, String profileImagePath) {
         this.parentFrame = parentFrame;
+        this.username = username;         
+        this.statusMessage = ""; 
+        
         setLayout(null);
-
         setOpaque(true);
         setBackground(Color.decode("#F9F9F9"));
 
         // 프로필 헤더 (친구목록과 동일)
-        ProfileHeaderView header = new ProfileHeaderView(username, "/Images/defaultprofileimage.png", 60, 60, ProfileHeaderView.Orientation.VERTICAL);
-        header.setBounds(66, 250, header.getPreferredSize().width, header.getPreferredSize().height);
+        if (profileImagePath == null || profileImagePath.isEmpty()) {
+            profileImagePath = "/Images/defaultprofileimage.png";
+        }
+        final String finalProfileImagePath = profileImagePath;
+        
+        // 프로필 헤더 (친구목록과 동일)
+        header = new ProfileHeaderView(this.username, this.profileImagePath, 60, 60, ProfileHeaderView.Orientation.VERTICAL);
+        Dimension hSize = header.getPreferredSize();
+        int headerX = 66;
+        int headerY = 230; // 살짝 위로 땡겨도 되고 취향대로
+        header.setBounds(headerX, headerY, hSize.width, hSize.height);
         add(header);
 
+        statusLabel = new JLabel(statusMessage, SwingConstants.CENTER);
+        statusLabel.setFont(fontSource.getFont(12f));
+        statusLabel.setForeground(Color.DARK_GRAY);
 
-        // 이미지 버튼 (필요 시 hover/pressed 이미지는 선택) 
+        int statusY = headerY + hSize.height + 8;
+        statusLabel.setBounds(headerX, statusY, hSize.width, 20);
+        add(statusLabel);
+
+        // 편집 버튼 
         ImageIcon normal = new ImageIcon(getClass().getResource("/Images/profileeditbutton.png"));
         Image scaled = normal.getImage().getScaledInstance(400, 50, Image.SCALE_SMOOTH);
         ImageIcon editIcon = new ImageIcon(scaled);
@@ -41,11 +66,29 @@ public class MyProfileViewPanel extends JPanel {
         editButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ProfileEditFrame pef = new ProfileEditFrame(MyProfileViewPanel.this, username, ip_addr, port_no, profileImagePath);
+                ProfileEditFrame pef = new ProfileEditFrame(MyProfileViewPanel.this, MyProfileViewPanel.this.username, ip_addr, port_no, MyProfileViewPanel.this.profileImagePath, MyProfileViewPanel.this.statusMessage);
                 pef.setLocationRelativeTo(parentFrame);
                 pef.setVisible(true);
             }
         });
+    }
+    
+ // 편집 결과를 반영하는 메서드
+    public void updateProfile(String newName, String newStatus) {
+        if (newName != null && !newName.isEmpty()) {
+            this.username = newName;
+            header.setUserName(newName);       // 프로필 헤더에 이름 갱신
+        }
+        if (newStatus != null) {
+            this.statusMessage = newStatus;
+            statusLabel.setText(newStatus);    // 상태메시지 라벨 갱신
+        }
+
+        // 필요하면 여기서 parentFrame/친구패널까지 알려줄 수도 있음
+        parentFrame.onMyProfileUpdated(newName, newStatus);
+
+        revalidate();
+        repaint();
     }
     
     // 배경 직접 그리기

@@ -11,12 +11,19 @@ public class ClientFriendsMenuPanel extends JPanel {
     private JLabel friendsLabel;
     private FriendsListPanel friendsListPanel;
     private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
-    
-    private final String profileImagePath = "/Images/defaultprofileimage.png";
+    private String profileImagePath;
+    private ProfileHeaderView myHeader; 
 
-    public ClientFriendsMenuPanel(ClientMenuFrame parentFrame, String username, String ip_addr, String port_no) {
+    public ClientFriendsMenuPanel(ClientMenuFrame parentFrame, String username, String ip_addr, String port_no, String profileImagePath) {
         setLayout(null);
         setBackground(Color.decode("#F9F9F9"));
+        
+        if (profileImagePath == null || profileImagePath.isEmpty()) {
+            this.profileImagePath = "/Images/defaultprofileimage.png";
+        } 
+        else {
+            this.profileImagePath = profileImagePath;
+        }
         
         friendsListPanel = new FriendsListPanel(username); //본인은 제외하기 위해 내이름 전달
         
@@ -54,16 +61,16 @@ public class ClientFriendsMenuPanel extends JPanel {
         friendsLabel.setBounds(97, 20, 50, 50);
         add(friendsLabel);
         
-        ProfileHeaderView header = new ProfileHeaderView(username, profileImagePath, 50, 50, ProfileHeaderView.Orientation.HORIZONTAL);
-        header.setBounds(95, 80, header.getPreferredSize().width, header.getPreferredSize().height);
-        add(header);
+        // 필드에 저장해두기
+        myHeader = new ProfileHeaderView(username, this.profileImagePath, 50, 50, ProfileHeaderView.Orientation.HORIZONTAL);
+        myHeader.setBounds(95, 80, myHeader.getPreferredSize().width, myHeader.getPreferredSize().height);
+        add(myHeader);
 
-      
-        // 프로필 버튼 클릭 시: 프로필 편집 프레임 띄우기
-        header.getProfileButton().addActionListener(new ActionListener() {
+        // 프로필 버튼 클릭 시: 내 프로필 보기 프레임 띄우기
+        myHeader.getProfileButton().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                MyProfileViewFrame pef = new MyProfileViewFrame(ClientFriendsMenuPanel.this, username, ip_addr, port_no, profileImagePath);
+                MyProfileViewFrame pef = new MyProfileViewFrame(ClientFriendsMenuPanel.this, username, ip_addr, port_no, ClientFriendsMenuPanel.this.profileImagePath);
                 pef.setVisible(true);
             }
         });
@@ -85,6 +92,13 @@ public class ClientFriendsMenuPanel extends JPanel {
     	if(friendsListPanel != null) {
     		friendsListPanel.updateList(usernames);
     	}
+    }
+    
+    // 내 이름이 바뀌었을 때 호출할 힘수
+    public void updateMyProfileName(String newName) {
+        if (myHeader != null && newName != null && !newName.isEmpty()) {
+            myHeader.setUserName(newName);
+        }
     }
     
     private JButton makeButton(ImageIcon icon, int x, int y) {

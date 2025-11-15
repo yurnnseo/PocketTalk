@@ -30,8 +30,10 @@ public class ClientMenuFrame extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
+        String profileImagePath = "/Images/defaultprofileimage.png";
+        
         //패널 객체들을 먼저 생성해서 저장
-        friendsPanel = new ClientFriendsMenuPanel(this, username, ip_addr, port_no);
+        friendsPanel = new ClientFriendsMenuPanel(this, username, ip_addr, port_no, profileImagePath);
         chatPanel = new ClientChatingMenuPanel(this, username, ip_addr, port_no);
         //처음에는 친구 패널
         setContentPane(friendsPanel);

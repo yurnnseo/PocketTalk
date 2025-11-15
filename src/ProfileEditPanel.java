@@ -17,7 +17,7 @@ public class ProfileEditPanel extends JPanel {
     private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
     private JLabel editProfileLabel;
     
-    public ProfileEditPanel(ProfileEditFrame parentFrame, String username, String ip_addr, String port_no) {
+    public ProfileEditPanel(ProfileEditFrame parentFrame, String username, String ip_addr, String port_no, String currentStatusMessage) {
         this.parentFrame = parentFrame;
 
         setLayout(null);
@@ -42,10 +42,26 @@ public class ProfileEditPanel extends JPanel {
         okbutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                parentFrame.dispose(); // 저장 후 창 닫기 
-                
+
+                String newName = name.getText().trim();
+                String text = message.getText().trim();
+                String placeholder = "상태메시지";
+
+                String statusToSend;
+                if (text.equals(placeholder) || text.isEmpty()) {
+                    statusToSend = "";  // ★ 서버에는 빈 문자열로 저장
+                } 
+                else {
+                    statusToSend = text;
+                }
+
+                // ProfileEditFrame 쪽에 “저장됨” 알려주기 (거기서 dos.writeUTF() 하게)
+                parentFrame.onProfileSaved(newName, statusToSend);
+
+                parentFrame.dispose();
             }
         });
+
 
         cancelbutton.addActionListener(new ActionListener() {
             @Override
@@ -60,14 +76,7 @@ public class ProfileEditPanel extends JPanel {
         name.setBorder(null);
         name.setOpaque(false);
         name.setBounds(33, 168, 150, 50);
-
-        // 상태 메시지 입력 필드
-        message = new JTextField("상태메시지");
-        message.setForeground(Color.gray);
-        message.setBorder(null);
-        message.setOpaque(false);
-        message.setBounds(33, 235, 150, 30);
-
+        
         // 이름 포커스 이벤트
         name.addFocusListener(new FocusAdapter() {
             @Override
@@ -85,11 +94,28 @@ public class ProfileEditPanel extends JPanel {
             }
         });
 
+        // 상태 메시지 입력 필드
+        String placeholder = "";
+        
+        // 서버에서 받은 상태메시지가 없으면 placeholder로 보이게
+        if (currentStatusMessage == null || currentStatusMessage.isEmpty()) {
+            message = new JTextField(placeholder);
+            message.setForeground(Color.GRAY);
+        } 
+        else {
+            message = new JTextField(currentStatusMessage);
+            message.setForeground(Color.BLACK);
+        }
+        
+        message.setBorder(null);
+        message.setOpaque(false);
+        message.setBounds(33, 235, 150, 30);
+        
         // 상태메시지 포커스 이벤트
         message.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (message.getText().equals("상태메시지")) {
+                if (message.getText().equals(placeholder)) {
                     message.setText("");
                     message.setForeground(Color.BLACK);
                 }
@@ -98,7 +124,7 @@ public class ProfileEditPanel extends JPanel {
             @Override
             public void focusLost(FocusEvent e) {
                 if (message.getText().isEmpty()) {
-                    message.setText("상태메시지");
+                    message.setText(placeholder);
                     message.setForeground(Color.GRAY);
                 }
             }

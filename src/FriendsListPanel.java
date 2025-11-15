@@ -1,6 +1,7 @@
 //친구메뉴패널에 뜨는 친구 목록
 import java.util.List;
 import javax.swing.JPanel;
+import java.awt.*;
 
 public class FriendsListPanel extends JPanel{
 	private String myname;
@@ -26,6 +27,11 @@ public class FriendsListPanel extends JPanel{
 
 	         y += header.getPreferredSize().height + 15; // 다음 친구 위치
 		 }
+		 
+		// 스크롤 영역 계산: 패널의 preferredSize 직접 설정
+	    int friendslistpanelWidth = 260; // scrollPane 내용영역보다 살짝 작게 잡아도 됨
+	    int friendslistpanelHeight = Math.max(y, 300); // 최소 300임. 친구 많으면 그 이상으로
+	    setPreferredSize(new Dimension(friendslistpanelWidth, friendslistpanelHeight));
 		
 		 revalidate();
 		 repaint();

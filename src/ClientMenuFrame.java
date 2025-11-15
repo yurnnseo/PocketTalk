@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.*;
 
@@ -14,6 +16,8 @@ public class ClientMenuFrame extends JFrame {
     private DataInputStream dis;
     private DataOutputStream dos;
     private String[] currentUserList; //서버에게서 받은 최신 목록
+    private ClientFriendsMenuPanel friendsPanel; 
+    private ClientChatingMenuPanel chatPanel;
     
     public ClientMenuFrame(String username, String ip_addr, String port_no) {
         this.username = username;
@@ -26,8 +30,12 @@ public class ClientMenuFrame extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
-        // 처음엔 친구 목록 패널 표시
-        setContentPane(new ClientFriendsMenuPanel(this, username, ip_addr, port_no));
+        //패널 객체들을 먼저 생성해서 저장
+        friendsPanel = new ClientFriendsMenuPanel(this, username, ip_addr, port_no);
+        chatPanel = new ClientChatingMenuPanel(this, username, ip_addr, port_no);
+        //처음에는 친구 패널
+        setContentPane(friendsPanel);
+        
         setVisible(true);
         
         try {
@@ -54,9 +62,30 @@ public class ClientMenuFrame extends JFrame {
             while (true) {
                 try {
                     String msg = dis.readUTF();
-                    if (msg.startsWith("/userlist ")) {
+                    
+                    if (msg.startsWith("/list ")) { 
+                    	// "/list" 6글자 제외
+                    	String userListString = msg.substring(6).trim();
+                    	
+                    	String[] users;
+                        if (userListString.isEmpty()) {
+                            users = new String[0]; // 빈 목록
+                        } else {
+                            //공백으로 분리
+                            users = userListString.split(" "); 
+                        }
                         //멤버 변수에 저장
-                        currentUserList = msg.substring(10).split(",");
+                        currentUserList = users;
+                        //형식 변환
+                        List<String> usernames = Arrays.asList(currentUserList);
+                        //Swing UI업데이트(람다 표현식 사용)
+                        SwingUtilities.invokeLater(() -> {
+                            //ClientFriendsMenuPanel에 메서드 있음.
+                            if (friendsPanel != null) {
+                                friendsPanel.updateFriendList(usernames); 
+                            }
+                        });
+                        
                     }
                 } catch (IOException e) {
                     break;
@@ -67,13 +96,15 @@ public class ClientMenuFrame extends JFrame {
 
     // 화면 전환용 메소드
     public void showFriendsMenu() {
-        setContentPane(new ClientFriendsMenuPanel(this, username, ip_addr, port_no));
+        //setContentPane(new ClientFriendsMenuPanel(this, username, ip_addr, port_no));
+    	setContentPane(friendsPanel);
         revalidate();
         repaint();
     }
 
     public void showChattingMenu() {
-        setContentPane(new ClientChatingMenuPanel(this, username, ip_addr, port_no));
+        //setContentPane(new ClientChatingMenuPanel(this, username, ip_addr, port_no));
+    	setContentPane(chatPanel);
         revalidate();
         repaint();
     }

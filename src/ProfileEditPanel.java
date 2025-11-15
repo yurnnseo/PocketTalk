@@ -5,11 +5,11 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 
 public class ProfileEditPanel extends JPanel {
     private Image backgroundImg;
-    private ImageIcon okicon1, okicon2, cancelicon1, cancelicon2;
-    private JButton okbutton1, okbutton2, cancelbutton1, cancelbutton2;
+    private JButton okbutton,cancelbutton;
     private JTextField name, message;
 
     // 부모는 ProfileEditFrame
@@ -30,69 +30,24 @@ public class ProfileEditPanel extends JPanel {
         editProfileLabel.setForeground(Color.BLACK);
         editProfileLabel.setBounds(25, 20, 500, 20);
         add(editProfileLabel);
-
-        // 아이콘 로드
-        okicon1 = new ImageIcon(getClass().getResource("/okicon1.png"));
-        okicon2 = new ImageIcon(getClass().getResource("/okicon2.png"));
-        cancelicon1 = new ImageIcon(getClass().getResource("/cancelicon1.png"));
-        cancelicon2 = new ImageIcon(getClass().getResource("/cancelicon2.png"));
-
+ 
         // 버튼 생성
-        okbutton1 = makeButton(okicon1, 150, 395);
-        okbutton2 = makeButton(okicon2, 150, 395);
-        cancelbutton1 = makeButton(cancelicon1, 230, 395);
-        cancelbutton2 = makeButton(cancelicon2, 230, 395);
+        okbutton = makeButton("저장",  60, 28, 150, 395);      
+        cancelbutton = makeButton("취소",  60, 28, 230, 395);
 
-        add(okbutton1);
-        add(okbutton2);
-        add(cancelbutton1);
-        add(cancelbutton2);
-
-        // 처음에는 hover용 버튼 숨기기
-        okbutton2.setVisible(false);
-        cancelbutton2.setVisible(false);
-
-        // 확인 버튼 호버
-        okbutton1.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                okbutton1.setVisible(false);
-                okbutton2.setVisible(true);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                okbutton2.setVisible(false);
-                okbutton1.setVisible(true);
-            }
-        });
-
-        // 취소 버튼 호버
-        cancelbutton1.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                cancelbutton1.setVisible(false);
-                cancelbutton2.setVisible(true);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                cancelbutton2.setVisible(false);
-                cancelbutton1.setVisible(true);
-            }
-        });
-
-        // 클릭 동작 (okbutton2에만 리스너 추가)
-        okbutton2.addActionListener(new ActionListener() {
+        add(okbutton);
+        add(cancelbutton);
+       
+        // 클릭 동작
+        okbutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 parentFrame.dispose(); // 저장 후 창 닫기 
-                ClientMenuFrame root = (ClientMenuFrame) SwingUtilities.getWindowAncestor(parentFrame.getParentPanel());
-                root.showFriendsMenu();
+                
             }
         });
 
-        cancelbutton2.addActionListener(new ActionListener() {
+        cancelbutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 parentFrame.dispose();
@@ -154,13 +109,33 @@ public class ProfileEditPanel extends JPanel {
     }
 
     // 버튼 생성 함수
-    private JButton makeButton(ImageIcon icon, int x, int y) {
-        JButton btn = new JButton(icon);
-        btn.setBounds(x, y, icon.getIconWidth(), icon.getIconHeight());
-        btn.setContentAreaFilled(false);
-        btn.setBorderPainted(false);
+    private JButton makeButton(String text, int width, int height, int x, int y) {
+        JButton btn = new JButton(text);
+        btn.setBounds(x, y, width, height);
+        btn.setBackground(Color.WHITE); 
+        btn.setBorder(new LineBorder(Color.BLACK));
+        btn.setFont(fontSource.getFont(11f));
+        
         btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(true);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        
+        Color hoverColor = Color.decode("#E3D6F0"); // 연보라
+        Color normalColor = Color.WHITE;
+
+        btn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btn.setBackground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btn.setBackground(normalColor);
+            }
+        });
+        
         return btn;
     }
 

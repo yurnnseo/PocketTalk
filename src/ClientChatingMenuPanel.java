@@ -20,11 +20,11 @@ public class ClientChatingMenuPanel extends JPanel {
         chatingLabel.setBounds(97, 20, 50, 50);
         add(chatingLabel);
         
-        metaicon  = new ImageIcon(getClass().getResource("/metaIcon.png"));
-        metaicon2 = new ImageIcon(getClass().getResource("/metaIcon2.png"));
-        chaticon  = new ImageIcon(getClass().getResource("/chatIcon.png"));
-        chaticon2 = new ImageIcon(getClass().getResource("/chatIcon2.png"));
-        pluschaticon = new ImageIcon(getClass().getResource("/pluschaticon.png"));
+        metaicon  = new ImageIcon(getClass().getResource("/Images/metaIcon.png"));
+        metaicon2 = new ImageIcon(getClass().getResource("/Images/metaIcon2.png"));
+        chaticon  = new ImageIcon(getClass().getResource("/Images/chatIcon.png"));
+        chaticon2 = new ImageIcon(getClass().getResource("/Images/chatIcon2.png"));
+        pluschaticon = new ImageIcon(getClass().getResource("/Images/pluschaticon.png"));
         
         metabutton = makeButton(metaicon2, 13, 40);
         chatbutton = makeButton(chaticon2, 13, 120);
@@ -52,8 +52,7 @@ public class ClientChatingMenuPanel extends JPanel {
             	cp.setVisible(true);
             }
         });
-        
-        System.out.println("푸시하고 싶어");
+
     }
 
     private JButton makeButton(ImageIcon icon, int x, int y) {

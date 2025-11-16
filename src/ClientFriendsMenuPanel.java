@@ -13,10 +13,15 @@ public class ClientFriendsMenuPanel extends JPanel {
     private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
     private String profileImagePath;
     private ProfileHeaderView myHeader; 
-
+    private String myCurrentName;
+    private String myCurrentStatusM="";
+   
+    
     public ClientFriendsMenuPanel(ClientMenuFrame parentFrame, String username, String ip_addr, String port_no, String profileImagePath) {
         setLayout(null);
         setBackground(Color.decode("#F9F9F9"));
+        
+        this.myCurrentName = username; //초기값을 현재 정보 변수에 저장 
         
         if (profileImagePath == null || profileImagePath.isEmpty()) {
             this.profileImagePath = "/Images/defaultprofileimage.png";
@@ -62,7 +67,7 @@ public class ClientFriendsMenuPanel extends JPanel {
         add(friendsLabel);
         
         // 필드에 저장해두기
-        myHeader = new ProfileHeaderView(username, this.profileImagePath, 50, 50, ProfileHeaderView.Orientation.HORIZONTAL);
+        myHeader = new ProfileHeaderView(this.myCurrentName, this.profileImagePath, 50, 50, ProfileHeaderView.Orientation.HORIZONTAL);
         myHeader.setBounds(95, 80, myHeader.getPreferredSize().width, myHeader.getPreferredSize().height);
         add(myHeader);
 
@@ -70,7 +75,7 @@ public class ClientFriendsMenuPanel extends JPanel {
         myHeader.getProfileButton().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                MyProfileViewFrame pef = new MyProfileViewFrame(ClientFriendsMenuPanel.this, username, ip_addr, port_no, ClientFriendsMenuPanel.this.profileImagePath);
+                MyProfileViewFrame pef = new MyProfileViewFrame(ClientFriendsMenuPanel.this, myCurrentName, ip_addr, port_no, ClientFriendsMenuPanel.this.profileImagePath, myCurrentStatusM);
                 pef.setVisible(true);
             }
         });
@@ -94,10 +99,18 @@ public class ClientFriendsMenuPanel extends JPanel {
     	}
     }
     
-    // 내 이름이 바뀌었을 때 호출할 힘수
-    public void updateMyProfileName(String newName) {
-        if (myHeader != null && newName != null && !newName.isEmpty()) {
-            myHeader.setUserName(newName);
+    // 내 이름,상메 바뀌었을 때 호출할 힘수
+    public void updateMyProfileName(String newName, String newStatus) {
+    	if (newName != null && !newName.isEmpty()) {
+            this.myCurrentName = newName;
+        }
+       if (newStatus != null) {
+            this.myCurrentStatusM = newStatus;
+        }
+
+        if (myHeader != null) {
+            myHeader.setUserName(this.myCurrentName);
+            
         }
     }
     

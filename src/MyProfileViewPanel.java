@@ -16,7 +16,7 @@ public class MyProfileViewPanel extends JPanel {
     private ProfileHeaderView header;  
     private JLabel statusLabel; 
     
-    public MyProfileViewPanel(MyProfileViewFrame parentFrame, String username, String ip_addr, String port_no, String profileImagePath) {
+    public MyProfileViewPanel(MyProfileViewFrame parentFrame, String username, String ip_addr, String port_no, String profileImagePath, String statusM) {
         this.parentFrame = parentFrame;
         this.username = username;         
         this.statusMessage = ""; 

@@ -24,6 +24,6 @@ public class MyProfileViewFrame extends JFrame {
         if (parentMenuPanel != null) {
             parentMenuPanel.updateMyProfileName(newName, newStatus);
         }
-        // TODO: 필요하면 상태메시지도 어딘가에 표시 가능
+        
     }
 }

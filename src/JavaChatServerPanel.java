@@ -1,5 +1,4 @@
 // 실제 서버 기능
-
 import java.awt.event.*;
 import java.io.*;
 import java.net.*;
@@ -22,7 +21,8 @@ public class JavaChatServerPanel extends JPanel {
     private static final int BUF_LEN = 128; // 현재는 사용 안 하지만 남겨둠 (필요 시 사용)
 
     
-    // 이름 기준으로 유저 프로필 관리 (TXT 저장용)
+    // 이름 기준으로 유저 프로필 관리 (.txt 저장용)
+    // synchronizedMap은 클라이언트마다 새로운 스레드를 만들기 때문에 여러 스레드가 동시에 .txt를 수정할 수 없게 함.
     private Map<String, ClientProfile> clientProfiles = Collections.synchronizedMap(new HashMap<>());
 
     private static final String CLIENT_TXT_FILE = "./client_profiles.txt";
@@ -33,7 +33,7 @@ public class JavaChatServerPanel extends JPanel {
 
         // 로그 출력 영역
         JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBounds(12, 10, 320, 260);
+        scrollPane.setBounds(12, 10, 460, 450);
         scrollPane.setBorder(BorderFactory.createTitledBorder("Server Log"));
         add(scrollPane);
 
@@ -45,20 +45,20 @@ public class JavaChatServerPanel extends JPanel {
 
         // 포트 라벨
         JLabel lblPort = new JLabel("Port Number");
-        lblPort.setBounds(12, 285, 90, 26);
+        lblPort.setBounds(17, 466, 90, 26);
         add(lblPort);
 
         // 포트 입력 필드
         txtPortNumber = new JTextField();
         txtPortNumber.setHorizontalAlignment(SwingConstants.CENTER);
         txtPortNumber.setText("30000");
-        txtPortNumber.setBounds(111, 285, 221, 26);
+        txtPortNumber.setBounds(111, 467, 359, 26);
         add(txtPortNumber);
         txtPortNumber.setColumns(10);
 
         // 서버 시작 버튼
         btnServerStart = new JButton("Server Start");
-        btnServerStart.setBounds(12, 320, 320, 35);
+        btnServerStart.setBounds(17, 510, 450, 35);
         add(btnServerStart);
 
         btnServerStart.addActionListener(new ActionListener() {
@@ -76,9 +76,7 @@ public class JavaChatServerPanel extends JPanel {
             socket = new ServerSocket(port);
         } 
         catch (NumberFormatException | IOException e1) {
-            AppendText("[ERROR] 서버 소켓 생성 실패: " + e1.getMessage());
             e1.printStackTrace();
-            return;
         }
 
         AppendText("Chat Server Running on port " + txtPortNumber.getText());
@@ -176,14 +174,15 @@ public class JavaChatServerPanel extends JPanel {
                         bw.newLine();
 
                         // 여기서 한 줄씩 어떤 내용이 저장되는지 서버 로그에 찍기
-                        AppendText("-> " + line);
+                        AppendText("저장할 프로필 -> " + line);
                     }
                     AppendText("=================================");
                 }
             }
 
             AppendText("TXT 프로필 저장 완료: " + clientProfiles.size() + "명");
-        } catch (Exception e) {
+        } 
+        catch (Exception e) {
             AppendText("TXT 저장 오류: " + e.getMessage());
         }
     }
@@ -373,51 +372,55 @@ public class JavaChatServerPanel extends JPanel {
                                 String newImagePath = tokens[1];   // 새 프로필 이미지 경로
                                 String newStatus    = tokens[2];   // 새 상태메시지
 
+                                boolean nameChanged = false;
+                                
                                 synchronized (clientProfiles) {
-                                    // 1) 현재 접속자의 기존 프로필을 "현재 UserName"으로 가져오기
+                                    // 현재 접속자의 기존 프로필을 "현재 UserName"으로 가져오기
                                     ClientProfile p = clientProfiles.get(UserName);
 
                                     if (p == null) {
                                         // 혹시 없으면 새로 만듦 (이름 바뀐 상태 기준으로)
                                         p = new ClientProfile(newName, newStatus, newImagePath);
-                                    } else {
+                                    } 
+                                    
+                                    else {
                                         // 기존 프로필 값들 갱신
                                         p.setProfileImagePath(newImagePath);
                                         p.setStatusMessage(newStatus);
-                                        // ClientProfile에 setName()이 있다면 같이 호출
-                                        // p.setName(newName);
+                                        p.setName(newName);
                                     }
 
-                                    // 2) 이름이 실제로 변경된 경우 → Map의 key도 변경해야 함
+                                    // 이름이 실제로 변경된 경우 → Map의 key도 변경해야 함
                                     if (!newName.equals(UserName)) {
-                                        // 기존 키 제거하고
                                         clientProfiles.remove(UserName);
-                                        // 새 이름으로 다시 put
                                         clientProfiles.put(newName, p);
 
                                         AppendText("[프로필 이름 변경] " + UserName + " → " + newName);
 
                                         // 이 스레드가 들고 있는 현재 사용자 이름도 바꿔줌
                                         UserName = newName;
-                                    } else {
-                                        // 이름이 안 바뀐 경우, 그냥 덮어쓰기
-                                        clientProfiles.put(UserName, p);
+                                        
+                                        nameChanged = true;
+                                    } 
+                                    
+                                    else {
+                                        clientProfiles.put(UserName, p); // 이름이 안 바뀐 경우 덮어쓰기
                                     }
 
-                                    // 이 유저의 현재 프로필 객체 갱신
-                                    clientProfile = p;
+                                    clientProfile = p; // 이 유저의 현재 프로필 객체 갱신
                                 }
 
-                                // 3) 서버 로그에 최종 수정 내용 찍기
-                                AppendText("[프로필 수정됨] " + UserName +
-                                           " / 상태: " + clientProfile.getStatusMessage() +
-                                           " / 이미지: " + clientProfile.getProfileImagePath());
+                                // 서버 로그에 최종 수정 내용 찍기
+                                AppendText("[프로필 수정됨] " + UserName + " / 상태: " + clientProfile.getStatusMessage() + " / 이미지: " + clientProfile.getProfileImagePath());
 
-                                // 4) 모든 클라이언트에게 브로드캐스트 (/profile ...)
-                                broadcastProfileUpdate();
+                                broadcastProfileUpdate(); // 변경된 프로필 정보 전체 클라이언트에게 뿌리기
+                                
+                                // 이름이 바뀐 경우에는 접속자 리스트도 갱신
+                                if (nameChanged) {
+                                    BroadcastUserList(); 
+                                }
 
-                                // 5) .txt 파일로 전체 프로필 저장
-                                saveProfilesToTxt();
+                                saveProfilesToTxt(); // .txt 파일로 전체 프로필 저장
                             }
                             continue;
                         }

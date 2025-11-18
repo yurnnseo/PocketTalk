@@ -17,6 +17,10 @@ public class ClientProfile implements Serializable {
     public String getName() {
         return name;
     }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getStatusMessage() {
         return statusMessage;

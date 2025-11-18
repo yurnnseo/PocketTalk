@@ -16,10 +16,16 @@ public class MyProfileViewPanel extends JPanel {
     private ProfileHeaderView header;  
     private JLabel statusLabel; 
     
-    public MyProfileViewPanel(MyProfileViewFrame parentFrame, String username, String ip_addr, String port_no, String profileImagePath, String statusM) {
+    public MyProfileViewPanel(MyProfileViewFrame parentFrame, String username, String ip_addr, String port_no, String profileImagePath, String currentStatusMessage) {
         this.parentFrame = parentFrame;
         this.username = username;         
-        this.statusMessage = ""; 
+
+        if (currentStatusMessage != null) {
+            this.statusMessage = currentStatusMessage;
+        } 
+        else {
+            this.statusMessage = "";
+        }
         
         setLayout(null);
         setOpaque(true);
@@ -27,9 +33,11 @@ public class MyProfileViewPanel extends JPanel {
 
         // 프로필 헤더 (친구목록과 동일)
         if (profileImagePath == null || profileImagePath.isEmpty()) {
-            profileImagePath = "/Images/defaultprofileimage.png";
+            this.profileImagePath = "/Images/defaultprofileimage.png";
+        } 
+        else {
+            this.profileImagePath = profileImagePath;
         }
-        final String finalProfileImagePath = profileImagePath;
         
         // 프로필 헤더 (친구목록과 동일)
         header = new ProfileHeaderView(this.username, this.profileImagePath, 60, 60, ProfileHeaderView.Orientation.VERTICAL);
@@ -66,19 +74,20 @@ public class MyProfileViewPanel extends JPanel {
         editButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ProfileEditFrame pef = new ProfileEditFrame(MyProfileViewPanel.this, MyProfileViewPanel.this.username, ip_addr, port_no, MyProfileViewPanel.this.profileImagePath, MyProfileViewPanel.this.statusMessage);
+                ProfileEditFrame pef = new ProfileEditFrame(parentFrame, MyProfileViewPanel.this, MyProfileViewPanel.this.username, ip_addr, port_no, MyProfileViewPanel.this.profileImagePath, MyProfileViewPanel.this.statusMessage);
                 pef.setLocationRelativeTo(parentFrame);
                 pef.setVisible(true);
             }
         });
     }
     
- // 편집 결과를 반영하는 메서드
+    // 편집 결과를 반영하는 메서드
     public void updateProfile(String newName, String newStatus) {
         if (newName != null && !newName.isEmpty()) {
             this.username = newName;
             header.setUserName(newName);       // 프로필 헤더에 이름 갱신
         }
+        
         if (newStatus != null) {
             this.statusMessage = newStatus;
             statusLabel.setText(newStatus);    // 상태메시지 라벨 갱신

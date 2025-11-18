@@ -110,4 +110,9 @@ public class ClientMenuFrame extends JFrame {
         revalidate();
         repaint();
     }
+    
+    public DataOutputStream getDataOutputStream() {
+        return dos;
+    }
+
 }

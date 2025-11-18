@@ -5,6 +5,9 @@ import java.awt.event.*;
 import java.util.List;
 
 public class ClientFriendsMenuPanel extends JPanel {
+	
+	private final ClientMenuFrame parentFrame;
+	
 	private ImageIcon metaicon, metaicon2, chaticon, chaticon2;
     private JButton metabutton, chatbutton;
 	private Image backgroundImg;
@@ -14,11 +17,14 @@ public class ClientFriendsMenuPanel extends JPanel {
     private String profileImagePath;
     private ProfileHeaderView myHeader; 
     private String myCurrentName;
-    private String myCurrentStatusM="";
+    private String myCurrentStatusMessage="";
    
     
     public ClientFriendsMenuPanel(ClientMenuFrame parentFrame, String username, String ip_addr, String port_no, String profileImagePath) {
-        setLayout(null);
+        
+    	this.parentFrame = parentFrame;  
+    	
+    	setLayout(null);
         setBackground(Color.decode("#F9F9F9"));
         
         this.myCurrentName = username; //초기값을 현재 정보 변수에 저장 
@@ -75,7 +81,7 @@ public class ClientFriendsMenuPanel extends JPanel {
         myHeader.getProfileButton().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                MyProfileViewFrame pef = new MyProfileViewFrame(ClientFriendsMenuPanel.this, myCurrentName, ip_addr, port_no, ClientFriendsMenuPanel.this.profileImagePath, myCurrentStatusM);
+                MyProfileViewFrame pef = new MyProfileViewFrame(ClientFriendsMenuPanel.this, myCurrentName, ip_addr, port_no, ClientFriendsMenuPanel.this.profileImagePath, myCurrentStatusMessage, parentFrame.getDataOutputStream());
                 pef.setVisible(true);
             }
         });
@@ -104,13 +110,17 @@ public class ClientFriendsMenuPanel extends JPanel {
     	if (newName != null && !newName.isEmpty()) {
             this.myCurrentName = newName;
         }
-       if (newStatus != null) {
-            this.myCurrentStatusM = newStatus;
+    	
+        if (newStatus != null) {
+            this.myCurrentStatusMessage = newStatus;
         }
 
         if (myHeader != null) {
-            myHeader.setUserName(this.myCurrentName);
-            
+            myHeader.setUserName(this.myCurrentName);  
+        }
+        
+        if (friendsListPanel != null) {
+            friendsListPanel.setMyName(this.myCurrentName);
         }
     }
     

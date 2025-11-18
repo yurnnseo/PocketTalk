@@ -8,11 +8,15 @@ public class FriendsListPanel extends JPanel{
 	private final String profileImagePath = "/Images/defaultprofileimage.png";
 	
 	 public FriendsListPanel(String name) {
-	        this.myname = name;
-	        setLayout(null);
-	        setOpaque(false);
-	    }
+        this.myname = name;
+        setLayout(null);
+        setOpaque(false);
+    }
 	 
+	 public void setMyName(String newMyName) {
+        this.myname = newMyName;
+    }
+ 
 	 public void updateList(List<String> friendsName) {
 		removeAll(); //목록 갱신 시 중복 방지
 		 

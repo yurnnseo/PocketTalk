@@ -12,13 +12,15 @@ public class JavaChatServerFrame extends JFrame {
     public JavaChatServerFrame() {
         setTitle("PocketTalk Server");
         
-        setSize(360, 420); 
+        setSize(500, 600); 
         setLocationRelativeTo(null); // 화면 가운데
 
         serverPanel = new JavaChatServerPanel();
         setContentPane(serverPanel);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
         
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        
+        // 프레임이 닫힐 때 동작 수행됨.
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -28,12 +30,8 @@ public class JavaChatServerFrame extends JFrame {
 
                 if (result == JOptionPane.YES_OPTION) {
                     serverPanel.shutdownServer(); // 서버 정리
-                    // 그 다음에 EXIT_ON_CLOSE 가 작동해서 종료됨
+                    dispose();     
                 } 
-                else {
-                    // NO → 종료 무시 → 기본 EXIT_ON_CLOSE 를 막기 위해 이벤트 consume
-                    e.getWindow().setVisible(true);
-                }
             }
         });
     }

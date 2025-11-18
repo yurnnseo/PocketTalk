@@ -2,14 +2,12 @@
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 
 public class ProfileEditPanel extends JPanel {
-    private Image backgroundImg;
-    private JButton okbutton,cancelbutton;
+    private JButton okbutton, cancelbutton;
     private JTextField name, message;
 
     // 부모는 ProfileEditFrame
@@ -22,8 +20,9 @@ public class ProfileEditPanel extends JPanel {
 
         setLayout(null);
         setOpaque(true);
-
         setBackground(Color.decode("#F9F9F9"));
+
+        final String placeholder = "상태메시지";
         
         editProfileLabel = new JLabel("나의 프로필 편집", SwingConstants.LEFT);
         editProfileLabel.setFont(fontSource.getFont(16f));
@@ -33,36 +32,28 @@ public class ProfileEditPanel extends JPanel {
  
         // 버튼 생성
         okbutton = makeButton("저장",  60, 28, 150, 395);      
-        cancelbutton = makeButton("취소",  60, 28, 230, 395);
+        cancelbutton = makeButton("취소", 60, 28, 230, 395);
 
         add(okbutton);
         add(cancelbutton);
        
-        // 클릭 동작
+        // 저장 버튼 클릭
         okbutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
                 String newName = name.getText().trim();
                 String text = message.getText().trim();
-                String placeholder = "상태메시지";
 
-                String statusToSend;
-                if (text.equals(placeholder) || text.isEmpty()) {
-                    statusToSend = "";  // ★ 서버에는 빈 문자열로 저장
-                } 
-                else {
-                    statusToSend = text;
-                }
+                // placeholder 또는 빈 문자열이면 서버에는 ""로 저장
+                String statusToSend = (text.equals(placeholder) || text.isEmpty()) ? "" : text;
 
-                // ProfileEditFrame 쪽에 “저장됨” 알려주기 (거기서 dos.writeUTF() 하게)
                 parentFrame.onProfileSaved(newName, statusToSend);
-
                 parentFrame.dispose();
             }
         });
 
-
+        // 취소 버튼 클릭
         cancelbutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -94,19 +85,15 @@ public class ProfileEditPanel extends JPanel {
             }
         });
 
-        // 상태 메시지 입력 필드
-        String placeholder = "";
-        
-        // 서버에서 받은 상태메시지가 없으면 placeholder로 보이게
+        // 상태메시지 입력 필드 초기화
         if (currentStatusMessage == null || currentStatusMessage.isEmpty()) {
             message = new JTextField(placeholder);
             message.setForeground(Color.GRAY);
-        } 
-        else {
+        } else {
             message = new JTextField(currentStatusMessage);
             message.setForeground(Color.BLACK);
         }
-        
+
         message.setBorder(null);
         message.setOpaque(false);
         message.setBounds(33, 235, 150, 30);

@@ -1,3 +1,4 @@
+
 //StartPocketTalkPanel에서 버튼 누르면 띄워지는 새로운 창의 프레임
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -96,6 +97,7 @@ public class ClientMenuFrame extends JFrame {
         }
     }
 
+    
     // 화면 전환용 메소드
     public void showFriendsMenu() {
         //setContentPane(new ClientFriendsMenuPanel(this, username, ip_addr, port_no));
@@ -114,5 +116,15 @@ public class ClientMenuFrame extends JFrame {
     public DataOutputStream getDataOutputStream() {
         return dos;
     }
+    public List<String> getCurrentUserList() {
+        if (currentUserList != null) {
+            // 배열을 List로 변환하여 반환
+            return Arrays.asList(currentUserList); 
+        }
+        return null;
+    }
 
+    public String getUsername() {
+        return username;
+    }
 }

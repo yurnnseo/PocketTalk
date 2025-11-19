@@ -90,8 +90,8 @@ public class ClientFriendsMenuPanel extends JPanel {
         chatbutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                metabutton.setIcon(metaicon);
-                chatbutton.setIcon(chaticon2);
+               // metabutton.setIcon(metaicon2);
+               // chatbutton.setIcon(chaticon2);
                 parentFrame.showChattingMenu();
             }
         });
@@ -120,7 +120,7 @@ public class ClientFriendsMenuPanel extends JPanel {
         }
         
         if (friendsListPanel != null) {
-            friendsListPanel.setMyName(this.myCurrentName);
+            friendsListPanel.setMyName(this.myCurrentName, this.myCurrentStatusMessage);
         }
     }
     
@@ -146,5 +146,5 @@ public class ClientFriendsMenuPanel extends JPanel {
         g.fillRect(75, 150, getWidth() - 60, 1);
     }
     
-    
+  
 }

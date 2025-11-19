@@ -10,6 +10,7 @@ import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -35,18 +36,22 @@ public class ChoosePerson extends JFrame{
     private DataInputStream dis;
     private DataOutputStream dos;
     private JLabel lblUserName, choiceLabel, okLabel; 
-     
+    private FriendsListPanel parentPanel;
+    private String username;
     private JButton okbutton;
     
     private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
     
-	public ChoosePerson() {
+	public ChoosePerson(String username, List<String> users) {
+		this.username = username; //본인 이름
+		
 		setLayout(null);
 		setBackground(Color.decode("#F9F9F9"));
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 260, 370); // 크기 조정
         setResizable(false);
+        
         
         //배경 이미지 그리는 패널
         contentPane = new JPanel() {
@@ -62,6 +67,16 @@ public class ChoosePerson extends JFrame{
         contentPane.setLayout(null);
         setContentPane(contentPane);
         
+        //친구 목록 화면 출력
+        parentPanel = new FriendsListPanel(username); //본인은 제외
+        parentPanel.updateList(users);
+        int listX = 10;
+        int listY = 45; 
+        int listWidth = 245; 
+        int listHeight = 240; 
+        parentPanel.setBounds(listX, listY, listWidth, listHeight);
+        contentPane.add(parentPanel);
+        
         choiceLabel = new JLabel("대화상대 선택", SwingConstants.CENTER);
         choiceLabel.setFont(fontSource.getFont(12f));
         choiceLabel.setForeground(Color.BLACK);
@@ -71,7 +86,7 @@ public class ChoosePerson extends JFrame{
         //버튼 생성
         okbutton = makeButton("선택 완료", 60, 28, 165, 290);
 
-        add(okbutton);
+        contentPane.add(okbutton);
         //취소는 창닫기 버튼 누르면 됨
 	}
 	

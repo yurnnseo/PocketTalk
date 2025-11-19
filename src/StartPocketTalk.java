@@ -11,7 +11,8 @@ public class StartPocketTalk extends JFrame {
         setVisible(true); // 프레임을 화면에 출력
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) 
+    {
         new StartPocketTalk();
     }
 }

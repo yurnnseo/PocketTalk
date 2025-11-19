@@ -5,7 +5,9 @@ import java.awt.*;
 
 public class FriendsListPanel extends JPanel{
 	private String myname;
+	private String message;
 	private final String profileImagePath = "/Images/defaultprofileimage.png";
+	
 	
 	 public FriendsListPanel(String name) {
         this.myname = name;
@@ -13,8 +15,10 @@ public class FriendsListPanel extends JPanel{
         setOpaque(false);
     }
 	 
-	 public void setMyName(String newMyName) {
+	 public void setMyName(String newMyName, String newMessage) {
         this.myname = newMyName;
+        this.message = newMessage;
+        
     }
  
 	 public void updateList(List<String> friendsName) {

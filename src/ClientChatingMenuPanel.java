@@ -2,6 +2,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.List;
 
 public class ClientChatingMenuPanel extends JPanel {
     private Image backgroundImg;
@@ -38,9 +39,10 @@ public class ClientChatingMenuPanel extends JPanel {
         metabutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                metabutton.setIcon(metaicon);
-                chatbutton.setIcon(chaticon);
-                parentFrame.showFriendsMenu();
+            	parentFrame.showFriendsMenu();
+                //metabutton.setIcon(metaicon);
+                //chatbutton.setIcon(chaticon);
+                
             }
         });
         
@@ -48,7 +50,8 @@ public class ClientChatingMenuPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
             	//대화 상대 고르는 팝업창띄우고 고르면 그 사람이랑 대화하는 뷰 떠야함
-            	ChoosePerson cp = new ChoosePerson();
+            	List<String> userList = parentFrame.getCurrentUserList();
+            	ChoosePerson cp = new ChoosePerson(username,userList);
             	cp.setVisible(true);
             }
         });
@@ -73,4 +76,6 @@ public class ClientChatingMenuPanel extends JPanel {
         g.fillRect(0, 0, 75, getHeight());
         g.drawImage(backgroundImg, 0, 0, getWidth(), getHeight(), this);
     }
+    
+   
 }

@@ -92,8 +92,10 @@ public class JavaChatServerPanel extends JPanel {
     
     // 서버의 JTextArea에 문자열 출력
     public void AppendText(String str) {
-        textArea.append(str + "\n");
-        textArea.setCaretPosition(textArea.getText().length());
+    	SwingUtilities.invokeLater(() -> {
+            textArea.append(str + "\n");
+            textArea.setCaretPosition(textArea.getText().length());
+        });
     }
     
     // 새 클라이언트가 접속할 때마다 UserService 스레드 하나씩 생성

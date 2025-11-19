@@ -276,6 +276,40 @@ public class JavaChatServerPanel extends JPanel {
                 user.WriteOne(str);
             }
         }
+        
+        private void applyProfileChange(String newName, String newImagePath, String newStatus) {
+            synchronized (clientProfiles) {
+                ClientProfile p = clientProfiles.get(UserName);
+
+                if (p == null) {
+                    p = new ClientProfile(newName, newStatus, newImagePath);
+                } 
+                else {
+                    p.setProfileImagePath(newImagePath);
+                    p.setStatusMessage(newStatus);
+                    p.setName(newName);
+                }
+
+                if (!newName.equals(UserName)) {
+                    clientProfiles.remove(UserName);
+                    clientProfiles.put(newName, p);
+                    AppendText("[프로필 이름 변경] " + UserName + " → " + newName);
+                    UserName = newName;
+                } 
+                else {
+                    clientProfiles.put(UserName, p);
+                }
+
+                clientProfile = p;
+            }
+
+            AppendText("[프로필 수정됨] " + UserName + " / 상태: " + clientProfile.getStatusMessage() + " / 이미지: " + clientProfile.getProfileImagePath());
+
+            broadcastProfileUpdate();
+            BroadcastUserList();
+            saveProfilesToTxt();
+        }
+
 
         
         // 접속자 이름 목록 보내기 ("/list " 프로토콜)
@@ -367,65 +401,17 @@ public class JavaChatServerPanel extends JPanel {
                         if (chat_msg.startsWith("/profile_update ")) {
                             String body = chat_msg.substring("/profile_update ".length());
                             String[] tokens = body.split(" ", 3);
-                            // tokens[0] = 새이름, tokens[1] = 이미지경로, tokens[2] = 상태메시지
 
-                            if (tokens.length >= 3) {
-                                String newName      = tokens[0];   // 새 이름
-                                String newImagePath = tokens[1];   // 새 프로필 이미지 경로
-                                String newStatus    = tokens[2];   // 새 상태메시지
+                            if (tokens.length >= 2) {
+                                String newName      = tokens[0].trim();
+                                String newImagePath = tokens[1].trim();
+                                String newStatus    = (tokens.length == 3) ? tokens[2] : "";  // 상태 없으면 빈 문자열
 
-                                boolean nameChanged = false;
-                                
-                                synchronized (clientProfiles) {
-                                    // 현재 접속자의 기존 프로필을 "현재 UserName"으로 가져오기
-                                    ClientProfile p = clientProfiles.get(UserName);
-
-                                    if (p == null) {
-                                        // 혹시 없으면 새로 만듦 (이름 바뀐 상태 기준으로)
-                                        p = new ClientProfile(newName, newStatus, newImagePath);
-                                    } 
-                                    
-                                    else {
-                                        // 기존 프로필 값들 갱신
-                                        p.setProfileImagePath(newImagePath);
-                                        p.setStatusMessage(newStatus);
-                                        p.setName(newName);
-                                    }
-
-                                    // 이름이 실제로 변경된 경우 → Map의 key도 변경해야 함
-                                    if (!newName.equals(UserName)) {
-                                        clientProfiles.remove(UserName);
-                                        clientProfiles.put(newName, p);
-
-                                        AppendText("[프로필 이름 변경] " + UserName + " → " + newName);
-
-                                        // 이 스레드가 들고 있는 현재 사용자 이름도 바꿔줌
-                                        UserName = newName;
-                                        
-                                        nameChanged = true;
-                                    } 
-                                    
-                                    else {
-                                        clientProfiles.put(UserName, p); // 이름이 안 바뀐 경우 덮어쓰기
-                                    }
-
-                                    clientProfile = p; // 이 유저의 현재 프로필 객체 갱신
-                                }
-
-                                // 서버 로그에 최종 수정 내용 찍기
-                                AppendText("[프로필 수정됨] " + UserName + " / 상태: " + clientProfile.getStatusMessage() + " / 이미지: " + clientProfile.getProfileImagePath());
-
-                                broadcastProfileUpdate(); // 변경된 프로필 정보 전체 클라이언트에게 뿌리기
-                                
-                                // 이름이 바뀐 경우에는 접속자 리스트도 갱신
-                                if (nameChanged) {
-                                    BroadcastUserList(); 
-                                }
-
-                                saveProfilesToTxt(); // .txt 파일로 전체 프로필 저장
+                                applyProfileChange(newName, newImagePath, newStatus);
                             }
                             continue;
                         }
+
 
                         // --- 일반 채팅 ---
                         AppendText("[MSG] " + UserName + " : " + chat_msg);

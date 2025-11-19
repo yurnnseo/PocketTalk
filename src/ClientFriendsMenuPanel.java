@@ -98,12 +98,28 @@ public class ClientFriendsMenuPanel extends JPanel {
         
     }
 
-    //서버에서 받은 목록으로 친구 패널 업데이트
+    // 서버에서 받은 /list 로 친구 패널 업데이트
     public void updateFriendList(List<String> usernames) {
-    	if(friendsListPanel != null) {
-    		friendsListPanel.updateList(usernames);
-    	}
+        if (friendsListPanel != null) {
+            friendsListPanel.updateOnlineList(usernames);
+        }
     }
+    
+    // 서버에서 받은 /profile name img status 로 친구 프로필 갱신
+    public void updateFriendProfileFromServer(String name, String imagePath, String statusMsg) {
+        if (friendsListPanel != null) {
+            friendsListPanel.updateFriendProfile(name, imagePath, statusMsg);
+        }
+
+        // 만약 내 프로필에 대한 /profile 이면, 내 헤더/상태도 맞춰주고 싶다면
+        if (name != null && name.equals(myCurrentName)) {
+            this.myCurrentStatusMessage = (statusMsg == null) ? "" : statusMsg;
+            // 내 프로필 헤더 이름은 이미 myCurrentName 기준이라 그대로고,
+            // 상태메시지를 아래 어딘가에 표시하고 싶으면 별도 라벨 달아서 갱신하면 됨.
+        }
+    }
+
+
     
     // 내 이름,상메 바뀌었을 때 호출할 힘수
     public void updateMyProfileName(String newName, String newStatus) {

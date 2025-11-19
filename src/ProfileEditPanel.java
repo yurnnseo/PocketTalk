@@ -44,7 +44,6 @@ public class ProfileEditPanel extends JPanel {
 
                 String newName = name.getText().trim();
                 String text = message.getText().trim();
-
                 // placeholder 또는 빈 문자열이면 서버에는 ""로 저장
                 String statusToSend = (text.equals(placeholder) || text.isEmpty()) ? "" : text;
 

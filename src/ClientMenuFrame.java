@@ -59,43 +59,71 @@ public class ClientMenuFrame extends JFrame {
         }
     }
     
-    // 이 프레임이 직접 리스너를 가짐
     class ListenNetwork extends Thread {
         public void run() {
             while (true) {
                 try {
                     String msg = dis.readUTF();
-                    
-                    if (msg.startsWith("/list ")) { 
-                    	// "/list" 6글자 제외
-                    	String userListString = msg.substring(6).trim();
-                    	
-                    	String[] users;
+                    msg = msg.trim();
+
+                    // 1) 접속자 목록
+                    if (msg.startsWith("/list ")) {
+                        String userListString = msg.substring(6).trim();
+
+                        String[] users;
                         if (userListString.isEmpty()) {
-                            users = new String[0]; // 빈 목록
+                            users = new String[0];
                         } else {
-                            //공백으로 분리
-                            users = userListString.split(" "); 
+                            users = userListString.split(" ");
                         }
-                        //멤버 변수에 저장
+
                         currentUserList = users;
-                        //형식 변환
-                        List<String> usernames = Arrays.asList(currentUserList);
-                        //Swing UI업데이트(람다 표현식 사용)
+                        java.util.List<String> usernames = Arrays.asList(currentUserList);
+
                         SwingUtilities.invokeLater(() -> {
-                            //ClientFriendsMenuPanel에 메서드 있음.
                             if (friendsPanel != null) {
-                                friendsPanel.updateFriendList(usernames); 
+                                friendsPanel.updateFriendList(usernames);
                             }
                         });
-                        
                     }
+
+                    // 2) 프로필 정보 (/profile 이름 이미지경로 상태메시지...)
+                    else if (msg.startsWith("/profile ")) {
+                        // "/profile " 길이만큼 잘라서 뒤를 파싱
+                        String body = msg.substring("/profile ".length());
+
+                        // 상태메시지는 공백이 포함될 수 있으므로 4개로 split
+                        // tokens[0] = "/profile" 이 아니라 body 를 split하니까:
+                        // body = "name imagePath status message ..."
+                        String[] tokens = body.split(" ", 3);
+                        if (tokens.length >= 2) {
+                            String name      = tokens[0];
+                            String imagePath = tokens[1];
+                            String statusMsg = (tokens.length == 3) ? tokens[2] : "";
+
+                            SwingUtilities.invokeLater(() -> {
+                                if (friendsPanel != null) {
+                                    friendsPanel.updateFriendProfileFromServer(name, imagePath, statusMsg);
+                                }
+                            });
+                        }
+                    }
+
+                    // 3) 그 외(일반 채팅 등)는 아직 안 써놨지만, 나중에 여기서 분기
+                    else {
+                        // 예: 일반 채팅 메시지 처리
+                        // chatPanel.appendMessage(msg); 이런 식으로...
+                    }
+
                 } catch (IOException e) {
                     break;
                 }
             }
         }
     }
+
+        
+    
 
     
     // 화면 전환용 메소드

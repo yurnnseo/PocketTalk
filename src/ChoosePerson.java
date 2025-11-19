@@ -70,6 +70,7 @@ public class ChoosePerson extends JFrame{
         //친구 목록 화면 출력
         parentPanel = new FriendsListPanel(username); //본인은 제외
         parentPanel.updateList(users);
+
         int listX = 10;
         int listY = 45; 
         int listWidth = 245; 
@@ -81,7 +82,7 @@ public class ChoosePerson extends JFrame{
         choiceLabel.setFont(fontSource.getFont(12f));
         choiceLabel.setForeground(Color.BLACK);
         choiceLabel.setBounds(85, 5, 80, 30);
-        add(choiceLabel);
+        contentPane.add(choiceLabel);
         
         //버튼 생성
         okbutton = makeButton("선택 완료", 60, 28, 165, 290);

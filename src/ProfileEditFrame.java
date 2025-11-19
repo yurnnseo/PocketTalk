@@ -21,7 +21,6 @@ public class ProfileEditFrame extends JFrame {
 
     // ProfileEditPanel에서 저장 눌렀을 때 호출
     public void onProfileSaved(String newName, String statusToSend) {
-        System.out.println("[ProfileEditFrame] 저장됨: name=" + newName + ", status=" + statusToSend);
 
         // 내 프로필 화면(MyProfileViewPanel) 갱신
         parentPanel.updateProfile(newName, statusToSend);

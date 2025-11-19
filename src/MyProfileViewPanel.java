@@ -95,7 +95,6 @@ public class MyProfileViewPanel extends JPanel {
 
         // 필요하면 여기서 parentFrame/친구패널까지 알려줄 수도 있음
         parentFrame.onMyProfileUpdated(newName, newStatus);
-
         revalidate();
         repaint();
     }

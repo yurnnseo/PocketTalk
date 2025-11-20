@@ -72,7 +72,7 @@ public class ChoosePerson extends JFrame{
         setContentPane(contentPane);
         
         //친구 목록 화면 출력
-        parentPanel = new FriendsListPanel(username, true); //본인은 제외
+        parentPanel = new FriendsListPanel(username); //본인은 제외
         parentPanel.updateList(users);
         
         JScrollPane scrollPane = new JScrollPane(parentPanel);

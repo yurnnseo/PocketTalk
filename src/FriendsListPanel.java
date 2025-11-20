@@ -39,10 +39,6 @@ public class FriendsListPanel extends JPanel {
         setOpaque(false);
     }
 
-    public FriendsListPanel(String myName, boolean isSelectionMode) {
-        this.myName = myName;
-        this.isSelectedMode = isSelectedMode;   
-    }
     // 내 이름/상태가 바뀌었을 때 호출 (리스트에서 나 자신은 제외지만 이름 비교를 위해)
     public void setMyProfile(String newMyName, String newStatusMessage) {
         this.myName = newMyName;
@@ -74,7 +70,7 @@ public class FriendsListPanel extends JPanel {
         } 
         else {
             fp.name = name;
-            fp.statusMessage = statusMessage;
+            fp.statusMessage = (statusMessage == null) ? "" : statusMessage;
             if (imagePath != null && !imagePath.isEmpty()) {
                 fp.profileImagePath = imagePath;
             }
@@ -120,11 +116,10 @@ public class FriendsListPanel extends JPanel {
             
             if (fp.name.equals(myName)) continue; // 혹시라도 myName이 friends에 들어있다면 건너뜀
 
-            ProfileHeaderView header = new ProfileHeaderView(fp.name, fp.profileImagePath, 50, 50, ProfileHeaderView.Orientation.HORIZONTAL);
-            header.setBounds(20, y, header.getPreferredSize().width, header.getPreferredSize().height);
+            ProfileHeaderView header = new ProfileHeaderView(fp.name, fp.statusMessage, fp.profileImagePath, 50, 50, ProfileHeaderView.Orientation.HORIZONTAL);
+            header.setBounds(30, y, header.getPreferredSize().width, header.getPreferredSize().height);
             add(header);
-            
-            if(isSelectedMode) {
+    
                 header.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
@@ -133,12 +128,7 @@ public class FriendsListPanel extends JPanel {
                         refreshView();
                     }
                 });
-           
-                JLabel checkLabel = new JLabel(selectedUsers.contains(fp.name) ? "✓" : " ");
-                checkLabel.setFont(fontSource.getFont(20f));
-                checkLabel.setBounds(header.getWidth() - 30, (header.getHeight() - 20)/2, 20, 20);
-                header.add(checkLabel);
-            }
+        
             y += header.getPreferredSize().height + 15;
         }
 

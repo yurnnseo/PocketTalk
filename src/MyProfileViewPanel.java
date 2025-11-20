@@ -40,20 +40,20 @@ public class MyProfileViewPanel extends JPanel {
         }
         
         // 프로필 헤더 (친구목록과 동일)
-        header = new ProfileHeaderView(this.username, this.profileImagePath, 60, 60, ProfileHeaderView.Orientation.VERTICAL);
+        header = new ProfileHeaderView(this.username, this.statusMessage, this.profileImagePath, 60, 60, ProfileHeaderView.Orientation.VERTICAL);
         Dimension hSize = header.getPreferredSize();
         int headerX = 66;
         int headerY = 230; // 살짝 위로 땡겨도 되고 취향대로
         header.setBounds(headerX, headerY, hSize.width, hSize.height);
         add(header);
 
-        statusLabel = new JLabel(statusMessage, SwingConstants.CENTER);
+        /*statusLabel = new JLabel(statusMessage, SwingConstants.CENTER);
         statusLabel.setFont(fontSource.getFont(12f));
         statusLabel.setForeground(Color.DARK_GRAY);
-
+        
         int statusY = headerY + hSize.height + 8;
         statusLabel.setBounds(headerX, statusY, hSize.width, 20);
-        add(statusLabel);
+        add(statusLabel);*/
 
         // 편집 버튼 
         ImageIcon normal = new ImageIcon(getClass().getResource("/Images/profileeditbutton.png"));
@@ -90,7 +90,7 @@ public class MyProfileViewPanel extends JPanel {
         
         if (newStatus != null) {
             this.statusMessage = newStatus;
-            statusLabel.setText(newStatus);    // 상태메시지 라벨 갱신
+             header.setMessage(newStatus);    // 상태메시지 라벨 갱신
         }
 
         // 필요하면 여기서 parentFrame/친구패널까지 알려줄 수도 있음

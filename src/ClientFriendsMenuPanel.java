@@ -69,7 +69,7 @@ public class ClientFriendsMenuPanel extends JPanel {
         add(friendsLabel);
         
         // 필드에 저장해두기
-        myHeader = new ProfileHeaderView(this.myCurrentName, this.profileImagePath, 50, 50, ProfileHeaderView.Orientation.HORIZONTAL);
+        myHeader = new ProfileHeaderView(this.myCurrentName, this.myCurrentStatusMessage, this.profileImagePath, 50, 50, ProfileHeaderView.Orientation.HORIZONTAL);
         myHeader.setBounds(95, 80, myHeader.getPreferredSize().width, myHeader.getPreferredSize().height);
         add(myHeader);
 
@@ -129,6 +129,7 @@ public class ClientFriendsMenuPanel extends JPanel {
 
         if (myHeader != null) {
             myHeader.setUserName(this.myCurrentName);  
+            myHeader.setMessage(this.myCurrentStatusMessage);
         }
         
         if (friendsListPanel != null) {

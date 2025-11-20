@@ -3,6 +3,8 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.DataInputStream;
@@ -12,11 +14,13 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -68,15 +72,17 @@ public class ChoosePerson extends JFrame{
         setContentPane(contentPane);
         
         //친구 목록 화면 출력
-        parentPanel = new FriendsListPanel(username); //본인은 제외
+        parentPanel = new FriendsListPanel(username, true); //본인은 제외
         parentPanel.updateList(users);
-
-        int listX = 10;
-        int listY = 45; 
-        int listWidth = 245; 
-        int listHeight = 240; 
-        parentPanel.setBounds(listX, listY, listWidth, listHeight);
-        contentPane.add(parentPanel);
+        
+        JScrollPane scrollPane = new JScrollPane(parentPanel);
+        scrollPane.setBounds(10, 45, 230, 240);
+        scrollPane.getViewport().setOpaque(false); //배경 투명화
+        scrollPane.setOpaque(false);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder()); //테두리 투명화
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); //스크롤바 보이게
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        contentPane.add(scrollPane);
         
         choiceLabel = new JLabel("대화상대 선택", SwingConstants.CENTER);
         choiceLabel.setFont(fontSource.getFont(12f));
@@ -85,10 +91,16 @@ public class ChoosePerson extends JFrame{
         contentPane.add(choiceLabel);
         
         //버튼 생성
-        okbutton = makeButton("선택 완료", 60, 28, 165, 290);
+        okbutton = makeButton("선택 완료", 56, 28, 165, 290);
 
-        contentPane.add(okbutton);
-        //취소는 창닫기 버튼 누르면 됨
+        contentPane.add(okbutton); //취소는 창닫기 버튼 누르면 됨
+        
+        
+        okbutton.addActionListener(new ActionListener(){
+        	public void actionPerformed(ActionEvent e) {
+        		
+        	}
+        });
 	}
 	
 	 private JButton makeButton(String text, int width, int height, int x, int y) {

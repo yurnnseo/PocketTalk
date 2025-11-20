@@ -1,6 +1,8 @@
 // 친구메뉴패널에 뜨는 친구 목록
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -13,9 +15,11 @@ public class FriendsListPanel extends JPanel {
 
     // 친구 프로필 저장
     private final Map<String, FriendProfile> friends = new LinkedHashMap<>();
-    
     private static final String DEFAULT_PROFILE_IMAGE = "/Images/defaultprofileimage.png";
-
+    private boolean isSelectedMode = false;
+    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf");
+    private final Set<String> selectedUsers = new LinkedHashSet<>();
+    
     // 친구 한 명에 대한 정보 (이름, 상태메시지, 프로필 이미지 경로)
     private static class FriendProfile {
         String name;
@@ -35,6 +39,10 @@ public class FriendsListPanel extends JPanel {
         setOpaque(false);
     }
 
+    public FriendsListPanel(String myName, boolean isSelectionMode) {
+        this.myName = myName;
+        this.isSelectedMode = isSelectedMode;   
+    }
     // 내 이름/상태가 바뀌었을 때 호출 (리스트에서 나 자신은 제외지만 이름 비교를 위해)
     public void setMyProfile(String newMyName, String newStatusMessage) {
         this.myName = newMyName;
@@ -115,7 +123,22 @@ public class FriendsListPanel extends JPanel {
             ProfileHeaderView header = new ProfileHeaderView(fp.name, fp.profileImagePath, 50, 50, ProfileHeaderView.Orientation.HORIZONTAL);
             header.setBounds(20, y, header.getPreferredSize().width, header.getPreferredSize().height);
             add(header);
-
+            
+            if(isSelectedMode) {
+                header.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        if(selectedUsers.contains(fp.name)) selectedUsers.remove(fp.name);
+                        else selectedUsers.add(fp.name);
+                        refreshView();
+                    }
+                });
+           
+                JLabel checkLabel = new JLabel(selectedUsers.contains(fp.name) ? "✓" : " ");
+                checkLabel.setFont(fontSource.getFont(20f));
+                checkLabel.setBounds(header.getWidth() - 30, (header.getHeight() - 20)/2, 20, 20);
+                header.add(checkLabel);
+            }
             y += header.getPreferredSize().height + 15;
         }
 

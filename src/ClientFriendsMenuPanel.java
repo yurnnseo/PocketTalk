@@ -40,11 +40,7 @@ public class ClientFriendsMenuPanel extends JPanel {
         
         //스크롤팬 커스텀
         JScrollPane scrollPane = new JScrollPane(friendsListPanel);
-        int contentX = 75;
-        int contentY = 151; 
-        int contentWidth = 295; 
-        int contentHeight = 375; 
-        scrollPane.setBounds(contentX, contentY, contentWidth, contentHeight);
+        scrollPane.setBounds(65, 151, 295, 375);
         scrollPane.getViewport().setOpaque(false); //배경 투명화
         scrollPane.setOpaque(false);
         scrollPane.setBorder(BorderFactory.createEmptyBorder()); //테두리 투명화

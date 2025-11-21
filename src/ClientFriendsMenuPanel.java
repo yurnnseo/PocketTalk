@@ -1,142 +1,100 @@
-// 친구 목록 패널
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
 
 public class ClientFriendsMenuPanel extends JPanel {
-	
-	private final ClientMenuFrame parentFrame;
-	
-	private ImageIcon metaicon, metaicon2, chaticon, chaticon2;
+
+    private final ClientMenuFrame parentFrame;
+
+    private ImageIcon metaicon, metaicon2, chaticon, chaticon2;
     private JButton metabutton, chatbutton;
-	private Image backgroundImg;
+    private Image backgroundImg;
     private JLabel friendsLabel;
     private FriendsListPanel friendsListPanel;
-    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
+
+    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf");
+
     private String profileImagePath;
-    private ProfileHeaderView myHeader; 
+    private ProfileHeaderView myHeader;
     private String myCurrentName;
-    private String myCurrentStatusMessage="";
-   
-    
-    public ClientFriendsMenuPanel(ClientMenuFrame parentFrame, String username, String ip_addr, String port_no, String profileImagePath) {
-        
-    	this.parentFrame = parentFrame;  
-    	
-    	setLayout(null);
+    private String myCurrentStatusMessage = "";
+
+    public ClientFriendsMenuPanel(ClientMenuFrame parentFrame,
+                                  String username,
+                                  String ip_addr,
+                                  String port_no,
+                                  String profileImagePath) {
+
+        this.parentFrame = parentFrame;
+
+        setLayout(null);
         setBackground(Color.decode("#F9F9F9"));
-        
-        this.myCurrentName = username; //초기값을 현재 정보 변수에 저장 
-        
+
+        this.myCurrentName = username;
+
         if (profileImagePath == null || profileImagePath.isEmpty()) {
             this.profileImagePath = "/Images/defaultprofileimage.png";
-        } 
-        else {
+        } else {
             this.profileImagePath = profileImagePath;
         }
-        
-        friendsListPanel = new FriendsListPanel(username); //본인은 제외하기 위해 내이름 전달
-        
-        //스크롤팬 커스텀
+
+        // ★ 딱 1개만 생성되는 FriendsListPanel
+        friendsListPanel = new FriendsListPanel(this.myCurrentName);
+
         JScrollPane scrollPane = new JScrollPane(friendsListPanel);
         scrollPane.setBounds(65, 151, 295, 375);
-        scrollPane.getViewport().setOpaque(false); //배경 투명화
+        scrollPane.getViewport().setOpaque(false);
         scrollPane.setOpaque(false);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder()); //테두리 투명화
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); //스크롤바 보이게
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         add(scrollPane);
-        
 
-        // 아이콘
         metaicon  = new ImageIcon(getClass().getResource("/Images/metaIcon.png"));
         metaicon2 = new ImageIcon(getClass().getResource("/Images/metaIcon2.png"));
         chaticon  = new ImageIcon(getClass().getResource("/Images/chatIcon.png"));
         chaticon2 = new ImageIcon(getClass().getResource("/Images/chatIcon2.png"));
 
-        // 버튼 생성
         metabutton = makeButton(metaicon, 13, 40);
         chatbutton = makeButton(chaticon, 13, 120);
 
-        
         add(metabutton);
         add(chatbutton);
-        
+
         friendsLabel = new JLabel("친구", SwingConstants.LEFT);
         friendsLabel.setFont(fontSource.getFont(20f));
         friendsLabel.setForeground(Color.BLACK);
         friendsLabel.setBounds(97, 20, 50, 50);
         add(friendsLabel);
-        
-        // 필드에 저장해두기
-        myHeader = new ProfileHeaderView(this.myCurrentName, this.myCurrentStatusMessage, this.profileImagePath, 50, 50, ProfileHeaderView.Orientation.HORIZONTAL);
-        myHeader.setBounds(95, 80, myHeader.getPreferredSize().width, myHeader.getPreferredSize().height);
+
+        myHeader = new ProfileHeaderView(
+                this.myCurrentName,
+                this.myCurrentStatusMessage,
+                this.profileImagePath,
+                50, 50,
+                ProfileHeaderView.Orientation.HORIZONTAL
+        );
+        myHeader.setBounds(95, 80,
+                myHeader.getPreferredSize().width,
+                myHeader.getPreferredSize().height);
         add(myHeader);
 
-        // 프로필 버튼 클릭 시: 내 프로필 보기 프레임 띄우기
-        myHeader.getProfileButton().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                MyProfileViewFrame pef = new MyProfileViewFrame(ClientFriendsMenuPanel.this, myCurrentName, ip_addr, port_no, ClientFriendsMenuPanel.this.profileImagePath, myCurrentStatusMessage, parentFrame.getDataOutputStream());
-                pef.setVisible(true);
-            }
+        myHeader.getProfileButton().addActionListener(e -> {
+            MyProfileViewFrame pef = new MyProfileViewFrame(
+                    ClientFriendsMenuPanel.this,
+                    myCurrentName,
+                    ip_addr,
+                    port_no,
+                    ClientFriendsMenuPanel.this.profileImagePath,
+                    myCurrentStatusMessage,
+                    parentFrame.getDataOutputStream()
+            );
+            pef.setVisible(true);
         });
-        
-        // 채팅 버튼: 화면 전환
-        chatbutton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-               // metabutton.setIcon(metaicon2);
-               // chatbutton.setIcon(chaticon2);
-                parentFrame.showChattingMenu();
-            }
-        });
-        
+
+        chatbutton.addActionListener(e -> parentFrame.showChattingMenu());
     }
 
-    // 서버에서 받은 /list 로 친구 패널 업데이트
-    public void updateFriendList(List<String> usernames) {
-        if (friendsListPanel != null) {
-            friendsListPanel.updateOnlineList(usernames);
-        }
-    }
-    
-    // 서버에서 받은 /profile name img status 로 친구 프로필 갱신
-    public void updateFriendProfileFromServer(String name, String imagePath, String statusMsg) {
-        if (friendsListPanel != null) {
-            friendsListPanel.updateFriendProfile(name, imagePath, statusMsg);
-        }
-
-        // 만약 내 프로필에 대한 /profile 이면, 내 헤더/상태도 맞춰주고 싶다면
-        if (name != null && name.equals(myCurrentName)) {
-            this.myCurrentStatusMessage = (statusMsg == null) ? "" : statusMsg;
-            // 내 프로필 헤더 이름은 이미 myCurrentName 기준이라 그대로고,
-            // 상태메시지를 아래 어딘가에 표시하고 싶으면 별도 라벨 달아서 갱신하면 됨.
-        }
-    }
-
-
-    
-    // 내 이름,상메 바뀌었을 때 호출할 힘수
-    public void updateMyProfileName(String newName, String newStatus) {
-    	if (newName != null && !newName.isEmpty()) {
-            this.myCurrentName = newName;
-        }
-    	
-        if (newStatus != null) {
-            this.myCurrentStatusMessage = newStatus;
-        }
-
-        if (myHeader != null) {
-            myHeader.setUserName(this.myCurrentName);  
-            myHeader.setMessage(this.myCurrentStatusMessage);
-        }
-        
-        if (friendsListPanel != null) {
-            friendsListPanel.setMyName(this.myCurrentName, this.myCurrentStatusMessage);
-        }
-    }
-    
     private JButton makeButton(ImageIcon icon, int x, int y) {
         JButton btn = new JButton(icon);
         btn.setBounds(x, y, icon.getIconWidth(), icon.getIconHeight());
@@ -147,17 +105,68 @@ public class ClientFriendsMenuPanel extends JPanel {
         return btn;
     }
 
-    // 배경 직접 그리기
+    // /list 수신 시
+    public void updateFriendList(List<String> usernames) {
+        if (friendsListPanel != null) {
+            friendsListPanel.updateOnlineList(usernames);
+        }
+    }
+
+    // /profile 수신 시
+    public void updateFriendProfileFromServer(String name, String imagePath, String statusMsg) {
+
+        System.out.println("[ClientFriendsMenuPanel] updateFriendProfileFromServer name="
+                + name + ", status=" + statusMsg);
+
+        if (name != null) name = name.trim();
+        if (imagePath != null) imagePath = imagePath.trim();
+        if (statusMsg != null) statusMsg = statusMsg.trim();
+
+        // 1) 친구 목록(= FriendsListPanel의 profiles 맵)에 무조건 저장
+        if (friendsListPanel != null) {
+            friendsListPanel.updateFriendProfile(name, imagePath, statusMsg);
+        }
+
+        // 2) 그 중에서 "나 자신"이면, 위쪽 내 프로필 헤더도 같이 갱신
+        if (name != null && name.equals(myCurrentName)) {
+            this.myCurrentStatusMessage = (statusMsg == null) ? "" : statusMsg;
+
+            if (myHeader != null) {
+                myHeader.setUserName(myCurrentName);
+                myHeader.setMessage(myCurrentStatusMessage);
+                myHeader.revalidate();
+                myHeader.repaint();
+            }
+        }
+    }
+
+    // 내 프로필(이름, 상태메시지) 변경 시 – 상단 헤더/UI용
+    public void updateMyProfileName(String newName, String newStatus) {
+        if (newName != null && !newName.isEmpty()) {
+            this.myCurrentName = newName.trim();
+        }
+        if (newStatus != null) {
+            this.myCurrentStatusMessage = newStatus;
+        }
+
+        if (myHeader != null) {
+            myHeader.setUserName(this.myCurrentName);
+            myHeader.setMessage(this.myCurrentStatusMessage);
+        }
+
+        if (friendsListPanel != null) {
+            friendsListPanel.setMyName(this.myCurrentName);
+        }
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.setColor(Color.decode("#E3D6F0"));
         g.fillRect(0, 0, 75, getHeight());
         g.drawImage(backgroundImg, 0, 0, getWidth(), getHeight(), this);
-        
-        g.setColor(Color.LIGHT_GRAY); 
+
+        g.setColor(Color.LIGHT_GRAY);
         g.fillRect(75, 150, getWidth() - 60, 1);
     }
-    
-  
 }

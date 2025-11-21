@@ -13,16 +13,6 @@ public class ProfileHeaderView extends JPanel {
         setLayout(null);
         setOpaque(false);
 
-//        // 아이콘 로드 + 스케일
-//        Image img;
-//        if (imagePath != null && imagePath.startsWith("/")) {
-//            img = new ImageIcon(getClass().getResource(imagePath)).getImage();
-//        } 
-//        else {
-//            img = new ImageIcon(imagePath).getImage();
-//        }
-//        ImageIcon icon = new ImageIcon(img.getScaledInstance(imgW, imgH, Image.SCALE_SMOOTH));
-
         if (imagePath == null || imagePath.isEmpty()) {
             imagePath = "/Images/defaultprofileimage.png";
         }

@@ -48,7 +48,6 @@ public class ProfileEditPanel extends JPanel {
                 String statusToSend = (text.equals(placeholder) || text.isEmpty()) ? "" : text;
 
                 parentFrame.onProfileSaved(newName, statusToSend);
-                parentFrame.dispose();
             }
         });
 
@@ -88,7 +87,8 @@ public class ProfileEditPanel extends JPanel {
         if (currentStatusMessage == null || currentStatusMessage.isEmpty()) {
             message = new JTextField(placeholder);
             message.setForeground(Color.GRAY);
-        } else {
+        } 
+        else {
             message = new JTextField(currentStatusMessage);
             message.setForeground(Color.BLACK);
         }

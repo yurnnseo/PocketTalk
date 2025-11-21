@@ -1,27 +1,26 @@
-
-//StartPocketTalkPanel에서 버튼 누르면 띄워지는 새로운 창의 프레임
+import javax.swing.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.*;
-
 public class ClientMenuFrame extends JFrame {
+
     private String username, ip_addr, port_no;
     private Socket socket;
     private DataInputStream dis;
     private DataOutputStream dos;
-    private String[] currentUserList; //서버에게서 받은 최신 목록
-    private ClientFriendsMenuPanel friendsPanel; 
+
+    // 서버에게서 받은 최신 접속자 목록(/list 결과)
+    private String[] currentUserList;
+
+    private ClientFriendsMenuPanel friendsPanel;
     private ClientChatingMenuPanel chatPanel;
-    
+
     public ClientMenuFrame(String username, String ip_addr, String port_no) {
-        this.username = username;
+        this.username = (username == null) ? "" : username.trim();
         this.ip_addr = ip_addr;
         this.port_no = port_no;
 
@@ -32,25 +31,28 @@ public class ClientMenuFrame extends JFrame {
         setResizable(false);
 
         String profileImagePath = "/Images/defaultprofileimage.png";
-        
-        //패널 객체들을 먼저 생성해서 저장
-        friendsPanel = new ClientFriendsMenuPanel(this, username, ip_addr, port_no, profileImagePath);
-        chatPanel = new ClientChatingMenuPanel(this, username, ip_addr, port_no);
-        //처음에는 친구 패널
+
+        // 메인 패널들 먼저 생성
+        friendsPanel = new ClientFriendsMenuPanel(this, this.username, ip_addr, port_no, profileImagePath);
+        chatPanel    = new ClientChatingMenuPanel(this, this.username, ip_addr, port_no);
+
+        // 처음 화면은 친구 목록 화면
         setContentPane(friendsPanel);
-        
         setVisible(true);
-        
+
+        // ---- 서버 연결 ----
         try {
-            //메인 프레임이 생성될 때 연결
             socket = new Socket(ip_addr, Integer.parseInt(port_no));
             dis = new DataInputStream(socket.getInputStream());
             dos = new DataOutputStream(socket.getOutputStream());
 
+            // ★ 수신 스레드 먼저 시작
             ListenNetwork net = new ListenNetwork();
             net.start();
-            
-            dos.writeUTF("/login " + username); // 리스너 켜고 로그인
+
+            // ★ 그 다음 로그인 메시지 전송
+            dos.writeUTF("/login " + this.username);
+            dos.flush();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -58,15 +60,15 @@ public class ClientMenuFrame extends JFrame {
             System.exit(0);
         }
     }
-    
+
     class ListenNetwork extends Thread {
         public void run() {
             while (true) {
                 try {
                     String msg = dis.readUTF();
+                    if (msg == null) continue;
                     msg = msg.trim();
 
-                    // 1) 접속자 목록
                     if (msg.startsWith("/list ")) {
                         String userListString = msg.substring(6).trim();
 
@@ -77,8 +79,13 @@ public class ClientMenuFrame extends JFrame {
                             users = userListString.split(" ");
                         }
 
+                        // 여기서도 한 번 정리해 주면 더 안전
+                        for (int i = 0; i < users.length; i++) {
+                            if (users[i] != null) users[i] = users[i].trim();
+                        }
+
                         currentUserList = users;
-                        java.util.List<String> usernames = Arrays.asList(currentUserList);
+                        List<String> usernames = Arrays.asList(currentUserList);
 
                         SwingUtilities.invokeLater(() -> {
                             if (friendsPanel != null) {
@@ -86,20 +93,18 @@ public class ClientMenuFrame extends JFrame {
                             }
                         });
                     }
-
-                    // 2) 프로필 정보 (/profile 이름 이미지경로 상태메시지...)
                     else if (msg.startsWith("/profile ")) {
-                        // "/profile " 길이만큼 잘라서 뒤를 파싱
-                        String body = msg.substring("/profile ".length());
 
-                        // 상태메시지는 공백이 포함될 수 있으므로 4개로 split
-                        // tokens[0] = "/profile" 이 아니라 body 를 split하니까:
-                        // body = "name imagePath status message ..."
+                        String body = msg.substring("/profile ".length());
                         String[] tokens = body.split(" ", 3);
+
                         if (tokens.length >= 2) {
-                            String name      = tokens[0];
-                            String imagePath = tokens[1];
-                            String statusMsg = (tokens.length == 3) ? tokens[2] : "";
+                            String name      = tokens[0].trim();
+                            String imagePath = tokens[1].trim();
+                            String statusMsg = (tokens.length == 3) ? tokens[2].trim() : "";
+
+                            System.out.println("[클라 수신] /profile name=" + name +
+                                    " status=" + statusMsg);
 
                             SwingUtilities.invokeLater(() -> {
                                 if (friendsPanel != null) {
@@ -108,46 +113,41 @@ public class ClientMenuFrame extends JFrame {
                             });
                         }
                     }
-
-                    // 3) 그 외(일반 채팅 등)는 아직 안 써놨지만, 나중에 여기서 분기
                     else {
-                        // 예: 일반 채팅 메시지 처리
-                        // chatPanel.appendMessage(msg); 이런 식으로...
+                        // 나중에 채팅 패널에 연결
                     }
 
                 } catch (IOException e) {
+                    System.out.println("[클라 수신 스레드 종료] " + e.getMessage());
                     break;
                 }
             }
         }
     }
 
-        
-    
+     
 
-    
-    // 화면 전환용 메소드
+    // ---- 화면 전환 ----
     public void showFriendsMenu() {
-        //setContentPane(new ClientFriendsMenuPanel(this, username, ip_addr, port_no));
-    	setContentPane(friendsPanel);
+        setContentPane(friendsPanel);
         revalidate();
         repaint();
     }
 
     public void showChattingMenu() {
-        //setContentPane(new ClientChatingMenuPanel(this, username, ip_addr, port_no));
-    	setContentPane(chatPanel);
+        setContentPane(chatPanel);
         revalidate();
         repaint();
     }
-    
+
+    // ---- getter ----
     public DataOutputStream getDataOutputStream() {
         return dos;
     }
+
     public List<String> getCurrentUserList() {
         if (currentUserList != null) {
-            // 배열을 List로 변환하여 반환
-            return Arrays.asList(currentUserList); 
+            return Arrays.asList(currentUserList);
         }
         return null;
     }

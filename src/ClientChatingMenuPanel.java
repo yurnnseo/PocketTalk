@@ -40,8 +40,6 @@ public class ClientChatingMenuPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
             	parentFrame.showFriendsMenu();
-                //metabutton.setIcon(metaicon);
-                //chatbutton.setIcon(chaticon);
                 
             }
         });

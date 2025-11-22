@@ -254,7 +254,7 @@ public class JavaChatServerPanel extends JPanel {
 
             saveProfilesToTxt();
 
-	         // ★ 이 사람만이 아니라, 전체 프로필을 통째로 다시 뿌린다
+	         // 이 사람만이 아니라, 전체 프로필을 통째로 다시 뿌린다
 	         broadcastAllProfilesToAllClients();
 	
 	         // 접속자 목록도 다시 전송 (이름 바뀌었을 수도 있으니까)

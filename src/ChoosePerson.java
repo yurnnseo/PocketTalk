@@ -80,7 +80,7 @@ public class ChoosePerson extends JFrame{
         parentPanel.updateList(users);
         
         JScrollPane scrollPane = new JScrollPane(parentPanel);
-        scrollPane.setBounds(10, 45, 230, 240);
+        scrollPane.setBounds(10, 42, 238, 240);
         scrollPane.getViewport().setOpaque(false); //배경 투명화
         scrollPane.setOpaque(false);
         scrollPane.setBorder(BorderFactory.createEmptyBorder()); //테두리 투명화

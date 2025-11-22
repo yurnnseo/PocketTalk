@@ -82,8 +82,6 @@ public class FriendsListPanel extends JPanel {
         if (statusMessage != null) statusMessage = statusMessage.trim();
         if (imagePath != null) imagePath = imagePath.trim();
 
-     //   System.out.println("[FriendsListPanel] updateFriendProfile 호출됨 name=" + name
-       //         + ", status=" + statusMessage);
 
         FriendProfile fp = profiles.get(name);
         if (fp == null) {
@@ -136,13 +134,6 @@ public class FriendsListPanel extends JPanel {
 
         int y = 15;
 
-       // System.out.println("------ refreshView() 상태 ------");
-        for (String name : onlineNames) {
-            FriendProfile fp = profiles.get(name);
-            String status = (fp == null) ? "" : fp.statusMessage;
-            System.out.println(" -> " + name + " / status=" + status);
-        }
-       // System.out.println("--------------------------------");
 
         for (String name : onlineNames) {
             // 내 자신은 친구 목록에서 제외
@@ -169,7 +160,7 @@ public class FriendsListPanel extends JPanel {
             add(header);
 
             
-            //선택 모드->체크 표시 추가
+            //선택 모드 -> 체크 표시 추가
             if(isSelectionMode) {
             	if(selectedUsers.contains(name)) {
             		
@@ -184,19 +175,30 @@ public class FriendsListPanel extends JPanel {
             }
             
             final String userName = fp.name;
-            header.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                	if (isSelectionMode) {
-	                    if (selectedUsers.contains(userName)) {
-	                        selectedUsers.remove(userName);
-	                    } else {
-	                        selectedUsers.add(userName);
-	                    }
-	                    refreshView();
-                	}
-                }
-            });
+
+	         // 공통으로 쓸 클릭 리스너 하나 만들기
+	         MouseAdapter clickListener = new MouseAdapter() {
+	             @Override
+	             public void mouseClicked(MouseEvent e) {
+	                 if (!isSelectionMode) return;
+	
+	                 if (selectedUsers.contains(userName)) {
+	                     selectedUsers.remove(userName);
+	                 } else {
+	                     selectedUsers.add(userName);
+	                 }
+	                 refreshView();
+	             }
+	         };
+	
+	         // header 자체에 달고
+	         header.addMouseListener(clickListener);
+	
+	         // header 안의 모든 자식 컴포넌트에도 동일 리스너 달기
+	         for (Component c : header.getComponents()) {
+	             c.addMouseListener(clickListener);
+	         }
+
 
             y += header.getPreferredSize().height + 15;
         }

@@ -13,12 +13,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -43,7 +45,9 @@ public class ChoosePerson extends JFrame{
     private FriendsListPanel parentPanel;
     private String username;
     private JButton okbutton;
-    
+    //이렇게 적는거 말고 받는거로 하고 싶은디.. 생성자 매개변수를 바꿔야되나
+    private final String serverIp = "127.0.0.1"; 
+    private final String serverPort = "30000";
     private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
     
 	public ChoosePerson(String username, List<String> users) {
@@ -72,7 +76,7 @@ public class ChoosePerson extends JFrame{
         setContentPane(contentPane);
         
         //친구 목록 화면 출력
-        parentPanel = new FriendsListPanel(username); //본인은 제외
+        parentPanel = new FriendsListPanel(username, true); //본인은 제외
         parentPanel.updateList(users);
         
         JScrollPane scrollPane = new JScrollPane(parentPanel);
@@ -94,11 +98,24 @@ public class ChoosePerson extends JFrame{
         okbutton = makeButton("선택 완료", 56, 28, 165, 290);
 
         contentPane.add(okbutton); //취소는 창닫기 버튼 누르면 됨
-        
-        
+               
         okbutton.addActionListener(new ActionListener(){
         	public void actionPerformed(ActionEvent e) {
-        		
+        		Set<String> selected = parentPanel.getSelectedUsers();
+                if (selected.isEmpty()) {
+                    JOptionPane.showMessageDialog(ChoosePerson.this, 
+                        "대화 상대를 한 명 이상 선택해주세요.", "선택 오류", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                
+                selected.add(username); //자기자신 추가
+                
+                String members = String.join(" ", selected);
+                
+                dispose(); //창 제거
+                
+                ChattingView chatting = new ChattingView(username, serverIp, serverPort, members);
+                chatting.setVisible(true);
         	}
         });
 	}

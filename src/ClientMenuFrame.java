@@ -103,8 +103,8 @@ public class ClientMenuFrame extends JFrame {
                             String imagePath = tokens[1].trim();
                             String statusMsg = (tokens.length == 3) ? tokens[2].trim() : "";
 
-                            System.out.println("[클라 수신] /profile name=" + name +
-                                    " status=" + statusMsg);
+                           // System.out.println("[클라 수신] /profile name=" + name +
+                            //        " status=" + statusMsg);
 
                             SwingUtilities.invokeLater(() -> {
                                 if (friendsPanel != null) {

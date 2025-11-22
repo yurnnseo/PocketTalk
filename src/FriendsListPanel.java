@@ -21,6 +21,8 @@ public class FriendsListPanel extends JPanel {
 
     private final Set<String> selectedUsers = new LinkedHashSet<>();
 
+    private boolean isSelectionMode = false; //채팅 상대 선택 모드
+    
     private static final String DEFAULT_PROFILE_IMAGE = "/Images/defaultprofileimage.png";
     private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf");
 
@@ -42,8 +44,15 @@ public class FriendsListPanel extends JPanel {
         }
     }
 
+    //기본 생성자
     public FriendsListPanel(String myName) {
+        this(myName, false); 
+    }
+    
+    //선택 모드 생성자
+    public FriendsListPanel(String myName, boolean isSelectionMode) {
         this.myName = myName;
+        this.isSelectionMode = isSelectionMode;
         setLayout(null);
         setOpaque(false);
     }
@@ -73,8 +82,8 @@ public class FriendsListPanel extends JPanel {
         if (statusMessage != null) statusMessage = statusMessage.trim();
         if (imagePath != null) imagePath = imagePath.trim();
 
-        System.out.println("[FriendsListPanel] updateFriendProfile 호출됨 name=" + name
-                + ", status=" + statusMessage);
+     //   System.out.println("[FriendsListPanel] updateFriendProfile 호출됨 name=" + name
+       //         + ", status=" + statusMessage);
 
         FriendProfile fp = profiles.get(name);
         if (fp == null) {
@@ -127,13 +136,13 @@ public class FriendsListPanel extends JPanel {
 
         int y = 15;
 
-        System.out.println("------ refreshView() 상태 ------");
+       // System.out.println("------ refreshView() 상태 ------");
         for (String name : onlineNames) {
             FriendProfile fp = profiles.get(name);
             String status = (fp == null) ? "" : fp.statusMessage;
             System.out.println(" -> " + name + " / status=" + status);
         }
-        System.out.println("--------------------------------");
+       // System.out.println("--------------------------------");
 
         for (String name : onlineNames) {
             // 내 자신은 친구 목록에서 제외
@@ -159,16 +168,33 @@ public class FriendsListPanel extends JPanel {
                     header.getPreferredSize().height);
             add(header);
 
+            
+            //선택 모드->체크 표시 추가
+            if(isSelectionMode) {
+            	if(selectedUsers.contains(name)) {
+            		
+                    JLabel checkLabel = new JLabel("✔");
+                    
+                    int checkX = 10; // 패널 왼쪽에서 10 픽셀
+                    int checkY = y + (header.getPreferredSize().height - 15) / 2; // 세로 중앙
+                    checkLabel.setBounds(checkX, checkY, 15, 15); 
+                    
+                    add(checkLabel);
+            	}
+            }
+            
             final String userName = fp.name;
             header.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    if (selectedUsers.contains(userName)) {
-                        selectedUsers.remove(userName);
-                    } else {
-                        selectedUsers.add(userName);
-                    }
-                    refreshView();
+                	if (isSelectionMode) {
+	                    if (selectedUsers.contains(userName)) {
+	                        selectedUsers.remove(userName);
+	                    } else {
+	                        selectedUsers.add(userName);
+	                    }
+	                    refreshView();
+                	}
                 }
             });
 
@@ -182,4 +208,10 @@ public class FriendsListPanel extends JPanel {
         revalidate();
         repaint();
     }
+    
+    //ChoosePerson에서 활용 할 선택된 사용자 목록 가져오는 메서드
+    public Set<String> getSelectedUsers() {
+        return selectedUsers;
+    }
+    
 }

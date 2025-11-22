@@ -115,8 +115,8 @@ public class ClientFriendsMenuPanel extends JPanel {
     // /profile 수신 시
     public void updateFriendProfileFromServer(String name, String imagePath, String statusMsg) {
 
-        System.out.println("[ClientFriendsMenuPanel] updateFriendProfileFromServer name="
-                + name + ", status=" + statusMsg);
+       // System.out.println("[ClientFriendsMenuPanel] updateFriendProfileFromServer name="
+        //        + name + ", status=" + statusMsg);
 
         if (name != null) name = name.trim();
         if (imagePath != null) imagePath = imagePath.trim();

@@ -18,7 +18,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-public class ChatingView extends JFrame {
+public class ChattingView extends JFrame {
     private JPanel contentPane;
     private JTextField txtInput;
     private String UserName;
@@ -31,8 +31,11 @@ public class ChatingView extends JFrame {
     private DataInputStream dis;
     private DataOutputStream dos;
     private JLabel lblUserName;
-
-	public ChatingView(String username, String ip_addr, String port_no) {
+    private String groupMembers; //그룹채팅위한 멤버 저장 변수
+    
+	public ChattingView(String username, String ip_addr, String port_no, String groupMembers) {
+		this.groupMembers = groupMembers;
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 392, 462);
 		contentPane = new JPanel();
@@ -75,6 +78,7 @@ public class ChatingView extends JFrame {
             dos = new DataOutputStream(os);
 
             SendMessage("/login " + UserName);
+            SendMessage("/createroom " + this.groupMembers);
             ListenNetwork net = new ListenNetwork();
             net.start();
             Myaction action = new Myaction();

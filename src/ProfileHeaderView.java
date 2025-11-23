@@ -93,4 +93,26 @@ public class ProfileHeaderView extends JPanel {
     public void setMessage(String newMessage) {
     	messageLabel.setText(newMessage);
     }
+    
+    public void setProfileImage(String imagePath) {
+        if (imagePath == null || imagePath.isEmpty()) {
+            imagePath = "/Images/defaultprofileimage.png";
+        }
+
+        Image img;
+        
+        if (imagePath.startsWith("/")) {
+            img = new ImageIcon(getClass().getResource(imagePath)).getImage();
+        } 
+        else {
+            img = new ImageIcon(imagePath).getImage();
+        }
+        
+        ImageIcon icon = new ImageIcon(
+                img.getScaledInstance(profileButton.getWidth()  > 0 ? profileButton.getWidth()  : 50, profileButton.getHeight() > 0 ? profileButton.getHeight() : 50,Image.SCALE_SMOOTH)
+        );
+        profileButton.setIcon(icon);
+        revalidate();
+        repaint();
+    }
 }

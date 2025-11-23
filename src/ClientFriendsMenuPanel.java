@@ -115,25 +115,24 @@ public class ClientFriendsMenuPanel extends JPanel {
     // /profile 수신 시
     public void updateFriendProfileFromServer(String name, String imagePath, String statusMsg) {
 
-       // System.out.println("[ClientFriendsMenuPanel] updateFriendProfileFromServer name="
-        //        + name + ", status=" + statusMsg);
 
         if (name != null) name = name.trim();
         if (imagePath != null) imagePath = imagePath.trim();
         if (statusMsg != null) statusMsg = statusMsg.trim();
 
-        // 1) 친구 목록(= FriendsListPanel의 profiles 맵)에 무조건 저장
+        // 친구 목록(= FriendsListPanel의 profiles 맵)에 무조건 저장
         if (friendsListPanel != null) {
             friendsListPanel.updateFriendProfile(name, imagePath, statusMsg);
         }
 
-        // 2) 그 중에서 "나 자신"이면, 위쪽 내 프로필 헤더도 같이 갱신
         if (name != null && name.equals(myCurrentName)) {
             this.myCurrentStatusMessage = (statusMsg == null) ? "" : statusMsg;
+            this.profileImagePath = (imagePath == null || imagePath.isEmpty()) ? "/Images/defaultprofileimage.png" : imagePath;
 
             if (myHeader != null) {
                 myHeader.setUserName(myCurrentName);
                 myHeader.setMessage(myCurrentStatusMessage);
+                myHeader.setProfileImage(this.profileImagePath); // ★ 이미지 갱신
                 myHeader.revalidate();
                 myHeader.repaint();
             }

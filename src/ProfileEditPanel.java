@@ -5,6 +5,8 @@ import java.awt.Graphics;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
+import java.awt.Image;
+import java.io.File; 
 
 public class ProfileEditPanel extends JPanel {
     private JButton okbutton, cancelbutton;
@@ -15,7 +17,11 @@ public class ProfileEditPanel extends JPanel {
     private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
     private JLabel editProfileLabel;
     
-    public ProfileEditPanel(ProfileEditFrame parentFrame, String username, String ip_addr, String port_no, String currentStatusMessage) {
+    // 선택된 이미지 경로 + 버튼
+    private String selectedImagePath;
+    private JButton imageButton;
+    
+    public ProfileEditPanel(ProfileEditFrame parentFrame, String username, String ip_addr, String port_no, String currentStatusMessage, String currentProfileImagePath) {
         this.parentFrame = parentFrame;
 
         setLayout(null);
@@ -44,12 +50,14 @@ public class ProfileEditPanel extends JPanel {
 
                 String newName = name.getText().trim();
                 String text = message.getText().trim();
-                // placeholder 또는 빈 문자열이면 서버에는 ""로 저장
                 String statusToSend = (text.equals(placeholder) || text.isEmpty()) ? "" : text;
 
-                parentFrame.onProfileSaved(newName, statusToSend);
+                // 이미지 경로(selectedImagePath)도 같이 넘김
+                parentFrame.onProfileSaved(newName, statusToSend, selectedImagePath);
             }
         });
+
+
 
         // 취소 버튼 클릭
         cancelbutton.addActionListener(new ActionListener() {
@@ -115,9 +123,56 @@ public class ProfileEditPanel extends JPanel {
                 }
             }
         });
+        
+        String initialPath;
+        
+        if (currentProfileImagePath == null || currentProfileImagePath.isEmpty()) {
+            initialPath = "/Images/defaultprofileimage.png";
+        } 
+        else {
+            initialPath = currentProfileImagePath;
+        }
+        
+        selectedImagePath = initialPath;
+
+        Image img;
+        
+        if (initialPath.startsWith("/")) {
+            img = new ImageIcon(getClass().getResource(initialPath)).getImage();
+        } 
+        else {
+            img = new ImageIcon(initialPath).getImage();
+        }
+        
+        ImageIcon profileIcon = new ImageIcon(img.getScaledInstance(80, 80, Image.SCALE_SMOOTH));
+
+        imageButton = new JButton(profileIcon);
+        imageButton.setContentAreaFilled(false);
+        imageButton.setBorderPainted(false);
+        imageButton.setFocusPainted(false);
+        imageButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        imageButton.setBounds(120, 70, 80, 80); // 위치는 적당히, 원하면 조정 가능
+
+        imageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+	            JFileChooser chooser = new JFileChooser();
+	            int result = chooser.showOpenDialog(ProfileEditPanel.this);
+	            
+	            if (result == JFileChooser.APPROVE_OPTION) {
+	                File f = chooser.getSelectedFile();
+	                selectedImagePath = f.getAbsolutePath();
+	
+	                Image selImg = new ImageIcon(selectedImagePath).getImage();
+	                ImageIcon selIcon = new ImageIcon(selImg.getScaledInstance(80, 80, Image.SCALE_SMOOTH));
+	                imageButton.setIcon(selIcon);
+	            }
+            }
+        });
 
         add(name);
         add(message);
+        add(imageButton);
     }
 
     // 버튼 생성 함수

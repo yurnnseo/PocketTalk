@@ -99,11 +99,19 @@ public class MyProfileViewPanel extends JPanel {
         repaint();
     }
     
+    public void updateProfile(String newName, String newStatus, String newImagePath) {
+        if (newImagePath != null && !newImagePath.isEmpty()) {
+            this.profileImagePath = newImagePath;
+            header.setProfileImage(newImagePath);
+        }
+        updateProfile(newName, newStatus);
+    }
+    
     // 배경 직접 그리기
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.setColor(Color.decode("#ECECEC"));
-        g.fillRect(0, 0, getWidth(), 290);
+        g.fillRect(0, 0, getWidth(), 260);
     }
 }

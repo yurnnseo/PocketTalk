@@ -1,6 +1,14 @@
 //채팅창
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,6 +16,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -17,8 +26,9 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
-public class ChattingView extends JFrame {
+public class ChattingPanel extends JPanel {
     private JPanel contentPane;
     private JTextField txtInput;
     private String UserName;
@@ -32,43 +42,51 @@ public class ChattingView extends JFrame {
     private DataOutputStream dos;
     private JLabel lblUserName;
     private String groupMembers; //그룹채팅위한 멤버 저장 변수
+    private Image backgroundImg;
+    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf");
+    private MessageContainerPanel messageContainer;
     
-	public ChattingView(String username, String ip_addr, String port_no, String groupMembers) {
-		this.groupMembers = groupMembers;
+	public ChattingPanel(String username, String ip_addr, String port_no, String groupMembers) {
+		this.groupMembers = groupMembers;	
+
+		setBorder(new EmptyBorder(5, 5, 5, 5));
+		setLayout(null);
+		setBackground(Color.decode("#F9F9F9"));
 		
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 392, 462);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
-		contentPane.setLayout(null);
+		messageContainer = new MessageContainerPanel(fontSource.getFont(13f));
+		JScrollPane scrollPane = new JScrollPane(messageContainer);
+		scrollPane.setBounds(12, 12, 350, 455);   
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		add(scrollPane);
 
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(12, 10, 352, 340);
-		contentPane.add(scrollPane);
-
-		textArea = new JTextArea();
-		textArea.setEditable(false);
-		scrollPane.setViewportView(textArea);
+		//메시지 추가될 때마다 스크롤 자동 내림 기능
+		scrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {  
+            public void adjustmentValueChanged(AdjustmentEvent e) {  
+                if (e.getAdjustable().getMaximum() == e.getValue() + e.getAdjustable().getVisibleAmount()) {
+                    // 스크롤이 맨 아래에 있을 때만 자동으로 아래로 내림
+                    e.getAdjustable().setValue(e.getAdjustable().getMaximum());
+                }
+            }
+        });
 
 		txtInput = new JTextField();
-		txtInput.setBounds(91, 365, 185, 40);
-		contentPane.add(txtInput);
+		txtInput.setBounds(10, 475, 250, 40);
+		add(txtInput);
 		txtInput.setColumns(10);
 
-		btnSend = new JButton("Send");
-		btnSend.setBounds(288, 364, 76, 40);
-		contentPane.add(btnSend);
+		btnSend = makeButton("전송", 70, 40, 270, 475);
+		add(btnSend);
 		
 		lblUserName = new JLabel("Name");
 		lblUserName.setHorizontalAlignment(SwingConstants.CENTER);
-		lblUserName.setBounds(12, 364, 67, 40);
-		contentPane.add(lblUserName);
-		setVisible(true);
-	
-		AppendText("User " + username + " connecting " + ip_addr + " " + port_no + "\n");
+		lblUserName.setBounds(12, 364, 62, 40);
+		add(lblUserName);
+		
+
+		//AppendText("User " + username + " connecting " + ip_addr + " " + port_no + "\n");
 		UserName = username;
-		lblUserName.setText(username + ">");
+		lblUserName.setText(username + " >");
 
         try {
             socket = new Socket(ip_addr, Integer.parseInt(port_no));
@@ -87,7 +105,7 @@ public class ChattingView extends JFrame {
             txtInput.requestFocus();
         } catch (NumberFormatException | IOException e) {
             e.printStackTrace();
-            AppendText("connect error");
+            //AppendText("connect error");
         }
     }
 
@@ -99,9 +117,16 @@ public class ChattingView extends JFrame {
                 try {
                     // Use readUTF to read messages
                     String msg = dis.readUTF();
-                    AppendText(msg);
+                    //AppendText(msg);
+                    boolean isMine = msg.startsWith("[" + UserName + "]");
+                    
+                    // 메시지 내용만 추출 
+                    String content = msg.substring(msg.indexOf("] ") + 2).trim();
+                    
+                    // messageContainer에 메시지 버블 추가
+                    messageContainer.addMessage(content, isMine);
                 } catch (IOException e) {
-                    AppendText("dis.read() error");
+                   // AppendText("dis.read() error");
                     try {
                         dos.close();
                         dis.close();
@@ -122,9 +147,8 @@ public class ChattingView extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			// Send button을 누르거나 메시지 입력하고 Enter key 치면
 			if (e.getSource() == btnSend || e.getSource() == txtInput) {
-				String msg = null;
-				msg = String.format("[%s] %s\n", UserName, txtInput.getText());
-				SendMessage(msg);
+				String msg = txtInput.getText();		
+				SendMessage(msg + "\n");
 				txtInput.setText(""); // 메세지를 보내고 나면 메세지 쓰는창을 비운다.
 				txtInput.requestFocus(); // 메세지를 보내고 커서를 다시 텍스트 필드로 위치시킨다
 				if (msg.contains("/exit")) // 종료 처리
@@ -137,11 +161,11 @@ public class ChattingView extends JFrame {
 	}
 
     // 화면에 출력
-    public void AppendText(String msg) {
+    /*public void AppendText(String msg) {
         textArea.append(msg);
         textArea.setCaretPosition(textArea.getText().length());
     }
-
+*/
 
     // Server에게 network로 전송
     public void SendMessage(String msg) {
@@ -149,7 +173,7 @@ public class ChattingView extends JFrame {
             // Use writeUTF to send messages
             dos.writeUTF(msg);
         } catch (IOException e) {
-            AppendText("dos.write() error");
+           // AppendText("dos.write() error");
             try {
                 dos.close();
                 dis.close();
@@ -159,5 +183,35 @@ public class ChattingView extends JFrame {
                 System.exit(0);
             }
         }
+    }
+    
+    private JButton makeButton(String text, int width, int height, int x, int y) {
+        JButton btn = new JButton(text);
+        btn.setBounds(x, y, width, height);
+        btn.setBackground(Color.WHITE); 
+        btn.setBorder(new LineBorder(Color.BLACK));
+        btn.setFont(fontSource.getFont(12f));
+        
+        btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(true);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        
+        Color hoverColor = Color.decode("#E3D6F0"); // 연보라
+        Color normalColor = Color.WHITE;
+
+        btn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btn.setBackground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btn.setBackground(normalColor);
+            }
+        });
+        
+        return btn;
     }
 }

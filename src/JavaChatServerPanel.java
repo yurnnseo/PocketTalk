@@ -355,8 +355,8 @@ public class JavaChatServerPanel extends JPanel {
 
                     AppendText("새로운 참가자 " + UserName + " 입장. " + "상태: " + clientProfile.getStatusMessage() + ", 이미지: " + clientProfile.getProfileImagePath());
 
-                    WriteOne("Welcome to Java chat server");
-                    WriteOne(UserName + "님 환영합니다.");
+                    //WriteOne("Welcome to Java chat server\n");
+                   // WriteOne(UserName + "님 환영합니다.");
 
                     broadcastAllProfilesToAllClients(); // 모든 프로필을 전체 클라에게 /profile 로 뿌림
                     BroadcastUserList(); // 현재 온라인 유저들 이름 /list 로 뿌림
@@ -379,8 +379,8 @@ public class JavaChatServerPanel extends JPanel {
                             continue;
                         }
 
-                        AppendText("[MSG] " + UserName + " : " + chat_msg);
-                        WriteAll(UserName + " : " + chat_msg);
+                        //AppendText("[MSG] " + UserName + " : " + chat_msg);
+                        WriteAll(UserName + " : " + chat_msg+"\n");
                     }
 
                 } catch (IOException e) {

@@ -114,8 +114,7 @@ public class ChoosePerson extends JFrame{
                 
                 dispose(); //창 제거
                 
-                ChattingView chatting = new ChattingView(username, serverIp, serverPort, members);
-                chatting.setVisible(true);
+                new ChattingFrame(username, serverIp, serverPort, members);
         	}
         });
 	}

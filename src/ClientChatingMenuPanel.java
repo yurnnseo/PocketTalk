@@ -11,8 +11,21 @@ public class ClientChatingMenuPanel extends JPanel {
     private JLabel chatingLabel;
     private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
 
+    private final ClientMenuFrame parentFrame;
+    private final String username;
+    private final String ip_addr;
+    private final String port_no;
+
+    private ChatRoomListPanel roomListPanel;
+
+    
     public ClientChatingMenuPanel(ClientMenuFrame parentFrame, String username, String ip_addr, String port_no) {
-        setLayout(null);
+    	this.parentFrame = parentFrame;
+        this.username = username;
+        this.ip_addr = ip_addr;
+        this.port_no = port_no;
+    	
+    	setLayout(null);
         setBackground(Color.decode("#F9F9F9"));
 
         chatingLabel = new JLabel("채팅", SwingConstants.LEFT);
@@ -35,6 +48,16 @@ public class ClientChatingMenuPanel extends JPanel {
         add(chatbutton);
         add(newchatbutton);
         
+        // 채팅방 목록 패널 + 스크롤
+        roomListPanel = new ChatRoomListPanel(this);
+        JScrollPane roomScroll = new JScrollPane(roomListPanel);
+        roomScroll.setBounds(80, 80, 290, 430);
+        roomScroll.getViewport().setOpaque(false);
+        roomScroll.setOpaque(false);
+        roomScroll.setBorder(BorderFactory.createEmptyBorder());
+        roomScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        add(roomScroll);
+        
         // 친구 목록으로 돌아가기
         metabutton.addActionListener(new ActionListener() {
             @Override
@@ -49,12 +72,29 @@ public class ClientChatingMenuPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
             	//대화 상대 고르는 팝업창띄우고 고르면 그 사람이랑 대화하는 뷰 떠야함
             	List<String> userList = parentFrame.getCurrentUserList();
-            	ChoosePerson cp = new ChoosePerson(username,userList);
-            	cp.setVisible(true);
+                ChoosePerson cp = new ChoosePerson(parentFrame, username, userList);
+                cp.setVisible(true);
             }
         });
-
     }
+    
+    /**
+     * 서버에서 "/room creatorName members..." 를 받았을 때
+     * ClientMenuFrame이 이 메서드를 호출해 줌.
+     */
+    public void addChatRoom(String creatorName, String membersString) {
+        if (roomListPanel != null) {
+            roomListPanel.addRoom(creatorName, membersString);
+        }
+    }
+
+    // 채팅방 더블클릭 시 실행
+    public void openChatRoom(String creatorName, String membersString) {
+        // ★ ip, port 필요 없음. parentFrame + username만 넘김
+        ChattingFrame.openRoom(parentFrame, username, membersString, creatorName);
+    }
+
+
 
     private JButton makeButton(ImageIcon icon, int x, int y) {
         JButton btn = new JButton(icon);

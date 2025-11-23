@@ -113,8 +113,23 @@ public class ClientMenuFrame extends JFrame {
                             });
                         }
                     }
-                    else {
-                        // 나중에 채팅 패널에 연결
+                    else if (msg.startsWith("/room ")) {
+                        // "/room creator member1 member2 ..."
+                        String body = msg.substring("/room ".length()).trim();
+                        String[] tokens = body.split("\\s+");
+                        if (tokens.length >= 1) {
+                            String creatorName = tokens[0];            // 만든 사람
+                            String membersString = body;               // 전체 멤버 문자열
+
+                            SwingUtilities.invokeLater(() -> {
+                                if (chatPanel != null) {
+                                    chatPanel.addChatRoom(creatorName, membersString);
+                                }
+                            });
+                        }
+                    } else {
+                    	// 일반 채팅 메시지 → 열려있는 채팅창들에 전달
+                        ChattingFrame.deliverChatMessage(msg);
                     }
 
                 } catch (IOException e) {
@@ -124,6 +139,18 @@ public class ClientMenuFrame extends JFrame {
             }
         }
     }
+    
+    public synchronized void sendToServer(String msg) {
+        try {
+            if (dos != null) {
+                dos.writeUTF(msg);
+                dos.flush();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
      
 

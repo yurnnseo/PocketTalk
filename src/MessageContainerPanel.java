@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
@@ -26,17 +27,18 @@ public class MessageContainerPanel extends JPanel{
     	MessagePanel messagepanel = new MessagePanel(messageText, isSent, customFont);
     	//좌우정렬 컨테이너 생성
     	JPanel alignPanel = new JPanel();
-    	alignPanel.setLayout(new FlowLayout(
-                isSent ? FlowLayout.RIGHT : FlowLayout.LEFT //내 메시지 isSent=true, 상대는 false
-            ));
-            alignPanel.setBackground(Color.decode("#F9F9F9"));
-            
-            alignPanel.add(messagepanel);
-            add(alignPanel);
-            
-            //UI 갱신
-            revalidate();
-            repaint();
+    	//내 메시지 isSent=true, 상대는 false
+    	alignPanel.setLayout(new FlowLayout(isSent ? FlowLayout.RIGHT : FlowLayout.LEFT, 0, 2));
+        alignPanel.setBackground(Color.decode("#F9F9F9"));
+        
+        alignPanel.setBorder(BorderFactory.createEmptyBorder(1, 0, 1, 0));
+        
+        alignPanel.add(messagepanel);
+        add(alignPanel);
+        
+        //UI 갱신
+        revalidate();
+        repaint();
     			
     }
 }

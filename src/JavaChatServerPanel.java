@@ -37,7 +37,7 @@ public class JavaChatServerPanel extends JPanel {
         textArea.setEditable(false);
         scrollPane.setViewportView(textArea);
 
-        loadProfilesFromTxt(); // loadProfilesFromTxt() 호출 -> .txt 파일 읽어서 이름 | 상태메시지 | 이미지경로를 clientProfiles 맵에 저장
+        loadProfilesFromTxt(); // .txt에서 프로필 로드
 
         JLabel lblPort = new JLabel("Port Number");
         lblPort.setBounds(17, 466, 90, 26);
@@ -58,6 +58,18 @@ public class JavaChatServerPanel extends JPanel {
         btnServerStart.addActionListener(e -> startServer());
     }
 
+    // ---- 공통 로그 함수 (한국어 카테고리, 시간 없음) ----
+    private void log(String category, String msg) {
+        AppendText("[" + category + "]  " + msg);
+    }
+
+    public void AppendText(String str) {
+        SwingUtilities.invokeLater(() -> {
+            textArea.append(str + "\n");
+            textArea.setCaretPosition(textArea.getText().length());
+        });
+    }
+
     // ServerSocket 열고 AcceptServer 스레드 시작
     private void startServer() {
         try {
@@ -65,9 +77,11 @@ public class JavaChatServerPanel extends JPanel {
             socket = new ServerSocket(port);
         } catch (NumberFormatException | IOException e1) {
             e1.printStackTrace();
+            log("에러", "서버 시작 실패: " + e1.getMessage());
+            return;
         }
 
-        AppendText("Chat Server Running on port " + txtPortNumber.getText());
+        log("시스템", "채팅 서버 시작 (포트 " + txtPortNumber.getText() + ")");
         btnServerStart.setText("Chat Server Running...");
         btnServerStart.setEnabled(false);
         txtPortNumber.setEnabled(false);
@@ -76,31 +90,23 @@ public class JavaChatServerPanel extends JPanel {
         accept_server.start();
     }
 
-    
-    public void AppendText(String str) {
-        SwingUtilities.invokeLater(() -> {
-            textArea.append(str + "\n");
-            textArea.setCaretPosition(textArea.getText().length());
-        });
-    }
-
     // 클라이언트 접속하면 클라이언트를 UserVec에 넣고 클라이언트 한 명당 스레드 생성
     class AcceptServer extends Thread {
         @Override
         public void run() {
             while (true) {
                 try {
-                    AppendText("Waiting clients ...");
+                    log("접속", "클라이언트 접속 대기 중...");
                     client_socket = socket.accept();
-                    AppendText("새로운 참가자 from " + client_socket);
+                    log("접속", "새 클라이언트 소켓 연결: " + client_socket);
 
                     UserService new_user = new UserService(client_socket);
                     UserVec.add(new_user);
-                    AppendText("사용자 입장. 현재 참가자 수: " + UserVec.size());
+                    log("접속", "새 UserService 생성 (현재 접속자 수: " + UserVec.size() + "명)");
 
                     new_user.start();
                 } catch (IOException e) {
-                    AppendText("!!!! accept 에러 발생... !!!!");
+                    log("에러", "accept 중 오류: " + e.getMessage());
                     break;
                 }
             }
@@ -111,7 +117,7 @@ public class JavaChatServerPanel extends JPanel {
     private void loadProfilesFromTxt() {
         File file = new File(CLIENT_TXT_FILE);
         if (!file.exists()) {
-            AppendText("프로필 TXT 없음. 새로 시작합니다.");
+            log("프로필", "프로필 TXT 없음. 새로 시작합니다.");
             return;
         }
 
@@ -130,32 +136,44 @@ public class JavaChatServerPanel extends JPanel {
                     count++;
                 }
             }
-            AppendText("TXT 프로필 로드 완료: " + count + "명");
+            log("프로필", "TXT 프로필 로드 완료: " + count + "명");
         } catch (Exception e) {
-            AppendText("TXT 로드 오류: " + e.getMessage());
+            log("프로필", "TXT 로드 오류: " + e.getMessage());
         }
     }
-
-
 
     public void saveProfilesToTxt() {
         try {
             File f = new File(CLIENT_TXT_FILE);
+            
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(f))) {
                 synchronized (clientProfiles) {
-                    AppendText("===== TXT로 저장할 프로필 목록 =====");
+                	
+                	log("프로필", "==============================");
+                    log("프로필", "TXT로 저장할 프로필 목록 ↓");
+                    
                     for (ClientProfile p : clientProfiles.values()) {
-                        String line = p.getName() + "|" + p.getStatusMessage() + "|" + p.getProfileImagePath();
+                        String name   = p.getName();
+                        String status = p.getStatusMessage();
+                        String img    = p.getProfileImagePath();
+
+                        // 파일에 쓰는 원본 포맷
+                        String line = name + "|" + status + "|" + img;
                         bw.write(line);
                         bw.newLine();
-                        AppendText("저장할 프로필 -> " + line);
+
+                        // 로그용은 보기 좋게 가공
+                        String statusForLog = (status == null || status.isEmpty()) ? "(없음)" : status;
+                        String imgForLog    = (img != null && img.contains("default")) ? "default" : img;
+
+                        log("프로필", " - " + name + " | 상태: " + statusForLog + " | 이미지: " + imgForLog);
                     }
-                    AppendText("=================================");
+                    log("프로필", "==============================\n");
                 }
             }
-            AppendText("TXT 프로필 저장 완료: " + clientProfiles.size() + "명");
+            log("프로필", "TXT 프로필 저장 완료: " + clientProfiles.size() + "명\n");
         } catch (Exception e) {
-            AppendText("TXT 저장 오류: " + e.getMessage());
+            log("프로필", "TXT 저장 오류: " + e.getMessage());
         }
     }
 
@@ -171,7 +189,7 @@ public class JavaChatServerPanel extends JPanel {
         try {
             if (socket != null && !socket.isClosed()) socket.close();
         } catch (IOException e) {
-            AppendText("서버 소켓 종료 중 오류: " + e.getMessage());
+            log("에러", "서버 소켓 종료 중 오류: " + e.getMessage());
         }
 
         synchronized (UserVec) {
@@ -182,7 +200,7 @@ public class JavaChatServerPanel extends JPanel {
         }
 
         saveProfilesToTxt();
-        AppendText("서버 및 클라이언트 연결 정리 완료.");
+        log("시스템", "서버 및 클라이언트 연결 정리 완료.");
     }
 
     // ====== 각 유저 스레드 ======
@@ -202,7 +220,7 @@ public class JavaChatServerPanel extends JPanel {
                 dis = new DataInputStream(client_socket.getInputStream());
                 dos = new DataOutputStream(client_socket.getOutputStream());
             } catch (Exception e) {
-                AppendText("UserService 생성 중 error: " + e.getMessage());
+                log("에러", "UserService 생성 중 error: " + e.getMessage());
             }
         }
 
@@ -210,10 +228,10 @@ public class JavaChatServerPanel extends JPanel {
             try {
                 dos.writeUTF(msg);
             } catch (IOException e) {
-                AppendText("dos.writeUTF() error: 클라이언트 연결 끊김");
+                log("에러", "dos.writeUTF() error: 클라이언트 연결 끊김 (" + UserName + ")");
                 closeConnection();
                 UserVec.removeElement(this);
-                AppendText("사용자 퇴장. 현재 참가자 수: " + UserVec.size());
+                log("접속", UserName + " 연결 끊김. 현재 접속자 수: " + UserVec.size() + "명");
             }
         }
 
@@ -224,6 +242,8 @@ public class JavaChatServerPanel extends JPanel {
         }
 
         private void applyProfileChange(String newName, String newImagePath, String newStatus) {
+            String oldName = UserName;
+
             synchronized (clientProfiles) {
                 ClientProfile p = clientProfiles.get(UserName);
 
@@ -239,7 +259,7 @@ public class JavaChatServerPanel extends JPanel {
                 if (!newName.equals(UserName)) {
                     clientProfiles.remove(UserName);
                     clientProfiles.put(newName, p);
-                    AppendText("[프로필 이름 변경] " + UserName + " → " + newName);
+                    log("프로필", "이름 변경: '" + oldName + "' → '" + newName + "'");
                     UserName = newName;
                 } else {
                     clientProfiles.put(UserName, p);
@@ -248,72 +268,85 @@ public class JavaChatServerPanel extends JPanel {
                 clientProfile = p;
             }
 
-            AppendText("[프로필 수정됨] " + UserName +
-                    " / 상태: " + clientProfile.getStatusMessage() +
-                    " / 이미지: " + clientProfile.getProfileImagePath());
+            log("프로필",
+                    "수정됨 - 이름: " + UserName +
+                    ", 상태: " + clientProfile.getStatusMessage() +
+                    ", 이미지: " + clientProfile.getProfileImagePath());
 
             saveProfilesToTxt();
 
-	         // 이 사람만이 아니라, 전체 프로필을 통째로 다시 뿌린다
-	         broadcastAllProfilesToAllClients();
-	
-	         // 접속자 목록도 다시 전송 (이름 바뀌었을 수도 있으니까)
-	         BroadcastUserList();
+            // 전체 프로필 다시 뿌리기
+            broadcastAllProfilesToAllClients();
 
+            // 접속자 목록도 다시 전송 (이름 바뀌었을 수도 있으니까)
+            BroadcastUserList();
         }
 
-        public void BroadcastUserList() {
-            StringBuilder sb = new StringBuilder("/list ");
-
-            synchronized (user_vc) {
-                for (UserService u : user_vc) {
-                    sb.append(u.UserName).append(" ");
-                }
-            }
-
-            String userListMsg = sb.toString().trim();
-            AppendText("현재 접속자 목록 전송: " + userListMsg);
-            WriteAll(userListMsg);
-        }
-
-     // 이 유저에게 서버가 알고 있는 모든 프로필 정보 보내기
+        // 이 유저에게 서버가 알고 있는 모든 프로필 정보 보내기
+        @SuppressWarnings("unused")
         private void sendAllProfilesToThisUser() {
             synchronized (clientProfiles) {
                 for (ClientProfile p : clientProfiles.values()) {
                     String msg = "/profile " + p.getName().trim() + " " +
                             p.getProfileImagePath().trim() + " " +
                             p.getStatusMessage().trim();
-                    AppendText("[개별전송 프로필] to " + UserName + " : " + msg);
+                    log("프로필", "개별 전송 to " + UserName + " : " + msg);
                     WriteOne(msg);
                 }
             }
         }
 
-        // 한 명 변경 후 전체에게 변경분만 보내는 함수 쓴다면 여기에도 trim
+        public void BroadcastUserList() {
+            StringBuilder sb = new StringBuilder("/list ");
+
+            // 이름 중복 제거를 위해 Set 사용
+            LinkedHashSet<String> nameSet = new LinkedHashSet<>();
+
+            synchronized (user_vc) {
+                for (UserService u : user_vc) {
+                    String n = u.UserName;
+                    if (n != null) {
+                        n = n.trim();
+                        if (!n.isEmpty()) nameSet.add(n);   // 같은 이름은 한 번만
+                    }
+                }
+            }
+
+            for (String n : nameSet) {
+                sb.append(n).append(" ");
+            }
+
+            String userListMsg = sb.toString().trim();
+            log("접속", "현재 접속자 목록 전송: " + userListMsg);
+            WriteAll(userListMsg);
+        }
+
+        // 한 명 변경 후 전체에게 변경분만 보내는 함수 쓰려면 여기 사용
+        @SuppressWarnings("unused")
         private void broadcastProfileUpdate() {
             if (clientProfile == null) return;
             String msg = "/profile " + clientProfile.getName().trim() + " " +
                     clientProfile.getProfileImagePath().trim() + " " +
                     clientProfile.getStatusMessage().trim();
-            AppendText("[브로드캐스트 프로필] " + msg);
+            log("프로필", "변경 브로드캐스트: " + msg);
             WriteAll(msg);
         }
-        
-     // 전체에게 모든 프로필 뿌리기
-     // ★ 서버가 알고 있는 모든 프로필을 "모든 클라이언트"에게 뿌려주는 함수
+
+        // 전체에게 모든 프로필 뿌리기
         private void broadcastAllProfilesToAllClients() {
+        	
+        	log("프로필", "전체 프로필 브로드캐스트 (총 " + clientProfiles.size() + "명)");
+        	
             synchronized (clientProfiles) {
                 for (ClientProfile p : clientProfiles.values()) {
                     String msg = "/profile " + p.getName().trim() + " " +
                             p.getProfileImagePath().trim() + " " +
                             p.getStatusMessage().trim();
-                    AppendText("[브로드캐스트 전체 프로필] " + msg);
-                    WriteAll(msg);   // ★ 모든 클라이언트에게 전송
+
+                    WriteAll(msg);
                 }
             }
         }
-
-
 
         public void closeConnection() {
             try {
@@ -321,7 +354,9 @@ public class JavaChatServerPanel extends JPanel {
                 if (dis != null) dis.close();
                 if (client_socket != null && !client_socket.isClosed())
                     client_socket.close();
-            } catch (IOException e) { }
+            } catch (IOException e) {
+                // 무시
+            }
         }
 
         @Override
@@ -333,11 +368,12 @@ public class JavaChatServerPanel extends JPanel {
                     String[] msg = line1.split(" ", 2);
 
                     if (msg.length < 2) {
-                        AppendText("[경고] 잘못된 로그인 메시지: " + line1);
+                        log("경고", "잘못된 로그인 메시지: " + line1);
                         continue;
                     }
 
                     UserName = msg[1].trim();
+                    log("인증", "로그인 요청: " + UserName);
 
                     synchronized (clientProfiles) {
                         clientProfile = clientProfiles.get(UserName);
@@ -345,27 +381,28 @@ public class JavaChatServerPanel extends JPanel {
                             clientProfile = new ClientProfile(UserName, "",
                                     "/Images/defaultprofileimage.png");
                             clientProfiles.put(UserName, clientProfile);
-                            AppendText("새 프로필 생성: " + UserName);
+                            log("프로필", "새 프로필 생성: " + UserName);
                         } else {
-                            AppendText("기존 프로필 로드: " + UserName);
+                            log("프로필", "기존 프로필 로드: " + UserName);
                         }
                     }
 
                     saveProfilesToTxt();
 
-                    AppendText("새로운 참가자 " + UserName + " 입장. " + "상태: " + clientProfile.getStatusMessage() + ", 이미지: " + clientProfile.getProfileImagePath());
+                    log("접속",
+                            UserName + " 님 입장했습니다 ! 상태: " +
+                            clientProfile.getStatusMessage() +
+                            ", 이미지: " + clientProfile.getProfileImagePath());
 
-                    //WriteOne("Welcome to Java chat server\n");
-                   // WriteOne(UserName + "님 환영합니다.");
-
-                    broadcastAllProfilesToAllClients(); // 모든 프로필을 전체 클라에게 /profile 로 뿌림
-                    BroadcastUserList(); // 현재 온라인 유저들 이름 /list 로 뿌림
-
+                    // 모든 프로필 /list 전송
+                    broadcastAllProfilesToAllClients(); // /profile
+                    BroadcastUserList();                // /list
 
                     // 이후부터는 채팅/프로필 업데이트 루프
                     while (true) {
                         String chat_msg = dis.readUTF().trim();
 
+                        // 프로필 변경
                         if (chat_msg.startsWith("/profile_update ")) {
                             String body = chat_msg.substring("/profile_update ".length());
                             String[] tokens = body.split(" ", 3);
@@ -379,15 +416,41 @@ public class JavaChatServerPanel extends JPanel {
                             continue;
                         }
 
-                        //AppendText("[MSG] " + UserName + " : " + chat_msg);
-                        WriteAll(UserName + " : " + chat_msg+"\n");
+                        // 채팅방 생성 요청 처리
+                        if (chat_msg.startsWith("/createroom ")) {
+                            String membersLine = chat_msg.substring("/createroom ".length()).trim();
+                            if (membersLine.isEmpty()) continue;
+
+                            // membersLine = "ww ff qq" 처럼
+                            String[] members = membersLine.split("\\s+");
+
+                            // 그대로 /room 으로 보냄
+                            String roomMsg = "/room " + membersLine;
+                            log("채팅방", UserName + " 님이 채팅방 생성: [" + membersLine + "]");
+
+                            synchronized (user_vc) {
+                                for (UserService u : user_vc) {
+                                    for (String m : members) {
+                                        if (u.UserName.equals(m)) {
+                                            u.WriteOne(roomMsg);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            continue;
+                        }
+
+                        // 일반 채팅
+                        log("메시지", UserName + " : " + chat_msg);
+                        WriteAll(UserName + " : " + chat_msg + "\n");
                     }
 
                 } catch (IOException e) {
-                    AppendText("dis.readUTF() error: " + e.getMessage());
+                    log("에러", "클라이언트 수신 오류 (" + UserName + "): " + e.getMessage());
                     closeConnection();
                     UserVec.removeElement(this);
-                    AppendText("사용자 퇴장. 남은 참가자 수: " + UserVec.size());
+                    log("접속", UserName + " 님 퇴장. 현재 접속자 수: " + UserVec.size() + "명");
                     BroadcastUserList();
                     break;
                 }

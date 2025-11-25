@@ -133,6 +133,24 @@ public class ChattingPanel extends JPanel {
         btnSendEmoji.addActionListener(e -> onClickSendEmoji());
         btnPlayGame.addActionListener(e -> {
             // TODO: 여기서 게임 시작 로직 구현
+        	JDialog loadingDialog = new JDialog(parentFrame, "잠시 대기", true);
+            
+            // 2. 다이얼로그에 표시할 내용 
+            JLabel loadingLabel = new JLabel("참가자를 기다리는 중", SwingConstants.CENTER);
+            loadingDialog.add(loadingLabel);
+            
+            // 3. 다이얼로그 크기 설정
+            loadingDialog.setSize(200, 150);
+            
+            // 4. 다이얼로그 위치 설정 (화면 중앙에 표시)
+            loadingDialog.setLocationRelativeTo(null);
+            
+            // 5. 다이얼로그 닫기 버튼==대기 취소
+            loadingDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            
+            // 6. 다이얼로그 표시 (이 시점부터 다이얼로그가 닫힐 때까지 호출을 막습니다: Modal)
+            loadingDialog.setVisible(true);
+            //loadingDialog.dispose();
         });
     }
 

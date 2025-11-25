@@ -7,7 +7,6 @@ public class MyProfileViewPanel extends JPanel {
 
     private final MyProfileViewFrame parentFrame;
     private JButton editButton;
-    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
     
     private String username;          
     private String statusMessage = ""; 
@@ -61,7 +60,7 @@ public class MyProfileViewPanel extends JPanel {
         ImageIcon editIcon = new ImageIcon(scaled);
 
         editButton = new JButton("프로필 편집");
-        editButton.setFont(fontSource.getFont(10f));
+        editButton.setFont(FontSource.get(10f));
         editButton.setBackground(Color.decode("#E3D6F0")); // 버튼 색상
         editButton.setForeground(Color.BLACK); // 글자색
         editButton.setFocusPainted(false);

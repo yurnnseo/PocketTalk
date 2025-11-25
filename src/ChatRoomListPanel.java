@@ -8,7 +8,6 @@ import java.util.List;
 public class ChatRoomListPanel extends JPanel {
 
     private static final String DEFAULT_PROFILE_IMAGE = "/Images/defaultprofileimage.png";
-    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf");
 
     private final ClientChatingMenuPanel parentPanel;
 

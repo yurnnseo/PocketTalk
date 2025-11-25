@@ -1,6 +1,7 @@
 //말풍선 디자인 패널
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -39,6 +40,14 @@ public class MessagePanel extends JPanel{
         setLayout(new BorderLayout());
         add(label, BorderLayout.CENTER);
         setOpaque(false);
+    }
+    
+   // 최대 크기를 고정
+    @Override
+    public Dimension getMaximumSize() {
+        Dimension d = getPreferredSize();
+        d.width = Integer.MAX_VALUE; // 가로는 필요하면 늘어나도 됨
+        return d;
     }
     
     @Override

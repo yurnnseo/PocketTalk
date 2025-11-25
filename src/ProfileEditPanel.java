@@ -14,7 +14,6 @@ public class ProfileEditPanel extends JPanel {
 
     // 부모는 ProfileEditFrame
     private final ProfileEditFrame parentFrame;
-    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
     private JLabel editProfileLabel;
     
     // 선택된 이미지 경로 + 버튼
@@ -31,18 +30,18 @@ public class ProfileEditPanel extends JPanel {
         final String placeholder = "상태메시지";
         
         editProfileLabel = new JLabel("나의 프로필 편집", SwingConstants.LEFT);
-        editProfileLabel.setFont(fontSource.getFont(16f));
+        editProfileLabel.setFont(FontSource.get(16f));
         editProfileLabel.setForeground(Color.BLACK);
         editProfileLabel.setBounds(25, 20, 500, 20);
         add(editProfileLabel);
  
         // 버튼 생성
-        okbutton = makeButton("저장",  60, 28, 150, 395);      
-        cancelbutton = makeButton("취소", 60, 28, 230, 395);
+        okbutton = UIComponentZip.createTextButton("저장", 150, 395, 60, 28, FontSource.get(11f));
+        cancelbutton = UIComponentZip.createTextButton("취소", 230, 395, 60, 28, FontSource.get(11f));
 
         add(okbutton);
         add(cancelbutton);
-       
+
         // 저장 버튼 클릭
         okbutton.addActionListener(new ActionListener() {
             @Override
@@ -56,8 +55,6 @@ public class ProfileEditPanel extends JPanel {
                 parentFrame.onProfileSaved(newName, statusToSend, selectedImagePath);
             }
         });
-
-
 
         // 취소 버튼 클릭
         cancelbutton.addActionListener(new ActionListener() {
@@ -175,36 +172,6 @@ public class ProfileEditPanel extends JPanel {
         add(imageButton);
     }
 
-    // 버튼 생성 함수
-    private JButton makeButton(String text, int width, int height, int x, int y) {
-        JButton btn = new JButton(text);
-        btn.setBounds(x, y, width, height);
-        btn.setBackground(Color.WHITE); 
-        btn.setBorder(new LineBorder(Color.BLACK));
-        btn.setFont(fontSource.getFont(11f));
-        
-        btn.setFocusPainted(false);
-        btn.setContentAreaFilled(false);
-        btn.setOpaque(true);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        
-        Color hoverColor = Color.decode("#E3D6F0"); // 연보라
-        Color normalColor = Color.WHITE;
-
-        btn.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                btn.setBackground(hoverColor);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                btn.setBackground(normalColor);
-            }
-        });
-        
-        return btn;
-    }
 
     @Override
     protected void paintComponent(Graphics g) {

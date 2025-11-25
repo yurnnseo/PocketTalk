@@ -9,8 +9,7 @@ public class ClientChatingMenuPanel extends JPanel {
     private ImageIcon metaicon, metaicon2, chaticon, chaticon2, pluschaticon;
     private JButton metabutton, chatbutton, newchatbutton;
     private JLabel chatingLabel;
-    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
-
+    
     private final ClientMenuFrame parentFrame;
     private final String username;
     private final String ip_addr;
@@ -29,7 +28,7 @@ public class ClientChatingMenuPanel extends JPanel {
         setBackground(Color.decode("#F9F9F9"));
 
         chatingLabel = new JLabel("채팅", SwingConstants.LEFT);
-        chatingLabel.setFont(fontSource.getFont(20f));
+        chatingLabel.setFont(FontSource.get(20f));
         chatingLabel.setForeground(Color.BLACK);
         chatingLabel.setBounds(97, 20, 50, 50);
         add(chatingLabel);
@@ -90,7 +89,7 @@ public class ClientChatingMenuPanel extends JPanel {
 
     // 채팅방 더블클릭 시 실행
     public void openChatRoom(String creatorName, String membersString) {
-        // ★ ip, port 필요 없음. parentFrame + username만 넘김
+        // ip, port 필요 없음. parentFrame + username만 넘김
         ChattingFrame.openRoom(parentFrame, username, membersString, creatorName);
     }
 

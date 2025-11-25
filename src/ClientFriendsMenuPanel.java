@@ -13,8 +13,7 @@ public class ClientFriendsMenuPanel extends JPanel {
     private JLabel friendsLabel;
     private FriendsListPanel friendsListPanel;
 
-    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf");
-
+    
     private String profileImagePath;
     private ProfileHeaderView myHeader;
     private String myCurrentName;
@@ -62,7 +61,7 @@ public class ClientFriendsMenuPanel extends JPanel {
         add(chatbutton);
 
         friendsLabel = new JLabel("친구", SwingConstants.LEFT);
-        friendsLabel.setFont(fontSource.getFont(20f));
+        friendsLabel.setFont(FontSource.get(20f));
         friendsLabel.setForeground(Color.BLACK);
         friendsLabel.setBounds(97, 20, 50, 50);
         add(friendsLabel);

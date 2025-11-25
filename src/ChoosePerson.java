@@ -18,7 +18,7 @@ public class ChoosePerson extends JFrame {
     private String username;
     private JButton okbutton;
     private JLabel choiceLabel;
-    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
+    
 
     // ClientMenuFrame을 받아서 저장 (소켓은 거기에만 있음)
     private final ClientMenuFrame parentFrame;
@@ -63,15 +63,15 @@ public class ChoosePerson extends JFrame {
         contentPane.add(scrollPane);
 
         choiceLabel = new JLabel("대화상대 선택", SwingConstants.CENTER);
-        choiceLabel.setFont(fontSource.getFont(12f));
+        choiceLabel.setFont(FontSource.get(12f));
         choiceLabel.setForeground(Color.BLACK);
         choiceLabel.setBounds(85, 5, 80, 30);
         contentPane.add(choiceLabel);
 
         // 버튼 생성
-        okbutton = makeButton("선택 완료", 56, 28, 165, 290);
-        contentPane.add(okbutton); // 취소는 창 닫기 버튼
-
+        okbutton = UIComponentZip.createTextButton("선택 완료", 165, 290, 56, 28, FontSource.get(10f));
+        contentPane.add(okbutton);
+        
         okbutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -104,35 +104,5 @@ public class ChoosePerson extends JFrame {
                 ChattingFrame.openRoom(parentFrame, username, members, username);
             }
         });
-    }
-
-    private JButton makeButton(String text, int width, int height, int x, int y) {
-        JButton btn = new JButton(text);
-        btn.setBounds(x, y, width, height);
-        btn.setBackground(Color.WHITE);
-        btn.setBorder(new LineBorder(Color.BLACK));
-        btn.setFont(fontSource.getFont(10f));
-
-        btn.setFocusPainted(false);
-        btn.setContentAreaFilled(false);
-        btn.setOpaque(true);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-        Color hoverColor = Color.decode("#E3D6F0"); // 연보라
-        Color normalColor = Color.WHITE;
-
-        btn.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                btn.setBackground(hoverColor);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                btn.setBackground(normalColor);
-            }
-        });
-
-        return btn;
     }
 }

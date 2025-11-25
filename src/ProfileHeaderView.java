@@ -7,7 +7,6 @@ public class ProfileHeaderView extends JPanel {
 
     private final JButton profileButton;
     private final JLabel nameLabel, messageLabel;
-    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf"); // 폰트
 
     public ProfileHeaderView(String username, String message, String imagePath, int imgW, int imgH, Orientation orientation) {
         setLayout(null);
@@ -37,12 +36,12 @@ public class ProfileHeaderView extends JPanel {
 
         // 이름 라벨
         nameLabel = new JLabel(username, SwingConstants.LEFT);
-        nameLabel.setFont(fontSource.getFont(16f));
+        nameLabel.setFont(FontSource.get(16f));
         nameLabel.setForeground(Color.BLACK);
         add(nameLabel);
 
         messageLabel = new JLabel(message, SwingConstants.RIGHT);
-        messageLabel.setFont(fontSource.getFont(12f));
+        messageLabel.setFont(FontSource.get(12f));
         messageLabel.setForeground(Color.DARK_GRAY);
         add(messageLabel);
         

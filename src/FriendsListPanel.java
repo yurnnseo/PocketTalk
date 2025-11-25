@@ -24,7 +24,7 @@ public class FriendsListPanel extends JPanel {
     private boolean isSelectionMode = false; //채팅 상대 선택 모드
     
     private static final String DEFAULT_PROFILE_IMAGE = "/Images/defaultprofileimage.png";
-    private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf");
+    
 
     // ----- 한 명의 친구 정보 -----
     private static class FriendProfile {

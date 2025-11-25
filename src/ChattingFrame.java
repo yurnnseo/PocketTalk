@@ -1,3 +1,4 @@
+import java.awt.Point;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
@@ -73,12 +74,21 @@ public class ChattingFrame extends JFrame {
                 OPENROOMS.remove(ChattingFrame.this.roomKey);
             }
         });
+        
+        try {
+            Point parentPos = parentFrame.getLocationOnScreen();
+
+            int offsetX = 40;
+            int offsetY = 40;
+
+            setLocation(parentPos.x + offsetX, parentPos.y + offsetY);
+
+        } catch (Exception ex) {
+            setLocation(200, 200);
+        }
     }
 
-    /**
-     * 서버에서 받은 일반 채팅 메시지를
-     * 열려있는 모든 채팅창으로 전달
-     */
+    // 서버에서 받은 일반 채팅 메시지를 열려있는 모든 채팅창으로 전달
     public static void deliverChatMessage(String msg) {
         for (ChattingFrame f : OPENROOMS.values()) {
             f.chatpanel.onReceiveChatMessage(msg);

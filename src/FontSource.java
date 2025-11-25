@@ -3,23 +3,25 @@ import java.awt.GraphicsEnvironment;
 import java.io.InputStream;
 
 public class FontSource {
-    private Font base;
 
-    public FontSource(String resourcePath) {
+    private static Font baseFont;
+
+    static {
         try {
-            InputStream is = getClass().getResourceAsStream(resourcePath);
-            if (is == null) throw new RuntimeException("리소스를 찾을 수 없음: " + resourcePath);
+            InputStream is = FontSource.class.getResourceAsStream("/IM_Hyemin-Bold.ttf");
+            if (is == null) throw new RuntimeException("폰트 파일을 찾을 수 없음: /IM_Hyemin-Bold.ttf");
 
-            base = Font.createFont(Font.TRUETYPE_FONT, is);
-            GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(base); // 안정화
-            //System.out.println("[FontSource] loaded: " + base.getFontName());
-        } 
-        
-        catch (Exception e) {
-            System.out.println("[FontSource] 로드 실패 → SansSerif: " + e);
-            base = new Font("SansSerif", Font.PLAIN, 10);
+            baseFont = Font.createFont(Font.TRUETYPE_FONT, is);
+            GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(baseFont);
+            
+        } catch (Exception e) {
+            System.out.println("[FontManager] 폰트 로드 실패 → SansSerif 사용");
+            baseFont = new Font("SansSerif", Font.PLAIN, 12);
         }
     }
 
-    public Font getFont(float size) { return base.deriveFont(size); }
+    // 외부에서 사용할 폰트 사이즈
+    public static Font get(float size) {
+        return baseFont.deriveFont(size);
+    }
 }

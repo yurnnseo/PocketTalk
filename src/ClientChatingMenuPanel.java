@@ -42,7 +42,7 @@ public class ClientChatingMenuPanel extends JPanel {
         
         metabutton = makeButton(metaicon2, 13, 40);
         chatbutton = makeButton(chaticon2, 13, 120);
-        newchatbutton = makeButton(pluschaticon, 310 ,30);
+        newchatbutton = makeButton(pluschaticon, 300 ,30);
         
         add(metabutton);
         add(chatbutton);

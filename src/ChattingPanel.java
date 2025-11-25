@@ -28,7 +28,7 @@ public class ChattingPanel extends JPanel {
     private String creatorName;
     private FontSource fontSource = new FontSource("/IM_Hyemin-Bold.ttf");
     private MessageContainerPanel messageContainer;
-
+    private JScrollPane scrollPane;
     private final ClientMenuFrame parentFrame;
 
     public ChattingPanel(ClientMenuFrame parentFrame,
@@ -46,10 +46,10 @@ public class ChattingPanel extends JPanel {
         setBackground(Color.decode("#F9F9F9"));
 
         messageContainer = new MessageContainerPanel(fontSource.getFont(13f));
-        JScrollPane scrollPane = new JScrollPane(messageContainer);
+        scrollPane = new JScrollPane(messageContainer);
         scrollPane.setBounds(12, 12, 350, 455);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        //scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         add(scrollPane);
 
         // 메시지 추가될 때마다 스크롤 자동 내림 기능
@@ -146,6 +146,7 @@ public class ChattingPanel extends JPanel {
 
         // 말풍선 추가 (내 메시지면 보라색, 상대는 흰색)
         messageContainer.addMessage(bubbleText, isMine);
+        
     }
 
     // 메시지 보내기 액션

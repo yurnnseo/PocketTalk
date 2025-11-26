@@ -176,7 +176,7 @@ public class ChattingPanel extends JPanel {
         	// 서버에 게임 참가 요청 전송  
             parentFrame.sendToServer("/game_request " + membersToSend + "\n");
         	
-        	loadingDialog = new JDialog(parentFrame, "잠시 대기", true);
+        	loadingDialog = new JDialog(parentFrame, "잠시 대기", false);
             JLabel loadingLabel = new JLabel("참가자를 기다리는 중...", SwingConstants.CENTER);
             loadingDialog.add(loadingLabel);
             
@@ -288,10 +288,9 @@ public class ChattingPanel extends JPanel {
             
             // 1. 대기 다이얼로그 닫기
         	if (loadingDialog != null) { 
-                SwingUtilities.invokeLater(() -> { //EDT에서 안전하게 GUI를 닫음
+                SwingUtilities.invokeLater(() -> { 
                     if (loadingDialog != null) { 
-                        loadingDialog.dispose();
-                        
+                        loadingDialog.dispose(); 
                         loadingDialog = null; 
                     }
                 });
@@ -549,16 +548,21 @@ public class ChattingPanel extends JPanel {
         }
 
         try {
-        	// ClientMenuFrame을 넘겨서 게임 중에도 서버와 통신할 수 있도록 해야 합니다.
-             new MiniGameFrame(parentFrame, UserName,opponentName).setVisible(true);
         	
-            // 실제 게임 프레임 대신 테스트용 다이얼로그 표시
-            /*JOptionPane.showMessageDialog(
-                parentFrame, 
-                "게임이 시작되었습니다!\n나: " + UserName + " vs 상대: " + opponentName, 
-                "게임 시작!", 
-                JOptionPane.INFORMATION_MESSAGE
-            );*/
+        	
+        	
+        	// ClientMenuFrame을 넘겨서 게임 중에도 서버와 통신할 수 있도록 해야 함
+             new MiniGameFrame(parentFrame, UserName,opponentName).setVisible(true);
+             if (loadingDialog != null) {
+                 SwingUtilities.invokeLater(() -> {
+                     if (loadingDialog != null) {
+                         loadingDialog.dispose(); // 다이얼로그 닫기
+                         loadingDialog = null;    // null로 초기화
+                     }
+                 });
+                 // 요청자 상태 초기화 (네트워크 스레드에서 접근 가능하므로 밖에 둠)
+                 isGameInitiator = false; 
+             }
 
         } catch (Exception e) {
             System.err.println("게임 프레임 생성 오류: " + e.getMessage());

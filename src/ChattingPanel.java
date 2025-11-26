@@ -40,7 +40,8 @@ public class ChattingPanel extends JPanel {
     private String groupMembers; // 그룹채팅 멤버 문자열
     private String creatorName;
     private MessageContainerPanel messageContainer;
-
+    private String opponent;
+    
     private final ClientMenuFrame parentFrame;
 
     // 하단 아이콘버튼 PNG 경로 
@@ -150,7 +151,7 @@ public class ChattingPanel extends JPanel {
             
          // 1. 참여자 이름 배열 생성 (예: ["userA", "userB"])
             String[] names = groupMembers.trim().split("\\s+");
-            String opponent = "";
+            opponent = "";
 
             // 2. 상대방 이름 찾기
             for (String name : names) {
@@ -310,7 +311,7 @@ public class ChattingPanel extends JPanel {
             
             // 요청을 받은 상대방(B)에게 버튼을 누르도록 유도하는 시스템 메시지 출력
             messageContainer.addMessage(
-                "[" + senderName + "] 님이 게임을 요청했습니다."+"\n"+"게임을 시작하려면 [게임 버튼]을 다시 눌러주세요.", 
+                "[" + senderName + "] 님이 게임을 요청했습니다. 게임을 시작하려면 [게임 버튼]을 다시 눌러주세요.", 
                 false
             );
             return;
@@ -548,23 +549,16 @@ public class ChattingPanel extends JPanel {
         }
 
         try {
-        	
-            // TODO: TicTacToeGameFrame 클래스는 별도로 정의해야 하며, 
-            // ClientMenuFrame을 넘겨서 게임 중에도 서버와 통신할 수 있도록 해야 합니다.
-            
-            // new TicTacToeGameFrame(
-            //     parentFrame,        // 서버 통신 핸들러 (ClientMenuFrame)
-            //     UserName,           // 내 이름
-            //     opponentName        // 상대방 이름
-            // ).setVisible(true);
+        	// ClientMenuFrame을 넘겨서 게임 중에도 서버와 통신할 수 있도록 해야 합니다.
+             new MiniGameFrame(parentFrame, UserName,opponentName).setVisible(true);
         	
             // 실제 게임 프레임 대신 테스트용 다이얼로그 표시
-            JOptionPane.showMessageDialog(
+            /*JOptionPane.showMessageDialog(
                 parentFrame, 
                 "게임이 시작되었습니다!\n나: " + UserName + " vs 상대: " + opponentName, 
                 "게임 시작!", 
                 JOptionPane.INFORMATION_MESSAGE
-            );
+            );*/
 
         } catch (Exception e) {
             System.err.println("게임 프레임 생성 오류: " + e.getMessage());

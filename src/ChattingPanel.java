@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
@@ -34,7 +35,8 @@ public class ChattingPanel extends JPanel {
     private JButton btnSendEmoji;
     private JButton btnPlayGame;
     private JLabel lblUserName;
-
+    private JDialog loadingDialog;
+    private boolean isGameInitiator = false; //게임 요청 판단
     private String groupMembers; // 그룹채팅 멤버 문자열
     private String creatorName;
     private MessageContainerPanel messageContainer;
@@ -133,24 +135,68 @@ public class ChattingPanel extends JPanel {
         btnSendEmoji.addActionListener(e -> onClickSendEmoji());
         btnPlayGame.addActionListener(e -> {
             // TODO: 여기서 게임 시작 로직 구현
-        	JDialog loadingDialog = new JDialog(parentFrame, "잠시 대기", true);
+        	int memberCount = getGroupMemberCount();
             
-            // 2. 다이얼로그에 표시할 내용 
-            JLabel loadingLabel = new JLabel("참가자를 기다리는 중", SwingConstants.CENTER);
+            if (memberCount != 2) {
+                // 단체 채팅방이거나 (멤버가 2명 초과) 자기 자신만 있는 경우 (멤버가 1명)
+                JOptionPane.showMessageDialog(
+                    parentFrame, 
+                    "현재 채팅방은 " + memberCount + "명으로, 1:1 게임만 가능합니다.", 
+                    "게임 참가 불가", 
+                    JOptionPane.WARNING_MESSAGE
+                );
+                return; // 게임 요청 전송 로직 실행을 중단
+            }
+            
+         // 1. 참여자 이름 배열 생성 (예: ["userA", "userB"])
+            String[] names = groupMembers.trim().split("\\s+");
+            String opponent = "";
+
+            // 2. 상대방 이름 찾기
+            for (String name : names) {
+                if (!name.equals(UserName) && !name.isEmpty()) {
+                    opponent = name;
+                    break;
+                }
+            }
+
+            // 3. 메시지 전송 시 순서를 [나의 이름] [상대방 이름]으로 강제 재정렬
+            String membersToSend;
+            if (opponent.isEmpty()) {
+                // 1명일 경우 (예외 상황이지만 안전장치)
+                membersToSend = UserName; 
+            } else {
+                // ⭐ 항상 [내 이름] [상대방 이름] 순서로 만듭니다.
+                membersToSend = UserName + " " + opponent; 
+            }
+            
+            final String participants = membersToSend;
+        	isGameInitiator = true;
+        	// 서버에 게임 참가 요청 전송  
+            parentFrame.sendToServer("/game_request " + membersToSend + "\n");
+        	
+        	loadingDialog = new JDialog(parentFrame, "잠시 대기", true);
+            JLabel loadingLabel = new JLabel("참가자를 기다리는 중...", SwingConstants.CENTER);
             loadingDialog.add(loadingLabel);
             
-            // 3. 다이얼로그 크기 설정
-            loadingDialog.setSize(200, 150);
-            
-            // 4. 다이얼로그 위치 설정 (화면 중앙에 표시)
+            loadingDialog.setSize(200, 150);      
             loadingDialog.setLocationRelativeTo(null);
-            
-            // 5. 다이얼로그 닫기 버튼==대기 취소
             loadingDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+ 
+            //서버에게 취소 요청
+            loadingDialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                    if (isGameInitiator) { // 내가 요청자일 때만 취소 요청
+                        parentFrame.sendToServer("/game_cancel " + participants + "\n");
+                        loadingDialog = null;
+                        isGameInitiator = false;
+                    }
+                }
+            });
             
-            // 6. 다이얼로그 표시 (이 시점부터 다이얼로그가 닫힐 때까지 호출을 막습니다: Modal)
+            
             loadingDialog.setVisible(true);
-            //loadingDialog.dispose();
         });
     }
 
@@ -236,6 +282,64 @@ public class ChattingPanel extends JPanel {
             return;
         }
 
+        // --- 게임 시작 처리 ---
+        if (content.startsWith("/game_start ")) {
+            
+            // 1. 대기 다이얼로그 닫기
+        	if (loadingDialog != null) { 
+                SwingUtilities.invokeLater(() -> { //EDT에서 안전하게 GUI를 닫음
+                    if (loadingDialog != null) { 
+                        loadingDialog.dispose();
+                        
+                        loadingDialog = null; 
+                    }
+                });
+                isGameInitiator = false; // 상태 초기화
+            }
+            
+            // 2. 게임 데이터 파싱 (예: "UserA UserB")
+            String gameData = content.substring("/game_start ".length()).trim();
+            openGameFrame(gameData);
+            
+            return;
+        }
+        
+        // ---게임 요청 알림---
+        if (content.startsWith("/game_prompt ")) {
+            String senderName = content.substring("/game_prompt ".length()).trim();
+            
+            // 요청을 받은 상대방(B)에게 버튼을 누르도록 유도하는 시스템 메시지 출력
+            messageContainer.addMessage(
+                "[" + senderName + "] 님이 게임을 요청했습니다."+"\n"+"게임을 시작하려면 [게임 버튼]을 다시 눌러주세요.", 
+                false
+            );
+            return;
+        }
+        
+        // ---게임 취소 알림---
+        if (content.startsWith("/game_canceled ")) {
+            String canceledName = content.substring("/game_canceled ".length()).trim();
+            
+            // A의 대기 다이얼로그 닫기 (A가 X버튼을 누르기 전에 B가 먼저 받았을 경우)
+            if (loadingDialog != null) { 
+                SwingUtilities.invokeLater(() -> { 
+                    if (loadingDialog != null) { 
+                        loadingDialog.dispose();
+                        
+                        loadingDialog = null; 
+                    }
+                });
+                isGameInitiator = false; // 상태 초기화
+            }
+            
+            // 시스템 메시지를 띄워 상대방의 취소 사실을 알립니다.
+            messageContainer.addMessage(
+                canceledName + " 님이 게임 요청을 취소했습니다.", 
+                false
+            );
+            return;
+        }
+        
         // --- 그 외 일반 텍스트 메시지 ---
         String bubbleText;
         if (sender != null) bubbleText = sender + " : " + content;
@@ -409,6 +513,62 @@ public class ChattingPanel extends JPanel {
 
             return btn;
         }
+    }
+    
+    private int getGroupMemberCount() {
+        // 쉼표로 구분된 문자열을 공백으로 먼저 치환하여 처리 용이하게 함
+        String normalizedMembers = groupMembers.replace(",", " ").trim(); 
+        
+        // 연속된 공백을 하나로 줄임
+        String[] names = normalizedMembers.split("\\s+");
+        
+        // 빈 문자열이 아닌 유효한 이름만 카운트
+        int count = 0;
+        for (String name : names) {
+            if (!name.trim().isEmpty()) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    // 게임 프레임 호출
+    public void openGameFrame(String gameData) {
+        // gameData 예: "UserA UserB"
+        String[] participants = gameData.split("\\s+"); 
+        String opponentName = "";
 
+        // 상대방 이름 추출
+        if (participants.length == 2) {
+            // 내가 UserA면 상대는 UserB, 내가 UserB면 상대는 UserA
+            opponentName = participants[0].equals(UserName) ? participants[1] : participants[0];
+        } else {
+            JOptionPane.showMessageDialog(parentFrame, "게임 참가자 정보 오류!", "오류", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+        	
+            // TODO: TicTacToeGameFrame 클래스는 별도로 정의해야 하며, 
+            // ClientMenuFrame을 넘겨서 게임 중에도 서버와 통신할 수 있도록 해야 합니다.
+            
+            // new TicTacToeGameFrame(
+            //     parentFrame,        // 서버 통신 핸들러 (ClientMenuFrame)
+            //     UserName,           // 내 이름
+            //     opponentName        // 상대방 이름
+            // ).setVisible(true);
+        	
+            // 실제 게임 프레임 대신 테스트용 다이얼로그 표시
+            JOptionPane.showMessageDialog(
+                parentFrame, 
+                "게임이 시작되었습니다!\n나: " + UserName + " vs 상대: " + opponentName, 
+                "게임 시작!", 
+                JOptionPane.INFORMATION_MESSAGE
+            );
+
+        } catch (Exception e) {
+            System.err.println("게임 프레임 생성 오류: " + e.getMessage());
+            JOptionPane.showMessageDialog(parentFrame, "게임 로딩 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

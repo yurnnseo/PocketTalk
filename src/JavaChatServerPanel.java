@@ -16,7 +16,7 @@ public class JavaChatServerPanel extends JPanel {
     private ServerSocket socket;
     private Socket client_socket;
     private Vector<UserService> UserVec = new Vector<>();
-
+    private final Map<String, String> gameRequests = Collections.synchronizedMap(new HashMap<>()); // key:요청 클라, value:상대 클라
     private static final int BUF_LEN = 128;
 
     // ---- 프로필 TXT 관리 ----
@@ -358,7 +358,21 @@ public class JavaChatServerPanel extends JPanel {
                 // 무시
             }
         }
-
+        
+        //게임 메시지를 특정 사용자들에게만 보냄
+        public void sendToSpecificUsers(String msg, String... userNames) {
+            Set<String> targetUsers = new HashSet<>(Arrays.asList(userNames));
+            
+            synchronized (user_vc) {
+                for (UserService user : user_vc) {
+                    // 접속 중인 유저의 이름이 타겟 목록에 있으면 메시지 전송
+                    if (targetUsers.contains(user.UserName)) {
+                        user.WriteOne(msg);
+                        log("게임", "전송 To: " + user.UserName + " - " + msg);
+                    }
+                }
+            }
+        }
         @Override
         public void run() {
             while (true) {
@@ -441,6 +455,86 @@ public class JavaChatServerPanel extends JPanel {
                             continue;
                         }
 
+                        // 게임 요청 처리
+                        if (chat_msg.startsWith("/game_request ")) {
+                            String participantsLine = chat_msg.substring("/game_request ".length()).trim();
+                            String[] participants = participantsLine.split("[,\\s]+");
+                            
+                            // 1. 유효성 검사 (클라이언트가 1:1 요청을 보내지만, 서버에서도 재확인)
+                            if (participants.length != 2) {
+                                log("게임", "경고: " + UserName + " 님이 1:1이 아닌 게임 요청을 보냄: " + participantsLine);                            
+                                continue;
+                            }
+                            
+                            String sender = participants[0]; // 요청자 (본인)
+                            String receiver = participants[1]; // 상대방
+                            
+                            if (!sender.equals(UserName)) {
+                                // 요청자와 메시지 보낸 UserName이 일치해야 함
+                                log("게임", "경고: 요청자 불일치! " + UserName + " != " + sender);
+                                continue;
+                            }
+
+                            // 2. 중앙 상태 맵에 요청 기록
+                            gameRequests.put(sender, receiver);
+                            log("게임", sender + " -> " + receiver + " 게임 요청 (대기 중)");
+                            
+                            // 3. 상대방도 나에게 요청했는지 확인 (쌍방 요청 확인)
+                            if (gameRequests.containsKey(receiver) && gameRequests.get(receiver).equals(sender)) {
+                                // 쌍방 요청이 확인됨: 게임 시작!
+                                
+                                // 4. 모든 클라이언트에게 게임 시작 명령 브로드캐스트
+                                String gameStartCmd = "/game_start " + participantsLine;
+                                
+                                // 두 참가자에게만 명령을 전송
+                                sendToSpecificUsers(gameStartCmd, sender, receiver);
+                                
+                                // 5. 요청 상태 초기화
+                                gameRequests.remove(sender);
+                                gameRequests.remove(receiver);
+                                log("게임", "=== " + sender + " & " + receiver + " 게임 시작! ===");
+                                
+                            } else {
+                                // 아직 상대방이 요청하지 않았거나, 상대방은 다른 사람에게 요청한 경우
+                                // 상대방에게 '대기 중'임을 알리는 시스템 메시지 등을 보낼 수 있으나,
+                                // 클라이언트에서 '참가자를 기다리는 중...' 다이얼로그가 이미 처리하므로 생략 가능.
+                            	sendToSpecificUsers("/game_prompt " + sender, receiver);
+                                log("게임", receiver + " (상대방)에게 " + sender + "의 요청 알림 전송");
+                            }
+                            continue;
+                        }                      
+                        
+                        // 게임 취소 처리
+                        if (chat_msg.startsWith("/game_cancel ")) {
+                            
+                            String participantsLine = chat_msg.substring("/game_cancel ".length()).trim();
+                            String[] participants = participantsLine.split("[,\\s]+");
+                            
+                            String canceler = UserName; // 취소한 사람
+                            String target = "";         // 상대방 이름
+                            
+                            if (participants.length == 2) {
+                                target = participants[0].equals(canceler) ? participants[1] : participants[0];
+                            }
+                            
+                            // 요청자 (UserName)의 상태를 맵에서 제거
+                            gameRequests.remove(canceler);
+                            log("게임", canceler + " 님이 게임 요청을 취소했습니다. 상대: " + target);
+                            
+                            // 상대방이 혹시 나에게 요청했던 상태라면 그것도 제거 (안전 장치)
+                            if (target != null && gameRequests.containsKey(target) && gameRequests.get(target).equals(canceler)) {
+                                gameRequests.remove(target);
+                                log("게임", "상대방(" + target + ")의 요청 대기 상태도 해제함.");
+                            }
+                            
+                            // 상대방에게 취소되었음을 알림
+                            if (!target.isEmpty()) {
+                                sendToSpecificUsers("/game_canceled " + canceler, target);
+                            }
+                            
+                            continue;
+                        }
+                        
                         // 일반 채팅
                         log("메시지", UserName + " : " + chat_msg);
                         WriteAll(UserName + " : " + chat_msg + "\n");

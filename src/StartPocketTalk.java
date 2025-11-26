@@ -15,4 +15,4 @@ public class StartPocketTalk extends JFrame {
     {
         new StartPocketTalk();
     }
-}
+}  

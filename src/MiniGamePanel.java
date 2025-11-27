@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 public class MiniGamePanel extends JPanel{
 	private JButton startbtn, howtoplaybtn;
 	private Font font;
-	private JLabel title;
+	private JLabel title, time;
 	private Image backgroundImg = null;
 	private String Background = "Images/gamebackground.png";
 	private JPanel startPanel; // 반투명 패널
@@ -23,7 +23,7 @@ public class MiniGamePanel extends JPanel{
 		this.backgroundImg = new ImageIcon(getClass().getResource("/" + Background)).getImage();
 		setSize(770, 600);
 		
-		//시작버튼이 달린 반투명 패널
+		//첫 번째 패널: 시작버튼이 달린 반투명 패널
 		startPanel = new JPanel() {
 			 @Override
 			    protected void paintComponent(Graphics g) {
@@ -57,6 +57,13 @@ public class MiniGamePanel extends JPanel{
 	    		repaint();
 	    	}
 	    });
+	    
+	    // 두 번째 패널: 게임 플레이 패널
+	    time = new JLabel();
+	    time.setFont(FontSource.get(20f));
+	    time.setBounds(100, 40, 770, 50);
+	    add(time);
+	    
 	}
 	
 	 // 배경 이미지 그리기

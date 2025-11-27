@@ -41,6 +41,8 @@ public class ChattingPanel extends JPanel {
     private String creatorName;
     private MessageContainerPanel messageContainer;
     private String opponent;
+    private final String roomId;
+
     
     private final ClientMenuFrame parentFrame;
 
@@ -56,14 +58,16 @@ public class ChattingPanel extends JPanel {
     private static final String EMOTICON_SAD = "/Images/Emoticon_sad.png";
     
     public ChattingPanel(ClientMenuFrame parentFrame,
-                         String username,
-                         String groupMembers,
-                         String creatorName) {
+            String username,
+            String roomId,
+            String groupMembers,
+            String creatorName) {
 
         this.parentFrame = parentFrame;
         this.groupMembers = groupMembers;
         this.creatorName = creatorName;
         this.UserName = username;
+        this.roomId = roomId;
 
         setBorder(new EmptyBorder(5, 5, 5, 5));
         setLayout(null);
@@ -116,12 +120,6 @@ public class ChattingPanel extends JPanel {
         add(btnSend);
         // ---- 하단 영역 끝 ----
 
-        
-        // ----- 방장 처리 -----
-        boolean isCreator = UserName.equals(creatorName);
-        if (isCreator) {
-            parentFrame.sendToServer("/createroom " + this.groupMembers);
-        }
 
         // 시스템 초대 메시지
         showInviteMessage();
@@ -357,7 +355,8 @@ public class ChattingPanel extends JPanel {
                 String msg = txtInput.getText();
                 if (msg == null || msg.trim().isEmpty()) return;
 
-                parentFrame.sendToServer(msg + "\n");
+                // ★ 변경된 부분: 방 ID 붙여서 전송
+                parentFrame.sendToServer("/msg " + roomId + " " + msg + "\n");
 
                 txtInput.setText("");
                 txtInput.requestFocus();
@@ -374,8 +373,8 @@ public class ChattingPanel extends JPanel {
         File file = chooser.getSelectedFile();
         if (file == null) return;
 
-        // 서버로만 /image 명령을 전송하고 → 서버 브로드캐스트를 onReceiveChatMessage()에서 처리
-        String command = "/image " + file.getAbsolutePath();
+        // 방 ID + /image 로 감싸서 전송
+        String command = "/msg " + roomId + " /image " + file.getAbsolutePath();
         parentFrame.sendToServer(command + "\n");
     }
 
@@ -505,11 +504,11 @@ public class ChattingPanel extends JPanel {
             btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
             btn.addActionListener(e -> {
-                // 서버로 이모티콘 전송
-                parentFrame.sendToServer("/emoji " + code + "\n");
-
+                // 서버로 이모티콘 전송 (방 ID 포함)
+                parentFrame.sendToServer("/msg " + roomId + " /emoji " + code + "\n");
                 dispose();
             });
+
 
             return btn;
         }

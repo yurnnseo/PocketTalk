@@ -81,16 +81,15 @@ public class ClientChatingMenuPanel extends JPanel {
      * 서버에서 "/room creatorName members..." 를 받았을 때
      * ClientMenuFrame이 이 메서드를 호출해 줌.
      */
-    public void addChatRoom(String creatorName, String membersString) {
+    public void addChatRoom(String roomId, String creatorName, String membersString) {
         if (roomListPanel != null) {
-            roomListPanel.addRoom(creatorName, membersString);
+            roomListPanel.addRoom(roomId, creatorName, membersString);
         }
     }
 
     // 채팅방 더블클릭 시 실행
-    public void openChatRoom(String creatorName, String membersString) {
-        // ip, port 필요 없음. parentFrame + username만 넘김
-        ChattingFrame.openRoom(parentFrame, username, membersString, creatorName);
+    public void openChatRoom(String roomId, String creatorName, String membersString) {
+        ChattingFrame.openRoom(parentFrame, username, roomId, membersString, creatorName);
     }
 
 

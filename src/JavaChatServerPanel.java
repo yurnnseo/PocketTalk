@@ -22,7 +22,13 @@ public class JavaChatServerPanel extends JPanel {
     // ---- 프로필 TXT 관리 ----
     private Map<String, ClientProfile> clientProfiles = Collections.synchronizedMap(new HashMap<>());
 
+    // ---- 채팅방 TXT/로그 관리 ----
     private static final String CLIENT_TXT_FILE = "./client_profiles.txt";
+    private static final String CHATROOM_TXT_FILE = "./chat_rooms.txt";
+    private static final String CHAT_LOG_DIR      = "./chat_logs";
+
+    private Map<String, ChatRoomInfo> chatRooms = Collections.synchronizedMap(new LinkedHashMap<>());
+
 
     public JavaChatServerPanel() {
         setLayout(null);
@@ -36,8 +42,12 @@ public class JavaChatServerPanel extends JPanel {
         textArea = new JTextArea();
         textArea.setEditable(false);
         scrollPane.setViewportView(textArea);
+        
+        File logDir = new File(CHAT_LOG_DIR);
+        if (!logDir.exists()) logDir.mkdir();
 
-        loadProfilesFromTxt(); // .txt에서 프로필 로드
+        loadProfilesFromTxt();    // 프로필 TXT 로드
+        loadChatRoomsFromTxt();   // 채팅방 TXT 로드
 
         JLabel lblPort = new JLabel("Port Number");
         lblPort.setBounds(17, 466, 90, 26);
@@ -202,6 +212,67 @@ public class JavaChatServerPanel extends JPanel {
         saveProfilesToTxt();
         log("시스템", "서버 및 클라이언트 연결 정리 완료.");
     }
+    
+    private void loadChatRoomsFromTxt() {
+        File file = new File(CHATROOM_TXT_FILE);
+        if (!file.exists()) {
+            log("채팅방", "채팅방 TXT 없음. 새로 시작합니다.");
+            return;
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            int count = 0;
+
+            while ((line = br.readLine()) != null) {
+                // roomId|creator|member1,member2,member3
+                String[] tokens = line.split("\\|", 3);
+                if (tokens.length == 3) {
+                    String roomId   = tokens[0].trim();
+                    String creator  = tokens[1].trim();
+                    String membersStr = tokens[2].trim();
+
+                    List<String> members = new ArrayList<>();
+                    if (!membersStr.isEmpty()) {
+                        for (String m : membersStr.split(",")) {
+                            String n = m.trim();
+                            if (!n.isEmpty()) members.add(n);
+                        }
+                    }
+
+                    if (!roomId.isEmpty()) {
+                        chatRooms.put(roomId,
+                                new ChatRoomInfo(roomId, creator, members));
+                        count++;
+                    }
+                }
+            }
+            log("채팅방", "TXT 채팅방 로드 완료: " + count + "개");
+        } catch (Exception e) {
+            log("채팅방", "TXT 채팅방 로드 오류: " + e.getMessage());
+        }
+    }
+
+    private void saveChatRoomsToTxt() {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(CHATROOM_TXT_FILE))) {
+            synchronized (chatRooms) {
+                for (ChatRoomInfo c : chatRooms.values()) {
+                    String membersStr = String.join(",", c.getMembers());
+                    String line = c.getRoomId() + "|" + c.getCreator() + "|" + membersStr;
+                    bw.write(line);
+                    bw.newLine();
+                }
+            }
+            log("채팅방", "TXT 채팅방 저장 완료: " + chatRooms.size() + "개");
+        } catch (Exception e) {
+            log("채팅방", "TXT 채팅방 저장 오류: " + e.getMessage());
+        }
+    }
+
+    
+    private synchronized String generateRoomId() {
+        return "R" + System.currentTimeMillis();
+    }
 
     // ====== 각 유저 스레드 ======
     class UserService extends Thread {
@@ -299,27 +370,24 @@ public class JavaChatServerPanel extends JPanel {
         public void BroadcastUserList() {
             StringBuilder sb = new StringBuilder("/list ");
 
-            // 이름 중복 제거를 위해 Set 사용
-            LinkedHashSet<String> nameSet = new LinkedHashSet<>();
-
-            synchronized (user_vc) {
-                for (UserService u : user_vc) {
-                    String n = u.UserName;
+            // 전체 친구 목록을 clientProfiles 기준으로 전송
+            synchronized (clientProfiles) {
+                for (ClientProfile p : clientProfiles.values()) {
+                    String n = p.getName();
                     if (n != null) {
                         n = n.trim();
-                        if (!n.isEmpty()) nameSet.add(n);   // 같은 이름은 한 번만
+                        if (!n.isEmpty()) {
+                            sb.append(n).append(" ");
+                        }
                     }
                 }
             }
 
-            for (String n : nameSet) {
-                sb.append(n).append(" ");
-            }
-
             String userListMsg = sb.toString().trim();
-            log("접속", "현재 접속자 목록 전송: " + userListMsg);
+            log("접속", "전체 친구 목록 전송: " + userListMsg);
             WriteAll(userListMsg);
         }
+
 
         // 한 명 변경 후 전체에게 변경분만 보내는 함수 쓰려면 여기 사용
         @SuppressWarnings("unused")
@@ -373,6 +441,69 @@ public class JavaChatServerPanel extends JPanel {
                 }
             }
         }
+        
+        private void sendMyChatRooms() {
+            synchronized (chatRooms) {
+                for (ChatRoomInfo c : chatRooms.values()) {
+                    if (c.getMembers().contains(UserName)) {
+                        String membersLine = String.join(" ", c.getMembers());
+                        // 프로토콜: /room roomId creator members...
+                        String roomMsg = "/room " + c.getRoomId() + " " + c.getCreator() + " " + membersLine;
+                        WriteOne(roomMsg);
+                    }
+                }
+            }
+        }
+
+        
+        private void handleRoomMessage(String roomId, String text) {
+            ChatRoomInfo room;
+            synchronized (chatRooms) {
+                room = chatRooms.get(roomId);
+            }
+            if (room == null) {
+                log("채팅방", "존재하지 않는 roomId로 메시지 수신: " + roomId);
+                return;
+            }
+
+            String fullLine = UserName + " : " + text;
+
+            // 로그 파일에 저장
+            File logFile = new File(CHAT_LOG_DIR, roomId + ".txt");
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(logFile, true))) {
+                bw.write(fullLine);
+                bw.newLine();
+            } catch (IOException e) {
+                log("채팅방", "메시지 로그 저장 오류(" + roomId + "): " + e.getMessage());
+            }
+
+            // 방 멤버에게만 전송
+            String sendMsg = "/msg " + roomId + " " + fullLine;
+            synchronized (user_vc) {
+                for (UserService u : user_vc) {
+                    if (room.getMembers().contains(u.UserName)) {
+                        u.WriteOne(sendMsg);
+                    }
+                }
+            }
+        }
+
+        private void sendRoomHistory(String roomId) {
+            File logFile = new File(CHAT_LOG_DIR, roomId + ".txt");
+            if (!logFile.exists()) return;
+
+            try (BufferedReader br = new BufferedReader(new FileReader(logFile))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String sendMsg = "/msg " + roomId + " " + line;
+                    WriteOne(sendMsg);   // 이제 this.WriteOne(...) 가능
+                }
+            } catch (IOException e) {
+                log("채팅방", "로그 전송 오류(" + roomId + "): " + e.getMessage());
+            }
+        }
+
+        
         @Override
         public void run() {
             while (true) {
@@ -412,6 +543,9 @@ public class JavaChatServerPanel extends JPanel {
                     broadcastAllProfilesToAllClients(); // /profile
                     BroadcastUserList();                // /list
 
+                    // 내가 들어있는 채팅방 목록 전송
+                    sendMyChatRooms();
+                    
                     // 이후부터는 채팅/프로필 업데이트 루프
                     while (true) {
                         String chat_msg = dis.readUTF().trim();
@@ -435,25 +569,50 @@ public class JavaChatServerPanel extends JPanel {
                             String membersLine = chat_msg.substring("/createroom ".length()).trim();
                             if (membersLine.isEmpty()) continue;
 
-                            // membersLine = "ww ff qq" 처럼
-                            String[] members = membersLine.split("\\s+");
+                            // membersLine = "me friend1 friend2 ..."
+                            String[] memberArr = membersLine.split("\\s+");
+                            List<String> members = new ArrayList<>();
+                            for (String m : memberArr) {
+                                String n = m.trim();
+                                if (!n.isEmpty()) members.add(n);
+                            }
 
-                            // 그대로 /room 으로 보냄
-                            String roomMsg = "/room " + membersLine;
-                            log("채팅방", UserName + " 님이 채팅방 생성: [" + membersLine + "]");
+                            // 방 ID 생성
+                            String roomId = generateRoomId();
+                            ChatRoomInfo roomInfo = new ChatRoomInfo(roomId, UserName, members);
 
+                            synchronized (chatRooms) {
+                                chatRooms.put(roomId, roomInfo);
+                            }
+                            saveChatRoomsToTxt();
+
+                            // 클라이언트에게 전송할 members 문자열
+                            String sendMembersLine = String.join(" ", members);
+
+                            // 프로토콜: /room roomId creator members...
+                            String roomMsg = "/room " + roomId + " " + UserName + " " + sendMembersLine;
+
+                            log("채팅방", "새 채팅방 생성: roomId=" + roomId + ", 멤버=" + sendMembersLine);
+
+                            // 현재 접속 중인 멤버들에게만 방 정보 전송
                             synchronized (user_vc) {
                                 for (UserService u : user_vc) {
-                                    for (String m : members) {
-                                        if (u.UserName.equals(m)) {
-                                            u.WriteOne(roomMsg);
-                                            break;
-                                        }
+                                    if (members.contains(u.UserName)) {
+                                        u.WriteOne(roomMsg);
                                     }
                                 }
                             }
                             continue;
                         }
+
+                        // 로그 요청
+                        if (chat_msg.startsWith("/loadlog ")) {
+                            String roomId = chat_msg.substring("/loadlog ".length()).trim();
+                            sendRoomHistory(roomId);
+                            continue;
+                        }
+
+
 
                         // 게임 요청 처리
                         if (chat_msg.startsWith("/game_request ")) {
@@ -534,6 +693,20 @@ public class JavaChatServerPanel extends JPanel {
                             
                             continue;
                         }
+                        
+                        // 방 메시지: /msg roomId 내용...
+                        if (chat_msg.startsWith("/msg ")) {
+                            String body = chat_msg.substring("/msg ".length()).trim();
+                            int firstSpace = body.indexOf(' ');
+                            if (firstSpace <= 0) continue;
+
+                            String roomId = body.substring(0, firstSpace);
+                            String text   = body.substring(firstSpace + 1);
+
+                            handleRoomMessage(roomId, text);
+                            continue;
+                        }
+
                         
                         // 일반 채팅
                         log("메시지", UserName + " : " + chat_msg);

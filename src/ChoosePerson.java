@@ -86,23 +86,24 @@ public class ChoosePerson extends JFrame {
                     return;
                 }
 
-                // 방 멤버: [creator, 초대된 사람들...]
                 List<String> membersList = new ArrayList<>();
-                membersList.add(username); // creator 맨 앞
+                membersList.add(username); // creator
 
                 for (String s : selected) {
-                    if (!s.equals(username)) {   // 혹시라도 포함돼 있으면 중복 방지
+                    if (!s.equals(username)) {
                         membersList.add(s);
                     }
                 }
 
                 String members = String.join(" ", membersList);
 
-                dispose(); // 창 닫기
+                // 1) 서버에게 방 생성 요청
+                parentFrame.sendToServer("/createroom " + members);
 
-                // ClientMenuFrame + username + 멤버 문자열만 넘김
-                ChattingFrame.openRoom(parentFrame, username, members, username);
+                // 2) 창 닫기 (실제 방 열리는 건 /room 수신 후 사용자가 더블클릭할 때)
+                dispose();
             }
         });
+
     }
 }

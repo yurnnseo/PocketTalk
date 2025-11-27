@@ -11,18 +11,7 @@ public class ChatRoomListPanel extends JPanel {
 
     private final ClientChatingMenuPanel parentPanel;
 
-    // 채팅방 정보
-    private static class ChatRoom {
-        String creatorName;
-        String membersString;
-
-        ChatRoom(String creatorName, String membersString) {
-            this.creatorName = creatorName;
-            this.membersString = membersString;
-        }
-    }
-
-    private final List<ChatRoom> rooms = new ArrayList<>();
+    private final List<ChatRoomInfo> rooms = new ArrayList<>();
 
     public ChatRoomListPanel(ClientChatingMenuPanel parentPanel) {
         this.parentPanel = parentPanel;
@@ -30,10 +19,6 @@ public class ChatRoomListPanel extends JPanel {
         setOpaque(false);
     }
 
-    public void addRoom(String creatorName, String membersString) {
-        rooms.add(new ChatRoom(creatorName, membersString));
-        refreshView();
-    }
     
     private String makeRoomTitle(String membersString) {
         // "A B C" → ["A","B","C"]
@@ -49,6 +34,20 @@ public class ChatRoomListPanel extends JPanel {
         // 3명 이상일 때: A, B, C 형태
         return String.join(", ", names);
     }
+    
+    public void addRoom(String roomId, String creatorName, String membersString) {
+        // "A B C" -> ["A","B","C"]
+        String[] arr = membersString.trim().split("\\s+");
+        List<String> members = new ArrayList<>();
+        for (String n : arr) {
+            n = n.trim();
+            if (!n.isEmpty()) members.add(n);
+        }
+
+        rooms.add(new ChatRoomInfo(roomId, creatorName, members));
+        refreshView();
+    }
+
 
 
     private void refreshView() {
@@ -56,22 +55,28 @@ public class ChatRoomListPanel extends JPanel {
 
         int y = 10;
 
-        for (ChatRoom room : rooms) {
-            
-        	// 상태메시지 대신 비워둠 (필요하면 "사람 수" 같은 거 넣어도 됨)
-        	String roomTitle = makeRoomTitle(room.membersString);
-        	// 방 하나를 프로필 + 이름 형태로 표현
-        	ProfileHeaderView header = new ProfileHeaderView(roomTitle, "", DEFAULT_PROFILE_IMAGE, 50, 50, ProfileHeaderView.Orientation.HORIZONTAL);
-        	
+        for (ChatRoomInfo room : rooms) {
+            // List<String> -> "A B C" 형태로 합치기
+            String membersString = String.join(" ", room.getMembers());
+
+            String roomTitle = makeRoomTitle(membersString);
+
+            ProfileHeaderView header = new ProfileHeaderView(
+                    roomTitle,
+                    "",
+                    DEFAULT_PROFILE_IMAGE,
+                    50, 50,
+                    ProfileHeaderView.Orientation.HORIZONTAL
+            );
+
             header.setBounds(15, y, header.getPreferredSize().width, header.getPreferredSize().height);
             add(header);
 
             MouseAdapter clickListener = new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    // 더블클릭일 때만 열기
                     if (e.getClickCount() == 2) {
-                        parentPanel.openChatRoom(room.creatorName, room.membersString);
+                        parentPanel.openChatRoom(room.getRoomId(), room.getCreator(), membersString);
                     }
                 }
             };
@@ -83,6 +88,7 @@ public class ChatRoomListPanel extends JPanel {
 
             y += header.getPreferredSize().height + 15;
         }
+
 
         int width = 260;
         int height = Math.max(y, 300);

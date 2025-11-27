@@ -114,20 +114,22 @@ public class ClientMenuFrame extends JFrame {
                         }
                     }
                     else if (msg.startsWith("/room ")) {
-                        // "/room creator member1 member2 ..."
                         String body = msg.substring("/room ".length()).trim();
                         String[] tokens = body.split("\\s+");
-                        if (tokens.length >= 1) {
-                            String creatorName = tokens[0];            // 만든 사람
-                            String membersString = body;               // 전체 멤버 문자열
+                        if (tokens.length >= 3) {
+                            String roomId       = tokens[0];
+                            String creatorName  = tokens[1];
+                            String membersString = String.join(" ",
+                                    Arrays.copyOfRange(tokens, 2, tokens.length));
 
                             SwingUtilities.invokeLater(() -> {
                                 if (chatPanel != null) {
-                                    chatPanel.addChatRoom(creatorName, membersString);
+                                    chatPanel.addChatRoom(roomId, creatorName, membersString);
                                 }
                             });
                         }
-                    } else {
+                    }
+                    else {
                     	// 일반 채팅 메시지 → 열려있는 채팅창들에 전달
                         ChattingFrame.deliverChatMessage(msg);
                     }

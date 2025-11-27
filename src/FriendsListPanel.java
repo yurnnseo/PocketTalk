@@ -14,7 +14,7 @@ public class FriendsListPanel extends JPanel {
     private String myName; // 내 이름 (리스트에서 나를 빼기 위함)
 
     // 프로필 정보: name -> FriendProfile(이름, 상태메시지, 이미지경로)
-    private final Map<String, FriendProfile> profiles = new HashMap<>();
+    private static final Map<String, FriendProfile> profiles = new HashMap<>();
 
     // 현재 온라인인 친구 이름 순서 ( /list 결과 )
     private final LinkedHashSet<String> onlineNames = new LinkedHashSet<>();

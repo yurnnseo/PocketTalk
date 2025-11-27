@@ -546,10 +546,7 @@ public class ChattingPanel extends JPanel {
             return;
         }
 
-        try {
-        	
-        	
-        	
+        try {        	
         	// ClientMenuFrame을 넘겨서 게임 중에도 서버와 통신할 수 있도록 해야 함
              new MiniGameFrame(parentFrame, UserName,opponentName).setVisible(true);
              if (loadingDialog != null) {

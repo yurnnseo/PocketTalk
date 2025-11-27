@@ -9,7 +9,7 @@ public class MiniGameFrame extends JFrame {
         setSize(770, 600); // 사이즈 설정
         setResizable(false); // 프레임 크기 고정. 사용자가 크기 조절 불가능
 
-        gamestartpanel = new MiniGamePanel();
+        gamestartpanel = new MiniGamePanel(parentFrame, username, oppenetName);
         add(gamestartpanel);
         setVisible(true); // 프레임을 화면에 출력
     }

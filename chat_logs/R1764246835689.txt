@@ -1,0 +1,3 @@
+fa : /emoji hello
+fa : 게임하자
+asdf : 그래

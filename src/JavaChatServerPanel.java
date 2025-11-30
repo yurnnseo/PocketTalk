@@ -442,6 +442,21 @@ public class JavaChatServerPanel extends JPanel {
             }
         }
         
+        // 접속자 목록에서 특정 사용자 이름 찾기
+        public UserService findUserService(String username) {
+            if (username == null || username.isEmpty()) return null;
+            
+            synchronized (user_vc) {
+                for (UserService user : user_vc) {
+                    // 접속이 완료되어 UserName이 설정된 경우에만 비교
+                    if (user.UserName != null && user.UserName.equals(username)) {
+                        return user;
+                    }
+                }
+            }
+            return null;
+        }
+        
         private void sendMyChatRooms() {
             synchronized (chatRooms) {
                 for (ChatRoomInfo c : chatRooms.values()) {
@@ -612,8 +627,6 @@ public class JavaChatServerPanel extends JPanel {
                             continue;
                         }
 
-
-
                         // 게임 요청 처리
                         if (chat_msg.startsWith("/game_request ")) {
                             String participantsLine = chat_msg.substring("/game_request ".length()).trim();
@@ -633,19 +646,15 @@ public class JavaChatServerPanel extends JPanel {
                                 log("게임", "경고: 요청자 불일치! " + UserName + " != " + sender);
                                 continue;
                             }
-
-                            // 2. 중앙 상태 맵에 요청 기록
+           
                             gameRequests.put(sender, receiver);
                             log("게임", sender + " -> " + receiver + " 게임 요청 (대기 중)");
                             
                             // 3. 상대방도 나에게 요청했는지 확인 (쌍방 요청 확인)
                             if (gameRequests.containsKey(receiver) && gameRequests.get(receiver).equals(sender)) {
-                                // 쌍방 요청이 확인됨: 게임 시작!
-                                
-                                // 4. 모든 클라이언트에게 게임 시작 명령 브로드캐스트
+                                // 쌍방 요청이 확인되면 게임 시작                              
                                 String gameStartCmd = "/game_start " + participantsLine;
-                                
-                                // 두 참가자에게만 명령을 전송
+                                  
                                 sendToSpecificUsers(gameStartCmd, sender, receiver);
                                 
                                 // 5. 요청 상태 초기화
@@ -653,10 +662,7 @@ public class JavaChatServerPanel extends JPanel {
                                 gameRequests.remove(receiver);
                                 log("게임", "=== " + sender + " & " + receiver + " 게임 시작! ===");
                                 
-                            } else {
-                                // 아직 상대방이 요청하지 않았거나, 상대방은 다른 사람에게 요청한 경우
-                                // 상대방에게 '대기 중'임을 알리는 시스템 메시지 등을 보낼 수 있으나,
-                                // 클라이언트에서 '참가자를 기다리는 중...' 다이얼로그가 이미 처리하므로 생략 가능.
+                            } else {                               
                             	sendToSpecificUsers("/game_prompt " + sender, receiver);
                                 log("게임", receiver + " (상대방)에게 " + sender + "의 요청 알림 전송");
                             }
@@ -693,8 +699,58 @@ public class JavaChatServerPanel extends JPanel {
                             
                             continue;
                         }
+                                               
+                        //게임 즉시 시작 요청 처리
+                        if (chat_msg.startsWith("/game_start_ready ")) {                          
+                            String opponentName = chat_msg.substring("/game_start_ready ".length()).trim();
+                            String sender = UserName;
+
+                            // Key: 요청자, Value: 상대방 이름
+                            gameRequests.put(sender, opponentName);
+                            log("게임", sender + " -> " + opponentName + " 준비 완료 (대기 중)");
+
+                            // 2. 상대방도 준비 완료했는지 확인
+                            if (gameRequests.containsKey(opponentName) && gameRequests.get(opponentName).equals(sender)) {  	
+                            	// 포도 난수 생성 책임을 서버에게 옮김 (동일 배열을 받기 위함)
+                                Random random = new Random();
+                                StringBuilder grapeData = new StringBuilder();
+                                
+                                // 왼쪽 판 (9x8) 데이터 생성
+                                for (int r = 0; r < 9; r++) {
+                                    for (int c = 0; c < 8; c++) {
+                                        grapeData.append(random.nextInt(4) + 1).append(","); // 1~4 값
+                                    }
+                                }
+                                // 오른쪽 판 (9x8) 데이터 생성
+                                for (int r = 0; r < 9; r++) {
+                                    for (int c = 0; c < 8; c++) {
+                                        grapeData.append(random.nextInt(4) + 1).append(","); // 1~4 값
+                                    }
+                                }
+                                String finalGrapeData = grapeData.substring(0, grapeData.length() - 1); // 마지막 쉼표 제거
+                                
+                                // 2. 게임 시작 명령에 포도 데이터 포함
+                                String participantsLine = sender + "," + opponentName;
+                              
+                                // 1. 요청자(sender)에게는 LEFT를 할당
+                                String senderCmd ="/game_start_command " + participantsLine + " LEFT " + finalGrapeData;
+                                sendToSpecificUsers(senderCmd, sender);
+
+                                // 2. 상대방(opponentName)에게는 RIGHT를 할당
+                                String receiverCmd = "/game_start_command " + participantsLine + " RIGHT " + finalGrapeData;
+                                sendToSpecificUsers(receiverCmd, opponentName);
+                                
+                                // 3. 요청 상태 초기화
+                                gameRequests.remove(sender);
+                                gameRequests.remove(opponentName);
+                                log("게임", "=== " + sender + " & " + opponentName + " 게임 동기화 시작 명령 전송! ===");
+                            } else {
+                                log("게임", opponentName + "의 준비 완료를 기다립니다.");
+                            }                            
+                            continue;
+                        }
                         
-                        // 방 메시지: /msg roomId 내용...
+                        // 방 메시지: /msg roomId 내용
                         if (chat_msg.startsWith("/msg ")) {
                             String body = chat_msg.substring("/msg ".length()).trim();
                             int firstSpace = body.indexOf(' ');

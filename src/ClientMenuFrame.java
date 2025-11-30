@@ -103,9 +103,6 @@ public class ClientMenuFrame extends JFrame {
                             String imagePath = tokens[1].trim();
                             String statusMsg = (tokens.length == 3) ? tokens[2].trim() : "";
 
-                           // System.out.println("[클라 수신] /profile name=" + name +
-                            //        " status=" + statusMsg);
-
                             SwingUtilities.invokeLater(() -> {
                                 if (friendsPanel != null) {
                                     friendsPanel.updateFriendProfileFromServer(name, imagePath, statusMsg);
@@ -129,6 +126,15 @@ public class ClientMenuFrame extends JFrame {
                             });
                         }
                     }
+                    
+                    else if (msg.startsWith("/game_start_command ")) {
+                    	String messageBody = msg.substring("/game_start_command ".length()).trim();
+                       
+                        SwingUtilities.invokeLater(() -> {
+                            MiniGameFrame.receiveStartCommand(messageBody); 
+                        });
+                    }
+                    
                     else {
                     	// 일반 채팅 메시지 → 열려있는 채팅창들에 전달
                         ChattingFrame.deliverChatMessage(msg);
@@ -152,10 +158,7 @@ public class ClientMenuFrame extends JFrame {
             e.printStackTrace();
         }
     }
-
-
-     
-
+    
     // ---- 화면 전환 ----
     public void showFriendsMenu() {
         setContentPane(friendsPanel);

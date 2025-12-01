@@ -41,36 +41,28 @@ public class MiniGameFrame extends JFrame {
 	public static void receiveStartCommand(String messageBody) {
 		if (activeInstance != null) {
 	        
-	        // 1. 메시지 파싱
-	        String[] parts = messageBody.split(" ", 3);
+	        // 1. 메시지 파싱 (참가자/상대방, myside, 내 포도 데이터, 상대방 포도 데이터)
+	        String[] parts = messageBody.split(" ", 4);
 	        
-	        if (parts.length < 3) {
+	        if (parts.length < 4) {
 	            System.err.println("오류: 포도 데이터가 누락되었습니다: " + messageBody);
 	            return;
 	        }
-	        String mySide = parts[1].trim(); // "LEFT" 또는 "RIGHT"
-	        String grapeDataPart = parts[2].trim();
+	        String mySide = parts[1].trim(); 
+	        String myGrapeDataPart = parts[2].trim();
+	    	String opponentGrapeDataPart = parts[3].trim();
 	        
-	        // 2. 포도 데이터 파싱
-	        String[] valueStrings = grapeDataPart.split(",");
-	        int[] grapeValues = new int[valueStrings.length];
-	        
-	        try {
-	            for (int i = 0; i < valueStrings.length; i++) {
-	                grapeValues[i] = Integer.parseInt(valueStrings[i].trim());
-	            }
-	        } catch (NumberFormatException e) {
-	        	System.err.println("오류: 포도 데이터 파싱 실패! 데이터 형식 오류: " + e.getMessage());
-	            System.err.println("수신된 포도 데이터 부분: [" + grapeDataPart + "]");
-	            
-	            // ⭐ 서버가 보낸 메시지를 그대로 출력하여 문제의 근원을 찾습니다.
-	            System.err.println("원천 메시지: " + messageBody);
-	            return;
-	        }
-	        
-	        // 3. 파싱된 데이터로 게임 시작
-	        activeInstance.gamestartpanel.initializeGrapes(grapeValues, mySide); // ⬅️ 데이터 전달
-	        activeInstance.gamestartpanel.startSynchronizedGame(); 
+	    	// 2. 내 포도 데이터 파싱
+	    	int[] myGrapeValues = parseGrapeData(myGrapeDataPart, "내 포도 데이터");
+	    	if (myGrapeValues == null) return;
+	    	
+	    	// 3. 상대방 포도 데이터 파싱
+	    	int[] opponentGrapeValues = parseGrapeData(opponentGrapeDataPart, "상대방 포도 데이터");
+	    	if (opponentGrapeValues == null) return;
+	    	
+	    	// 4. 파싱된 데이터로 게임 시작 (함수 시그니처 변경)
+	    	activeInstance.gamestartpanel.initializeGrapes(myGrapeValues, opponentGrapeValues, mySide); 
+	    	activeInstance.gamestartpanel.startSynchronizedGame();
 	        
 	    } else {
             System.err.println("오류: MiniGameFrame 인스턴스가 활성화되지 않았는데 시작 명령을 받았습니다.");
@@ -128,6 +120,20 @@ public class MiniGameFrame extends JFrame {
 	    activeInstance.gamestartpanel.applyRefill(ownerName, grapeValues);
 	}
 
-
+	private static int[] parseGrapeData(String grapeDataPart, String label) {
+	    String[] valueStrings = grapeDataPart.split(",");
+	    int[] grapeValues = new int[valueStrings.length];
+	    
+	    try {
+	        for (int i = 0; i < valueStrings.length; i++) {
+	            grapeValues[i] = Integer.parseInt(valueStrings[i].trim());
+	        }
+	        return grapeValues;
+	    } catch (NumberFormatException e) {
+	        System.err.println("오류: " + label + " 파싱 실패! 데이터 형식 오류: " + e.getMessage());
+	        System.err.println("수신된 데이터 부분: [" + grapeDataPart + "]");
+	        return null;
+	    }
+	}
 
 }

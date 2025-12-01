@@ -1,7 +1,0 @@
-sd||/Images/defaultprofileimage.png
-as||/Images/defaultprofileimage.png
-fd||/Images/defaultprofileimage.png
-dsdad||/Images/defaultprofileimage.png
-sa||/Images/defaultprofileimage.png
-jh||/Images/defaultprofileimage.png
-ds||C:\Users\ShinYoungSeo\Downloads\rirakuma.png

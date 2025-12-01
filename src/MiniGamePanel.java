@@ -131,16 +131,17 @@ public class MiniGamePanel extends JPanel{
 	}
 	
 	// 서버에서 포도 숫자들을 받았을 때 호출됨
-	public void initializeGrapes(int[] grapeValues, String mySide) {
+	public void initializeGrapes(int[] myGrapeValues, int[] opponentGrapeValues, String mySide) {
         this.mySide = mySide;
 
         GrapeMouseListener mouseListener = new GrapeMouseListener();
         GrapeMouseMotionListener motionListener = new GrapeMouseMotionListener();
 
         int index = 0;
-        index = leftGrid.fillFromValues(grapeValues, index, mouseListener, motionListener);
-        index = rightGrid.fillFromValues(grapeValues, index, mouseListener, motionListener);
-
+        
+        rightGrid.fillFromValues(myGrapeValues, index, mouseListener, motionListener);
+        leftGrid.fillFromValues(opponentGrapeValues, index, mouseListener, motionListener);
+        
         playername.setText(oppenetName + " VS " + userName);
         playername.setBounds(450, 40, 300, 50);
         

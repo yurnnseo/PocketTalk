@@ -713,31 +713,35 @@ public class JavaChatServerPanel extends JPanel {
                             if (gameRequests.containsKey(opponentName) && gameRequests.get(opponentName).equals(sender)) {  	
                             	// 포도 난수 생성 책임을 서버에게 옮김 (동일 배열을 받기 위함)
                                 Random random = new Random();
-                                StringBuilder grapeData = new StringBuilder();
                                 
-                                // 왼쪽 판 (9x8) 데이터 생성
+                                // 1.Left판에 할당할 포도 데이터
+                                StringBuilder grapeData_for_sender = new StringBuilder();
                                 for (int r = 0; r < 9; r++) {
                                     for (int c = 0; c < 8; c++) {
-                                        grapeData.append(random.nextInt(4) + 1).append(","); // 1~4 값
+                                        grapeData_for_sender.append(random.nextInt(4) + 1).append(","); // 1~4 값
                                     }
                                 }
-                                // 오른쪽 판 (9x8) 데이터 생성
+                                String finalGrapeData_SENDER = grapeData_for_sender.substring(0, grapeData_for_sender.length() - 1);
+                                
+                                
+                                // 2. Right판에 할당할 포도 데이터
+                                StringBuilder grapeData_for_opponent = new StringBuilder();
                                 for (int r = 0; r < 9; r++) {
                                     for (int c = 0; c < 8; c++) {
-                                        grapeData.append(random.nextInt(4) + 1).append(","); // 1~4 값
+                                        grapeData_for_opponent.append(random.nextInt(4) + 1).append(","); // 1~4 값
                                     }
                                 }
-                                String finalGrapeData = grapeData.substring(0, grapeData.length() - 1); // 마지막 쉼표 제거
-                                
-                                // 2. 게임 시작 명령에 포도 데이터 포함
-                                String participantsLine = sender + "," + opponentName;
+                                String finalGrapeData_OPPONENT = grapeData_for_opponent.substring(0, grapeData_for_opponent.length() - 1);
                               
-                                // 1. 요청자(sender)에게는 LEFT를 할당
-                                String senderCmd ="/game_start_command " + participantsLine + " LEFT " + finalGrapeData;
+                                // 3. 게임 시작 명령에 포도 데이터 포함
+                                String participantsLine = sender + "," + opponentName;
+                                
+                                // 1. LEFT를 할당
+                                String senderCmd ="/game_start_command " + participantsLine + " LEFT " + finalGrapeData_SENDER + " " + finalGrapeData_OPPONENT;                              
                                 sendToSpecificUsers(senderCmd, sender);
 
-                                // 2. 상대방(opponentName)에게는 RIGHT를 할당
-                                String receiverCmd = "/game_start_command " + participantsLine + " RIGHT " + finalGrapeData;
+                                // 2. RIGHT를 할당
+                                String receiverCmd = "/game_start_command " + participantsLine + " RIGHT " + finalGrapeData_OPPONENT + " " + finalGrapeData_SENDER;
                                 sendToSpecificUsers(receiverCmd, opponentName);
                                 
                                 // 3. 요청 상태 초기화

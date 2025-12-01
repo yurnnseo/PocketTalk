@@ -750,6 +750,65 @@ public class JavaChatServerPanel extends JPanel {
                             continue;
                         }
                         
+                        // ★ 포도 제거 동기화
+                        if (chat_msg.startsWith("/game_remove ")) {
+                            // 형식: /game_remove ownerName opponentName r1,c1;r2,c2;...
+                            String body = chat_msg.substring("/game_remove ".length()).trim();
+                            String[] tokens = body.split(" ", 3);  // owner, opponent, coords
+
+                            if (tokens.length == 3) {
+                                String ownerName    = tokens[0].trim();
+                                String opponentName = tokens[1].trim();
+                                String coordString  = tokens[2].trim();
+
+                                // 클라이언트들에게 보낼 명령
+                                String forward = "/game_apply_remove " + ownerName + " " + coordString;
+
+                                // 두 명에게만 전송 (본인 + 상대)
+                                sendToSpecificUsers(forward, ownerName, opponentName);
+
+                                log("게임", "포도 제거 브로드캐스트: " + forward);
+                            } else {
+                                log("게임", "잘못된 /game_remove 포맷: " + chat_msg);
+                            }
+                            continue;
+                        }
+                        
+                        // ★ 포도 리필 요청 처리
+                        if (chat_msg.startsWith("/game_refill_request ")) {
+                            // 형식: /game_refill_request ownerName opponentName
+                            String body = chat_msg.substring("/game_refill_request ".length()).trim();
+                            String[] tokens = body.split("\\s+");
+                            if (tokens.length < 2) {
+                                log("게임", "잘못된 /game_refill_request: " + chat_msg);
+                                continue;
+                            }
+
+                            String ownerName    = tokens[0].trim(); // 보드 주인 (요청자)
+                            String opponentName = tokens[1].trim(); // 상대
+
+                            // 9x8 전체 셀 수 (서버는 보드 상태를 모르므로 넉넉하게 전부 생성)
+                            int totalCells = 9 * 8; // MiniGrapeGameManager.ROWS * COLS 과 같음
+
+                            Random random = new Random();
+                            StringBuilder sb = new StringBuilder();
+                            for (int i = 0; i < totalCells; i++) {
+                                int v = random.nextInt(4) + 1; // 1~4
+                                if (i > 0) sb.append(",");
+                                sb.append(v);
+                            }
+                            String values = sb.toString();
+
+                            // 형식: /game_refill ownerName v1,v2,v3,...,v72
+                            String refillMsg = "/game_refill " + ownerName + " " + values;
+
+                            // ★ ownerName의 보드(오른쪽판 & 상대의 왼쪽판)에만 보내기
+                            sendToSpecificUsers(refillMsg, ownerName, opponentName);
+
+                            log("게임", "리필 명령 전송: " + refillMsg);
+                            continue;
+                        }
+
                         // 방 메시지: /msg roomId 내용
                         if (chat_msg.startsWith("/msg ")) {
                             String body = chat_msg.substring("/msg ".length()).trim();

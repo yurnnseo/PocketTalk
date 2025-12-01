@@ -135,6 +135,24 @@ public class ClientMenuFrame extends JFrame {
                         });
                     }
                     
+                    // 포도 제거 동기화 명령
+                    else if (msg.startsWith("/game_apply_remove ")) {
+                        String messageBody = msg.substring("/game_apply_remove ".length()).trim();
+
+                        SwingUtilities.invokeLater(() -> {
+                            MiniGameFrame.receiveRemoveCommand(messageBody);
+                        });
+                    }
+                    
+                    else if (msg.startsWith("/game_refill ")) {
+                        String body = msg.substring("/game_refill ".length()).trim();
+
+                        SwingUtilities.invokeLater(() -> {
+                            MiniGameFrame.receiveRefillCommand(body);
+                        });
+                    }
+
+                    
                     else {
                     	// 일반 채팅 메시지 → 열려있는 채팅창들에 전달
                         ChattingFrame.deliverChatMessage(msg);

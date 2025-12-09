@@ -1,0 +1,15 @@
+ds : 안녕
+fd : 안녕
+ds : ddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+ds : ddddddddddddddddddddddddddddddddddddd
+ds : dddddddddddddd
+ds : ddddddddddddddddddddddddddddddddddd
+ds : ddddddddddddddddddddd
+ds : fd
+ds : fsdfdfsdf
+ds : saaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+fd : fdfdf
+fd : fdfd
+fd : fdfdfd
+[포도게임 결과] ds 180점, fd 170점 → ds 승리!
+[포도게임 결과] fd 170점, ds 180점 → ds 승리!

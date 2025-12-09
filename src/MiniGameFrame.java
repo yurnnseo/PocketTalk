@@ -10,9 +10,11 @@ public class MiniGameFrame extends JFrame {
 	private MiniGamePanel gamestartpanel;
 	private ClientMenuFrame parentFrame;
 	private static MiniGameFrame activeInstance;
+	private String roomId;
 	
-	public MiniGameFrame(ClientMenuFrame parentFrame, String username, String oppenetName) {
+	public MiniGameFrame(ClientMenuFrame parentFrame, String username, String oppenetName, String roomId) {
 		this.parentFrame = parentFrame;
+		this.roomId = roomId;
 		
         setTitle("포도게임"); 
         setLayout(null); 
@@ -33,7 +35,7 @@ public class MiniGameFrame extends JFrame {
             }
         });
         
-        gamestartpanel = new MiniGamePanel(parentFrame, username, oppenetName);
+        gamestartpanel = new MiniGamePanel(parentFrame, username, oppenetName, roomId);
         add(gamestartpanel);
         setVisible(true); // 프레임을 화면에 출력
     }

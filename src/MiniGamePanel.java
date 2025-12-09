@@ -39,7 +39,7 @@ public class MiniGamePanel extends JPanel{
     
     private String roomId;
     
-	private ImageIcon[] grapeIcons; // 3가지 포도 이미지 아이콘
+	private ImageIcon[] grapeIcons; // 4가지 포도 이미지 아이콘
 	
 	// 게임판/선택/로직
     private MiniGrapeGrid leftGrid;
@@ -116,7 +116,7 @@ public class MiniGamePanel extends JPanel{
         startPanel.setBounds(0, 0, 770, 600);
         startPanel.setOpaque(false);
         add(startPanel);
-    
+
 	    font = FontSource.get(16f);
 	    
 	    title = new JLabel("포도게임");

@@ -42,7 +42,7 @@ public class ChattingPanel extends JPanel {
     private MessageContainerPanel messageContainer;
     private String opponent;
     private final String roomId;
-
+    private JScrollPane scrollPane;
     
     private final ClientMenuFrame parentFrame;
 
@@ -74,21 +74,11 @@ public class ChattingPanel extends JPanel {
         setBackground(Color.decode("#F9F9F9"));
 
         messageContainer = new MessageContainerPanel(FontSource.get(13f));
-        JScrollPane scrollPane = new JScrollPane(messageContainer);
+        scrollPane = new JScrollPane(messageContainer);
         scrollPane.setBounds(12, 10, 356, 465);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         add(scrollPane);
-
-        // 메시지 추가될 때마다 스크롤 자동 내림
-        scrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
-            public void adjustmentValueChanged(AdjustmentEvent e) {
-                if (e.getAdjustable().getMaximum()
-                        == e.getValue() + e.getAdjustable().getVisibleAmount()) {
-                    e.getAdjustable().setValue(e.getAdjustable().getMaximum());
-                }
-            }
-        });
 
         // ----- 하단 영역 -----
         lblUserName = new JLabel("Name");
@@ -219,7 +209,7 @@ public class ChattingPanel extends JPanel {
             text = creatorName + "님이 " + invited + "님을 초대했습니다.";
         }
 
-        messageContainer.addMessage(text, false);
+        addTextMessage(text, false);
     }
 
     // ===== 서버에서 온 일반 채팅 메시지 처리 =====
@@ -258,12 +248,12 @@ public class ChattingPanel extends JPanel {
 
             ImageIcon icon = loadScaledIcon(path, 90, 90);
             if (icon != null) {
-                messageContainer.addImageMessage(icon, isMine);
+            	addImageMessage(icon, isMine);
             } 
             else {
                 // 로드 실패 시 텍스트로 표시
-                messageContainer.addMessage((sender != null ? sender + " : " : "") + "[이모티콘 로드 실패: " + code + "]", isMine);
-            }
+            	addTextMessage((sender != null ? sender + " : " : "") + "[이모티콘 로드 실패: " + code + "]", isMine);
+                }
             return;
         }
 
@@ -273,11 +263,11 @@ public class ChattingPanel extends JPanel {
 
             ImageIcon icon = loadScaledIconFromFile(filePath, 180, 180); // 크기 조절
             if (icon != null) {
-                messageContainer.addImageMessage(icon, isMine);
+            	addImageMessage(icon, isMine);
             } 
             else {
-                messageContainer.addMessage((sender != null ? sender + " : " : "") + "[이미지 로드 실패]", isMine);
-            }
+            	addTextMessage((sender != null ? sender + " : " : "") + "[이미지 로드 실패]", isMine);
+            	}
             return;
         }
 
@@ -307,10 +297,10 @@ public class ChattingPanel extends JPanel {
             String senderName = content.substring("/game_prompt ".length()).trim();
             
             // 요청을 받은 상대방(B)에게 버튼을 누르도록 유도하는 시스템 메시지 출력
-            messageContainer.addMessage(
-                "[" + senderName + "] 님이 게임을 요청했습니다. 게임을 시작하려면 [게임 버튼]을 다시 눌러주세요.", 
-                false
-            );
+            addTextMessage(
+            	    "[" + senderName + "] 님이 게임을 요청했습니다. 게임을 시작하려면 [게임 버튼]을 다시 눌러주세요.",
+            	    false
+            	);
             return;
         }
         
@@ -331,10 +321,10 @@ public class ChattingPanel extends JPanel {
             }
             
             // 시스템 메시지를 띄워 상대방의 취소 사실을 알립니다.
-            messageContainer.addMessage(
-                canceledName + " 님이 게임 요청을 취소했습니다.", 
-                false
-            );
+            addTextMessage(
+            	    canceledName + " 님이 게임 요청을 취소했습니다.",
+            	    false
+            	);
             return;
         }
         
@@ -343,7 +333,7 @@ public class ChattingPanel extends JPanel {
         if (sender != null) bubbleText = sender + " : " + content;
         else bubbleText = content;
 
-        messageContainer.addMessage(bubbleText, isMine);
+        addTextMessage(bubbleText, isMine);
     }
 
 
@@ -363,6 +353,26 @@ public class ChattingPanel extends JPanel {
             }
         }
     }
+    
+    // 항상 채팅 맨 아래로 스크롤
+    private void scrollToBottom() {
+        SwingUtilities.invokeLater(() -> {
+            scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
+        });
+    }
+    
+    // 텍스트 말풍선 추가 + 자동 스크롤
+    private void addTextMessage(String text, boolean isSent) {
+        messageContainer.addMessage(text, isSent);
+        scrollToBottom();
+    }
+
+    // 이미지 말풍선 추가 + 자동 스크롤
+    private void addImageMessage(ImageIcon icon, boolean isSent) {
+        messageContainer.addImageMessage(icon, isSent);
+        scrollToBottom();
+    }
+
 
     // ===== 이미지 전송 =====
     private void onClickSendImage() {
@@ -548,7 +558,7 @@ public class ChattingPanel extends JPanel {
 
         try {        	
         	// ClientMenuFrame을 넘겨서 게임 중에도 서버와 통신할 수 있도록 해야 함
-             new MiniGameFrame(parentFrame, UserName,opponentName).setVisible(true);
+        	new MiniGameFrame(parentFrame, UserName, opponentName, roomId).setVisible(true);
              if (loadingDialog != null) {
                  SwingUtilities.invokeLater(() -> {
                      if (loadingDialog != null) {

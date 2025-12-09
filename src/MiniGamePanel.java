@@ -31,11 +31,15 @@ public class MiniGamePanel extends JPanel{
 	private Image backgroundImg = null;
 	private String Background = "Images/gamebackground.png";
 	private JPanel startPanel; // 반투명 패널
+	private GameRulePanel rulepanel;
 	
 	private String userName; // 플레이어 이름 
     private String oppenetName; // 상대방 이름
     private ClientMenuFrame parentFrame;
     private String mySide = "NONE"; // 게임 판 위치(기본값)
+    
+    private int myScore = 0;          // 내 점수
+    private int opponentScore = 0;    // 상대 점수
     
     private String roomId;
     
@@ -46,7 +50,8 @@ public class MiniGamePanel extends JPanel{
     private MiniGrapeGrid rightGrid;
     private MiniGrapeSelectionController selectionController;
     private MiniGrapeGameManager grapeGameManager;
-
+    private MiniGrapeGameController gameController;
+    
     // 포도 배치 공통
     private final int GRAPE_WIDTH = 35; // 이전 계산에 따라 조정
     private final int GRAPE_HEIGHT = 43; // 이전 계산에 따라 조정
@@ -65,9 +70,6 @@ public class MiniGamePanel extends JPanel{
     private MiniGrapeTimerPanel timerPanel;
     private boolean gameOver = false;
     
-    private int myScore = 0;          // 내 점수
-    private int opponentScore = 0;    // 상대 점수
-
 	public MiniGamePanel(ClientMenuFrame parentFrame, String username, String oppenetName, String roomId) {
 		this.parentFrame = parentFrame;	
 		this.userName = username; 
@@ -82,6 +84,7 @@ public class MiniGamePanel extends JPanel{
 		playername.setFont(FontSource.get(20f));
 		playername.setBounds(350, 40, 400, 30); 
 		add(playername);
+		playername.setVisible(false);
 
 		updateScoreTitle(); // 처음 생성 시 점수는 0:0
 
@@ -103,18 +106,21 @@ public class MiniGamePanel extends JPanel{
                 rightGrid.getBoard()
         );
 
-		//첫 번째 패널: 시작버튼이 달린 반투명 패널
-        startPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                g.setColor(new Color(0xF9, 0xF9, 0xF9, 102)); // 40% 투명
-                g.fillRect(0, 0, getWidth(), getHeight());
-            }
-        };
+        gameController = new MiniGrapeGameController(
+                this,
+                leftGrid,
+                rightGrid,
+                selectionController,
+                grapeGameManager,
+                userName,
+                oppenetName
+        );
+
+		//첫 번째 패널
+        startPanel = new JPanel();
         startPanel.setLayout(null);
         startPanel.setBounds(0, 0, 770, 600);
-        startPanel.setOpaque(false);
+        startPanel.setBackground(Color.decode("#F9F9F9"));
         add(startPanel);
 
 	    font = FontSource.get(16f);
@@ -129,42 +135,94 @@ public class MiniGamePanel extends JPanel{
 	    startPanel.add(startbtn);
 	    startPanel.add(howtoplaybtn);
 
+	    // 패널 변경 위한 선언
+	    rulepanel = new GameRulePanel(this);
+	    rulepanel.setBounds(0, 0, 770, 600);
+	    rulepanel.setVisible(false);
+	    add(rulepanel);
+	    
 	    startbtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 parentFrame.sendToServer("/game_start_ready " + oppenetName);
                 startbtn.setEnabled(false);
+                playername.setVisible(true);
                 System.out.println("서버로 게임 시작 요청 메시지 전송.");
             }
-        }); 	    
+        }); 	
+	    
+	    howtoplaybtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	showRulePanel();
+            }
+        }); 	
 	}
 	
 	// 이름과 점수를 한 줄로 표시하는 라벨 갱신
 	private void updateScoreTitle() {
-	    // 예: "ds : 0   VS   fd : 190"
-	    String text = userName + " : " + myScore
-	                + "   VS   "
-	                + oppenetName + " : " + opponentScore;
-	    playername.setText(text);
+		String text = userName + " : " + myScore
+                + "   VS   "
+                + oppenetName + " : " + opponentScore;
+		playername.setText(text);
+	}
+	
+	public void updateScore(int newMyScore, int newOpponentScore) {
+	    // 1. 필드 갱신
+	    this.myScore = newMyScore;
+	    this.opponentScore = newOpponentScore;
+	    
+	    // 2. UI 갱신 (기존 메서드 재활용)
+	    updateScoreTitle(); 
+	}
+	
+	public void sendRemoveToServer(String ownerName, String opponentName, String coordString) {
+	    parentFrame.sendToServer(
+	            "/game_remove " + ownerName + " " + opponentName + " " + coordString
+	    );
 	}
 
+	public void sendRefillRequest(String ownerName, String opponentName) {
+	    parentFrame.sendToServer("/game_refill_request " + ownerName + " " + opponentName);
+	}
+	
+	public void handleRemoteRemoveMessage(String ownerName, String coordString) {
+	    if (gameOver) return;
+
+	    // 1. 점수/제거 로직을 Controller에게 위임
+	    gameController.applyRemoteRemove(ownerName, coordString);
+	    
+	    // 2. UI 갱신
+	    revalidate();
+	    repaint();
+	}
+
+	public void handleRefillMessage(String ownerName, int[] grapeValues) {
+	    // 로직을 Controller에게 위임
+	    gameController.applyRefill(ownerName, grapeValues);
+	    
+	    // UI 갱신
+	    revalidate();
+	    repaint();
+	}
 	
 	// 서버에서 포도 숫자들을 받았을 때 호출됨
-	public void initializeGrapes(int[] myGrapeValues, int[] opponentGrapeValues, String mySide) {
-        this.mySide = mySide;
+	public void initializeGrapes(int[] myGrapeValues, int[] opponentGrapeValues, String mySide) {       
+		this.mySide = mySide;
 
-        GrapeMouseListener mouseListener = new GrapeMouseListener();
-        GrapeMouseMotionListener motionListener = new GrapeMouseMotionListener();
+	    GrapeMouseListener mouseListener = new GrapeMouseListener();
+	    GrapeMouseMotionListener motionListener = new GrapeMouseMotionListener();
 
-        int index = 0;
-        
-        rightGrid.fillFromValues(myGrapeValues, index, mouseListener, motionListener);
-        leftGrid.fillFromValues(opponentGrapeValues, index, mouseListener, motionListener);
-        
-        updateScoreTitle(); // 점수/이름 표시 갱신
-        
-        revalidate();
-        repaint();
+	    int index = 0;
+	    
+	    // 그리드 객체에 포도 값을 채우는 실제 로직 필요 (기존 코드에서 누락됨)
+	    rightGrid.fillFromValues(myGrapeValues, index, mouseListener, motionListener);
+	    leftGrid.fillFromValues(opponentGrapeValues, index, mouseListener, motionListener);
+	    
+	    updateScoreTitle(); // 점수/이름 표시 갱신
+	    
+	    revalidate();
+	    repaint();
     }
 
     // 내부 클래스
@@ -222,140 +280,12 @@ public class MiniGamePanel extends JPanel{
         public void mouseReleased(java.awt.event.MouseEvent e) {
         	
         	if (gameOver) return;   // 시간 끝나면 선택 처리 안 함
-            List<JLabel> selected = selectionController.getSelected();
-
-            int totalValue = grapeGameManager.removeIfSumIsFive(selected);
-
-            if (totalValue == 5 && !selected.isEmpty()) {
-
-                // 여기서 "어떤 포도들이 지워졌는지" 좌표 문자열로 만들기
-                StringBuilder sb = new StringBuilder();
-                for (JLabel grape : selected) {
-                    if (grape == null) continue;
-
-                    Object rowObj = grape.getClientProperty("row");
-                    Object colObj = grape.getClientProperty("col");
-
-                    if (!(rowObj instanceof Integer) || !(colObj instanceof Integer)) {
-                        continue;
-                    }
-
-                    int r = (Integer) rowObj;
-                    int c = (Integer) colObj;
-
-                    if (sb.length() > 0) sb.append(";");
-                    sb.append(r).append(",").append(c);
-                }
-
-                String coordString = sb.toString();
-
-                // 서버로 "누가, 누구와 게임 중인지, 어떤 좌표를 지웠는지" 보냄
-                // 형식: /game_remove <ownerName> <opponentName> <r1,c1;r2,c2;...>
-                parentFrame.sendToServer(
-                        "/game_remove " + userName + " " + oppenetName + " " + coordString
-                );
-            } else if (!selected.isEmpty()) {
-                // 합이 5가 아니면 아무 것도 안 함
-            }
-
+        	gameController.tryRemoveSelected();
+            
             resetSelectionAndDrag();
             revalidate();
-            repaint();
         }
     }
-
-    // 서버에서 넘어온 /game_apply_remove 명령 반영
-    public void applyRemoteRemove(String ownerName, String coordString) {
-    	
-    	if (coordString == null || coordString.isEmpty()) return;
-    	
-    	if (gameOver) return;  // 시간 끝나면 상대 제거도 반영 안 함
-
-        // ownerName == userName 이면 내 오른쪽 보드, 아니면 왼쪽 보드
-        boolean isMyBoard = ownerName.equals(userName);
-        JLabel[][] targetBoard = isMyBoard ? rightGrid.getBoard() : leftGrid.getBoard();
-
-        String[] tokens = coordString.split(";");
-        for (String t : tokens) {
-            String[] rc = t.split(",");
-            if (rc.length != 2) continue;
-
-            try {
-                int r = Integer.parseInt(rc[0].trim());
-                int c = Integer.parseInt(rc[1].trim());
-
-                if (r < 0 || r >= MiniGrapeGameManager.ROWS) continue;
-                if (c < 0 || c >= MiniGrapeGameManager.COLS) continue;
-
-                JLabel grape = targetBoard[r][c];
-
-                if (grape != null) {
-                    grapeGameManager.removeGrape(grape); // 실제 제거는 GameManager
-                }
-            } catch (NumberFormatException ignore) {
-            }
-        }
-
-        // 점수 처리
-        if (ownerName.equals(userName)) {
-            myScore += 10;
-        } 
-        else if (ownerName.equals(oppenetName)) {
-            opponentScore += 10;
-        }
-        updateScoreTitle(); // 점수 바뀌면 라벨도 다시 그림
-
-        // 더 이상 지울 게 없으면 서버에 리필 요청 (내가 지운 턴만)
-        if (ownerName.equals(userName)) {
-            boolean hasMove = grapeGameManager.hasAnyMoveOnGameBoard();
-            if (!hasMove) {
-                parentFrame.sendToServer("/game_refill_request " + userName + " " + oppenetName);
-                System.out.println("더 이상 지울 조합 없음. 서버에 리필 요청 보냄");
-            }
-        }
-
-        revalidate();
-        repaint();
-    }
-
-    // 서버에서 받은 리필 값을 적용하는 메서드
-    public void applyRefill(String ownerName, int[] grapeValues) {
-        // ownerName == userName 이면 내 오른쪽 보드, 아니면 상대의 왼쪽 보드
-        boolean isMyBoard = ownerName.equals(userName);
-        JLabel[][] targetBoard = isMyBoard ? rightGrid.getBoard() : leftGrid.getBoard();
-
-        int idx = 0;
-
-        for (int r = 0; r < MiniGrapeGameManager.ROWS; r++) {
-            for (int c = 0; c < MiniGrapeGameManager.COLS; c++) {
-                JLabel g = targetBoard[r][c];
-                if (g == null) {
-                    // 이미 지워진 자리면 건너뜀 (숫자도 소비하지 않음)
-                    continue;
-                }
-                if (idx >= grapeValues.length) {
-                    // 방어 코드: 값이 모자라면 그냥 종료
-                    break;
-                }
-
-                int v = grapeValues[idx++];
-                g.putClientProperty("value", v);
-
-                // 아이콘도 숫자에 맞게 다시 설정
-                int iconIndex = v - 1;
-                if (iconIndex < 0 || iconIndex >= grapeIcons.length) {
-                    iconIndex = 0;
-                }
-                g.setIcon(grapeIcons[iconIndex]);
-            }
-        }
-
-        revalidate();
-        repaint();
-    }
-
-
-
 
     private void resetSelectionAndDrag() {
         selectionController.clearSelection();
@@ -371,7 +301,7 @@ public class MiniGamePanel extends JPanel{
 
         // 게임 상태 초기화
         gameOver = false;
-        myScore = 0;
+        myScore = 0; 
         opponentScore = 0;
         updateScoreTitle();
 
@@ -456,4 +386,20 @@ public class MiniGamePanel extends JPanel{
         g.setColor(Color.LIGHT_GRAY);
         g.fillRect(380, 130, 1, getHeight() - 130);
     } 
+    
+    // 게임 시작 패널 호출
+    public void showStartPanel() {
+        startPanel.setVisible(true);  
+        rulepanel.setVisible(false); 
+        repaint();
+    }
+    
+    // 게임 방법 패널 호출
+    public void showRulePanel() {
+        startPanel.setVisible(false);  
+        rulepanel.setVisible(true);  
+        repaint();
+    }
+
+
 }

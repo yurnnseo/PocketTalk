@@ -47,6 +47,15 @@ public class MiniGrapeGrid {
         return board;
     }
 
+    // MiniGrapeGameController에서 사용할 아이콘 반환 메서드
+    public ImageIcon getIcon(int index) {
+        if (index >= 0 && index < icons.length) {
+            return icons[index];
+        }
+        // 인덱스가 잘못된 경우 방어적으로 처리 (예: 첫 번째 아이콘 반환)
+        return icons[0]; 
+    }
+    
     // 기존 포도 제거
     public void clearBoard() {
         for (int r = 0; r < ROWS; r++) {

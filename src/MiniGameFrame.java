@@ -88,7 +88,7 @@ public class MiniGameFrame extends JFrame {
 	    String ownerName   = parts[0].trim();
 	    String coordString = parts[1].trim();
 
-	    activeInstance.gamestartpanel.applyRemoteRemove(ownerName, coordString);
+	    activeInstance.gamestartpanel.handleRemoteRemoveMessage(ownerName, coordString);
 	}
 	
 	// 서버에서 받은 /game_refill 처리
@@ -119,7 +119,7 @@ public class MiniGameFrame extends JFrame {
 	        return;
 	    }
 
-	    activeInstance.gamestartpanel.applyRefill(ownerName, grapeValues);
+	    activeInstance.gamestartpanel.handleRefillMessage(ownerName, grapeValues);
 	}
 
 	private static int[] parseGrapeData(String grapeDataPart, String label) {

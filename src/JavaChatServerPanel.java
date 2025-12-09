@@ -812,6 +812,56 @@ public class JavaChatServerPanel extends JPanel {
                             log("게임", "리필 명령 전송: " + refillMsg);
                             continue;
                         }
+                        
+                    	// 포도게임 결과 처리 (roomId를 포함해서 받음)
+                        if (chat_msg.startsWith("/game_result ")) {
+                            // 형식: /game_result roomId user1 user2 summary...
+                            String body = chat_msg.substring("/game_result ".length()).trim();
+                            String[] parts = body.split(" ", 4); // roomId, user1, user2, summary...
+
+                            if (parts.length < 4) {
+                                log("게임", "잘못된 /game_result 포맷: " + chat_msg);
+                                continue;
+                            }
+
+                            String roomId         = parts[0].trim(); // ⭐ 어느 방에 보낼지
+                            String user1          = parts[1].trim(); // 참가자 1
+                            String user2          = parts[2].trim(); // 참가자 2
+                            String summaryForChat = parts[3].trim(); // "[포도게임 결과] ..." 전체 문자열
+
+                            // 로그 파일에 저장
+                            File logFile = new File(CHAT_LOG_DIR, roomId + ".txt");
+                            try (BufferedWriter bw = new BufferedWriter(new FileWriter(logFile, true))) {
+                                bw.write(summaryForChat);
+                                bw.newLine();
+                            } catch (IOException e) {
+                                log("채팅방", "게임 결과 로그 저장 오류(" + roomId + "): " + e.getMessage());
+                            }
+
+                            // 방 멤버에게만 전송  (/msg roomId 내용)
+                            ChatRoomInfo room;
+                            synchronized (chatRooms) {
+                                room = chatRooms.get(roomId);
+                            }
+                            if (room == null) {
+                                log("채팅방", "존재하지 않는 roomId로 게임 결과 수신: " + roomId);
+                                continue;
+                            }
+
+                            String sendMsg = "/msg " + roomId + " " + summaryForChat;
+
+                            synchronized (user_vc) {
+                                for (UserService u : user_vc) {
+                                    if (room.getMembers().contains(u.UserName)) {
+                                        u.WriteOne(sendMsg);
+                                    }
+                                }
+                            }
+
+                            log("게임", "포도게임 결과 전송: roomId=" + roomId + ", msg=" + summaryForChat);
+                            continue;
+                        }
+
 
                         // 방 메시지: /msg roomId 내용
                         if (chat_msg.startsWith("/msg ")) {

@@ -1,3 +1,4 @@
+// 상세 프로필 보기 프레임
 import java.awt.Window;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,7 +9,7 @@ public class MyProfileViewFrame extends JFrame {
 	
 	private final ClientFriendsMenuPanel parentMenuPanel;
     private MyProfileViewPanel myProfileViewPanel;
-    private final DataOutputStream dos;      // 서버로 보낼 스트림
+    private final DataOutputStream dos; // 서버로 보낼 스트림
     private String profileImagePath;        
 
     public MyProfileViewFrame(ClientFriendsMenuPanel parentMenuPanel, String username, String ip_addr, String port_no, String profileImagePath, String statusM, DataOutputStream dos) {
@@ -53,8 +54,7 @@ public class MyProfileViewFrame extends JFrame {
         }
     }
 
-
-    // 프로필 이미지가 추후에 바뀌는 경우를 위해 setter 하나 정도 만들어도 좋음
+    // 프로필 이미지가 추후에 바뀌는 경우를 위해 setter 만들어두기
     public void setProfileImagePath(String newPath) {
         this.profileImagePath = newPath;
     }

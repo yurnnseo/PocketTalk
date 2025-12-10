@@ -1,3 +1,4 @@
+// 공통 UI 모음
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -7,11 +8,10 @@ import javax.swing.border.LineBorder;
 public class UIComponentZip {
 
     private static final Color BUTTON_NORMAL = Color.WHITE;
-    private static final Color BUTTON_HOVER  = Color.decode("#E3D6F0"); // 연보라
+    private static final Color BUTTON_HOVER  = Color.decode("#E3D6F0");
 
     private UIComponentZip() {} 
-
-    // 공통 텍스트 버튼
+    // 텍스트 버튼
     public static JButton createTextButton(String text, int x, int y, int width, int height, Font font) {
         JButton btn = new JButton(text);
         btn.setBounds(x, y, width, height);

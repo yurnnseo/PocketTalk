@@ -77,10 +77,6 @@ public class ClientChatingMenuPanel extends JPanel {
         });
     }
     
-    /**
-     * 서버에서 "/room creatorName members..." 를 받았을 때
-     * ClientMenuFrame이 이 메서드를 호출해 줌.
-     */
     public void addChatRoom(String roomId, String creatorName, String membersString) {
         if (roomListPanel != null) {
             roomListPanel.addRoom(roomId, creatorName, membersString);
@@ -91,8 +87,6 @@ public class ClientChatingMenuPanel extends JPanel {
     public void openChatRoom(String roomId, String creatorName, String membersString) {
         ChattingFrame.openRoom(parentFrame, username, roomId, membersString, creatorName);
     }
-
-
 
     private JButton makeButton(ImageIcon icon, int x, int y) {
         JButton btn = new JButton(icon);

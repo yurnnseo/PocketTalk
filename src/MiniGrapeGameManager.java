@@ -1,8 +1,7 @@
+// 합 계산 + 제거 전담
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
-
-// 합 계산 + 제거 전담
 
 public class MiniGrapeGameManager {
 

@@ -18,26 +18,26 @@ public class MiniGameFrame extends JFrame {
 		
         setTitle("포도게임"); 
         setLayout(null); 
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // 프레임 종료 설정
-        setSize(770, 600); // 사이즈 설정
-        setResizable(false); // 프레임 크기 고정. 사용자가 크기 조절 불가능
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setSize(770, 600); 
+        setResizable(false);
 
         activeInstance = this; // 인스턴스 생성 시 static 필드에 현재 객체 저장
         
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
-                // 이 프레임이 닫힐 때, activeInstance를 해제합니다.
+                // 이 프레임이 닫힐 때, activeInstance를 해제
                 if (activeInstance == MiniGameFrame.this) {
                     activeInstance = null;
-                    System.out.println("MiniGameFrame이 닫혔습니다. activeInstance 해제됨.");
+                    //System.out.println("MiniGameFrame이 닫혔습니다. activeInstance 해제됨.");
                 }
             }
         });
         
         gamestartpanel = new MiniGamePanel(parentFrame, username, oppenetName, roomId);
         add(gamestartpanel);
-        setVisible(true); // 프레임을 화면에 출력
+        setVisible(true);
     }
 	
 	public static void receiveStartCommand(String messageBody) {
@@ -62,7 +62,7 @@ public class MiniGameFrame extends JFrame {
 	    	int[] opponentGrapeValues = parseGrapeData(opponentGrapeDataPart, "상대방 포도 데이터");
 	    	if (opponentGrapeValues == null) return;
 	    	
-	    	// 4. 파싱된 데이터로 게임 시작 (함수 시그니처 변경)
+	    	// 4. 파싱된 데이터로 게임 시작
 	    	activeInstance.gamestartpanel.initializeGrapes(myGrapeValues, opponentGrapeValues, mySide); 
 	    	activeInstance.gamestartpanel.startSynchronizedGame();
 	        
@@ -92,7 +92,6 @@ public class MiniGameFrame extends JFrame {
 	}
 	
 	// 서버에서 받은 /game_refill 처리
-	// messageBody 형식: "ownerName v1,v2,v3,..."
 	public static void receiveRefillCommand(String messageBody) {
 	    if (activeInstance == null) {
 	        System.err.println("MiniGameFrame 활성 인스턴스 없음 (/game_refill 무시)");

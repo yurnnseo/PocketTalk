@@ -1,3 +1,4 @@
+// 프로필 수정 프레임
 import java.awt.Window;
 import javax.swing.JFrame;
 

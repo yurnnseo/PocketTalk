@@ -1,3 +1,4 @@
+// 게임 룰 설명 패널
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -57,19 +58,19 @@ public class MiniGameRulePanel extends JPanel{
 	        String fullRule = "마우스 드래그로 합이 5가 되는 포도를 제거할 때마다";
 	        String target = "합이 5";
 
-	        // Draw sentence
+	        // 밑줄
 	        g.setColor(Color.BLACK);
 	        g.setFont(FontSource.get(22f));
 	        g.drawString(fullRule, 80, 300);
 
-	        // Find target position
+	        // 타겟 위치 선정
 	        int baseX = 80;
 	        int baseY = 300;
 	        int preWidth = g.getFontMetrics().stringWidth(fullRule.substring(0, fullRule.indexOf(target)));
 	        int targetWidth = g.getFontMetrics().stringWidth(target);
 	        int textHeight = g.getFontMetrics().getHeight();
 
-	        // Draw circle
+	        // 동그라미 치기
 	        int circleX = baseX + preWidth - 5;
 	        int circleY = baseY - textHeight + 5;
 	        int circleW = targetWidth + 10;

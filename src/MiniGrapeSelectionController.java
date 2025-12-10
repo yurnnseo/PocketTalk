@@ -1,9 +1,8 @@
+// 드래그 영역 선택 전담
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-
-// 드래그 영역 선택 전담
 
 public class MiniGrapeSelectionController {
 

@@ -1,6 +1,6 @@
+// 클라이언트 프로필 정보 (이름, 상태메시지, 프로필 이미지 경로)
 import java.io.Serializable;
 
-// 클라이언트 프로필 정보 (이름, 상태메시지, 프로필 이미지 경로)
 public class ClientProfile implements Serializable {
     private static final long serialVersionUID = 1L;
 

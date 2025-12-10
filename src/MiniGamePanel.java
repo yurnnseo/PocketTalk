@@ -1,3 +1,4 @@
+// UI/타이머/이름 + 마우스 이벤트만
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -20,17 +21,13 @@ import javax.swing.Timer;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-
-// UI/타이머/이름 + 마우스 이벤트만
-
 public class MiniGamePanel extends JPanel{
-	
 	private JButton startbtn, howtoplaybtn;
 	private Font font;
 	private JLabel title, playername, centerimg, img2, img3;
 	private Image backgroundImg = null;
 	private String Background = "Images/gamebackground.png";
-	private JPanel startPanel; // 반투명 패널
+	private JPanel startPanel;
 	private MiniGameRulePanel rulepanel;
 	
 	private String userName; // 플레이어 이름 
@@ -87,7 +84,6 @@ public class MiniGamePanel extends JPanel{
 		playername.setVisible(false);
 
 		updateScoreTitle(); // 처음 생성 시 점수는 0:0
-
 
         // 포도 이미지 초기화
         grapeIcons = new ImageIcon[4];
@@ -159,7 +155,7 @@ public class MiniGamePanel extends JPanel{
                 parentFrame.sendToServer("/game_start_ready " + oppenetName);
                 startbtn.setEnabled(false);
                 playername.setVisible(true);
-                System.out.println("서버로 게임 시작 요청 메시지 전송.");
+                //System.out.println("서버로 게임 시작 요청 메시지 전송.");
             }
         }); 	
 	    
@@ -178,15 +174,15 @@ public class MiniGamePanel extends JPanel{
                 + userName + " : " + myScore;
 		playername.setText(text);
 	}
-	
-	public void updateScore(int newMyScore, int newOpponentScore) {
-	    // 1. 필드 갱신
+
+	// 점수 갱신
+	public void updateScore(int newMyScore, int newOpponentScore) {	    
 	    this.myScore = newMyScore;
 	    this.opponentScore = newOpponentScore;
-	    
-	    // 2. UI 갱신 (기존 메서드 재활용)
+	        
 	    updateScoreTitle(); 
 	}
+	
 	
 	public void sendRemoveToServer(String ownerName, String opponentName, String coordString) {
 	    parentFrame.sendToServer(
@@ -203,8 +199,7 @@ public class MiniGamePanel extends JPanel{
 
 	    // 1. 점수/제거 로직을 Controller에게 위임
 	    gameController.applyRemoteRemove(ownerName, coordString);
-	    
-	    // 2. UI 갱신
+	  
 	    revalidate();
 	    repaint();
 	}
@@ -213,7 +208,6 @@ public class MiniGamePanel extends JPanel{
 	    // 로직을 Controller에게 위임
 	    gameController.applyRefill(ownerName, grapeValues);
 	    
-	    // UI 갱신
 	    revalidate();
 	    repaint();
 	}
@@ -226,8 +220,7 @@ public class MiniGamePanel extends JPanel{
 	    GrapeMouseMotionListener motionListener = new GrapeMouseMotionListener();
 
 	    int index = 0;
-	    
-	    // 그리드 객체에 포도 값을 채우는 실제 로직 필요 (기존 코드에서 누락됨)
+
 	    rightGrid.fillFromValues(myGrapeValues, index, mouseListener, motionListener);
 	    leftGrid.fillFromValues(opponentGrapeValues, index, mouseListener, motionListener);
 	    
@@ -237,7 +230,6 @@ public class MiniGamePanel extends JPanel{
 	    repaint();
     }
 
-    // 내부 클래스
     // 선택된 포도 계산해서 제거
     class GrapeMouseMotionListener extends MouseMotionAdapter {
         @Override
@@ -248,7 +240,7 @@ public class MiniGamePanel extends JPanel{
             if (dragStartPoint != null) {
                 dragCurrentPoint = e.getLocationOnScreen();
                 
-                // 1. 드래그 영역 계산 (패널 상대 좌표 기준)
+                // 드래그 영역 계산 (패널 상대 좌표 기준)
                 Point startPanelPoint = new Point(
                     dragStartPoint.x - getLocationOnScreen().x,
                     dragStartPoint.y - getLocationOnScreen().y
@@ -279,19 +271,19 @@ public class MiniGamePanel extends JPanel{
     class GrapeMouseListener extends MouseAdapter {
         @Override
         public void mousePressed(MouseEvent e) {
-        	
-        	if (gameOver) return; // 시간 끝나면 클릭 무시
+        	if (gameOver) return;
             // 드래그 시작 지점 기록
             dragStartPoint = e.getLocationOnScreen();
             dragCurrentPoint = dragStartPoint;
             selectionController.clearSelection();
+            
             repaint();
         }
 
         @Override
-        public void mouseReleased(java.awt.event.MouseEvent e) {
+        public void mouseReleased(MouseEvent e) {
         	
-        	if (gameOver) return;   // 시간 끝나면 선택 처리 안 함
+        	if (gameOver) return; 
         	gameController.tryRemoveSelected();
             
             resetSelectionAndDrag();
@@ -309,7 +301,7 @@ public class MiniGamePanel extends JPanel{
 
     // 서버에게 명령 받아 양쪽 클라이언트가 동시에 게임 시작
     public void startSynchronizedGame() {
-        startPanel.setVisible(false);   // 시작 패널 숨기기
+        startPanel.setVisible(false); 
 
         // 게임 상태 초기화
         gameOver = false;
@@ -317,7 +309,7 @@ public class MiniGamePanel extends JPanel{
         opponentScore = 0;
         updateScoreTitle();
 
-        // 혹시 이전 타이머가 있으면 제거
+        // 이전 타이머가 있으면 제거
         if (timerPanel != null) {
             timerPanel.stopTimer();
             remove(timerPanel);
@@ -327,7 +319,6 @@ public class MiniGamePanel extends JPanel{
         // 60초짜리 타이머 패널 생성 + 콜백 (시간 끝났을 때)
         timerPanel = new MiniGrapeTimerPanel(60, () -> onTimeOver());
 
-        // 위치는 원하는 대로 조절
         timerPanel.setBounds(0, 0, 780, 30);
         add(timerPanel);
 
@@ -337,7 +328,7 @@ public class MiniGamePanel extends JPanel{
     
     // 시간이 끝났을 때 호출되는 메서드
     private void onTimeOver() {
-        gameOver = true;   // 더 이상 게임 진행 불가
+        gameOver = true;
 
         // 승자 판정
         String winnerText;
@@ -349,7 +340,7 @@ public class MiniGamePanel extends JPanel{
             winnerText = "무승부!";
         }
 
-        // 결과 메시지 (채팅에 그대로 뿌릴 문구)
+        // 결과 메시지
         String summaryForChat =
                 "[포도게임 결과] "
                 + userName + " " + myScore + "점, "
@@ -368,7 +359,7 @@ public class MiniGamePanel extends JPanel{
                     JOptionPane.INFORMATION_MESSAGE
             );
 
-            // 2. 서버로 결과 전송 (roomId + 두 사람 이름 + 결과문)
+            // 2. 서버로 결과 전송
             parentFrame.sendToServer(
                     "/game_result " 
                     + roomId + " "          // ⭐ 가장 먼저 roomId

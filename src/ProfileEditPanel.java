@@ -1,4 +1,3 @@
-// ProfileEditPanel.java
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
@@ -15,8 +14,7 @@ public class ProfileEditPanel extends JPanel {
     // 부모는 ProfileEditFrame
     private final ProfileEditFrame parentFrame;
     private JLabel editProfileLabel;
-    
-    // 선택된 이미지 경로 + 버튼
+   
     private String selectedImagePath;
     private JButton imageButton;
     
@@ -35,14 +33,12 @@ public class ProfileEditPanel extends JPanel {
         editProfileLabel.setBounds(25, 20, 500, 20);
         add(editProfileLabel);
  
-        // 버튼 생성
         okbutton = UIComponentZip.createTextButton("저장", 150, 395, 60, 28, FontSource.get(11f));
         cancelbutton = UIComponentZip.createTextButton("취소", 230, 395, 60, 28, FontSource.get(11f));
 
         add(okbutton);
         add(cancelbutton);
 
-        // 저장 버튼 클릭
         okbutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -56,7 +52,6 @@ public class ProfileEditPanel extends JPanel {
             }
         });
 
-        // 취소 버튼 클릭
         cancelbutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -71,7 +66,6 @@ public class ProfileEditPanel extends JPanel {
         name.setOpaque(false);
         name.setBounds(33, 168, 150, 50);
         
-        // 이름 포커스 이벤트
         name.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -148,7 +142,7 @@ public class ProfileEditPanel extends JPanel {
         imageButton.setBorderPainted(false);
         imageButton.setFocusPainted(false);
         imageButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        imageButton.setBounds(120, 70, 80, 80); // 위치는 적당히, 원하면 조정 가능
+        imageButton.setBounds(120, 70, 80, 80);
 
         imageButton.addActionListener(new ActionListener() {
             @Override

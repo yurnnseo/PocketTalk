@@ -40,17 +40,17 @@ public class ClientMenuFrame extends JFrame {
         setContentPane(friendsPanel);
         setVisible(true);
 
-        // ---- 서버 연결 ----
+        // 서버 연결
         try {
             socket = new Socket(ip_addr, Integer.parseInt(port_no));
             dis = new DataInputStream(socket.getInputStream());
             dos = new DataOutputStream(socket.getOutputStream());
 
-            // ★ 수신 스레드 먼저 시작
+            // 수신 스레드 먼저 시작
             ListenNetwork net = new ListenNetwork();
             net.start();
 
-            // ★ 그 다음 로그인 메시지 전송
+            // 그 다음 로그인 메시지 전송
             dos.writeUTF("/login " + this.username);
             dos.flush();
 
@@ -78,8 +78,7 @@ public class ClientMenuFrame extends JFrame {
                         } else {
                             users = userListString.split(" ");
                         }
-
-                        // 여기서도 한 번 정리해 주면 더 안전
+           
                         for (int i = 0; i < users.length; i++) {
                             if (users[i] != null) users[i] = users[i].trim();
                         }
@@ -154,7 +153,7 @@ public class ClientMenuFrame extends JFrame {
 
                     
                     else {
-                    	// 일반 채팅 메시지 → 열려있는 채팅창들에 전달
+                    	// 일반 채팅 메시지 -> 열려있는 채팅창들에 전달
                         ChattingFrame.deliverChatMessage(msg);
                     }
 
@@ -177,7 +176,7 @@ public class ClientMenuFrame extends JFrame {
         }
     }
     
-    // ---- 화면 전환 ----
+    // 화면 전환
     public void showFriendsMenu() {
         setContentPane(friendsPanel);
         revalidate();
@@ -190,7 +189,7 @@ public class ClientMenuFrame extends JFrame {
         repaint();
     }
 
-    // ---- getter ----
+    // getter
     public DataOutputStream getDataOutputStream() {
         return dos;
     }

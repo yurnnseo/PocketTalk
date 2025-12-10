@@ -42,17 +42,9 @@ public class MyProfileViewPanel extends JPanel {
         header = new ProfileHeaderView(this.username, this.statusMessage, this.profileImagePath, 60, 60, ProfileHeaderView.Orientation.VERTICAL);
         Dimension hSize = header.getPreferredSize();
         int headerX = 66;
-        int headerY = 230; // 살짝 위로 땡겨도 되고 취향대로
+        int headerY = 230;
         header.setBounds(headerX, headerY, hSize.width, hSize.height);
         add(header);
-
-        /*statusLabel = new JLabel(statusMessage, SwingConstants.CENTER);
-        statusLabel.setFont(fontSource.getFont(12f));
-        statusLabel.setForeground(Color.DARK_GRAY);
-        
-        int statusY = headerY + hSize.height + 8;
-        statusLabel.setBounds(headerX, statusY, hSize.width, 20);
-        add(statusLabel);*/
 
         // 편집 버튼 
         ImageIcon normal = new ImageIcon(getClass().getResource("/Images/profileeditbutton.png"));
@@ -61,12 +53,12 @@ public class MyProfileViewPanel extends JPanel {
 
         editButton = new JButton("프로필 편집");
         editButton.setFont(FontSource.get(10f));
-        editButton.setBackground(Color.decode("#E3D6F0")); // 버튼 색상
-        editButton.setForeground(Color.BLACK); // 글자색
+        editButton.setBackground(Color.decode("#E3D6F0"));
+        editButton.setForeground(Color.BLACK);
         editButton.setFocusPainted(false);
         editButton.setBorderPainted(false);
         editButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        editButton.setBounds(28, 390, 260, 35); // 버튼 위치와 크기 조정
+        editButton.setBounds(28, 390, 260, 35); 
         add(editButton);
 
         // 버튼 클릭 시 프로필 수정 창 열기
@@ -84,15 +76,14 @@ public class MyProfileViewPanel extends JPanel {
     public void updateProfile(String newName, String newStatus) {
         if (newName != null && !newName.isEmpty()) {
             this.username = newName;
-            header.setUserName(newName);       // 프로필 헤더에 이름 갱신
+            header.setUserName(newName); // 프로필 헤더에 이름 갱신
         }
         
         if (newStatus != null) {
             this.statusMessage = newStatus;
-             header.setMessage(newStatus);    // 상태메시지 라벨 갱신
+             header.setMessage(newStatus); // 상태메시지 라벨 갱신
         }
 
-        // 필요하면 여기서 parentFrame/친구패널까지 알려줄 수도 있음
         parentFrame.onMyProfileUpdated(newName, newStatus);
         revalidate();
         repaint();

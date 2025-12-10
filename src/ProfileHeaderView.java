@@ -26,7 +26,6 @@ public class ProfileHeaderView extends JPanel {
         }
         ImageIcon icon = new ImageIcon(img.getScaledInstance(imgW, imgH, Image.SCALE_SMOOTH));
         
-        // 이미지 버튼
         profileButton = new JButton(icon);
         profileButton.setContentAreaFilled(false);
         profileButton.setBorderPainted(false);
@@ -34,7 +33,6 @@ public class ProfileHeaderView extends JPanel {
         profileButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         add(profileButton);
 
-        // 이름 라벨
         nameLabel = new JLabel(username, SwingConstants.LEFT);
         nameLabel.setFont(FontSource.get(16f));
         nameLabel.setForeground(Color.BLACK);
@@ -45,7 +43,6 @@ public class ProfileHeaderView extends JPanel {
         messageLabel.setForeground(Color.DARK_GRAY);
         add(messageLabel);
         
-        // 배치
         if (orientation == Orientation.HORIZONTAL) {
             int gap = 15;
             int Area = 150;
@@ -62,8 +59,6 @@ public class ProfileHeaderView extends JPanel {
         } 
         
         else {
-            // 세로 정렬  → 내 프로필용
-            // 너비 살짝 여유를 두고 가운데 정렬
             int width = Math.max(imgW + 40, 180);
             int imgX = (width - imgW) / 2;
             int imgY = 0;

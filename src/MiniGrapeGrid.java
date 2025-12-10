@@ -1,8 +1,7 @@
+// 포도 9x8 배치
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseMotionAdapter;
-
-// 포도 9x8 배치
 
 public class MiniGrapeGrid {
 
@@ -52,7 +51,7 @@ public class MiniGrapeGrid {
         if (index >= 0 && index < icons.length) {
             return icons[index];
         }
-        // 인덱스가 잘못된 경우 방어적으로 처리 (예: 첫 번째 아이콘 반환)
+        // 인덱스가 잘못된 경우 방어적으로 처리
         return icons[0]; 
     }
     
@@ -68,9 +67,6 @@ public class MiniGrapeGrid {
         }
     }
 
-    /**
-     * values[startIndex]부터 9x8 개수를 채운 뒤, 마지막 인덱스를 반환
-     */
     public int fillFromValues(int[] values, int startIndex,
                               MouseAdapter clickListener,
                               MouseMotionAdapter motionListener) {

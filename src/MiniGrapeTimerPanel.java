@@ -1,3 +1,4 @@
+// 미니게임 타이머 시간 계산
 import javax.swing.*;
 import java.awt.*;
 
@@ -23,7 +24,7 @@ public class MiniGrapeTimerPanel extends JPanel {
         progressBar.setBackground(Color.decode("#d6d6d6"));
         progressBar.setBorder(null);
         progressBar.setStringPainted(true);
-        progressBar.setFont(FontSource.get(11f));   // 너가 쓰는 폰트
+        progressBar.setFont(FontSource.get(11f));
 
         updateProgressBarText();
         add(progressBar, BorderLayout.CENTER);

@@ -1,3 +1,4 @@
+// 폰트 설정
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.io.InputStream;

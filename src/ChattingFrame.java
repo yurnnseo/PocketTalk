@@ -12,7 +12,7 @@ public class ChattingFrame extends JFrame {
     private static final Map<String, ChattingFrame> OPENROOMS = new HashMap<>();
 
     private final ChattingPanel chatpanel;
-    private final String roomKey;   // = roomId
+    private final String roomKey;   // key = roomId
     private final String roomId;    // 방 ID
 
     private static String makeRoomTitle(String membersString) {
@@ -24,20 +24,17 @@ public class ChattingFrame extends JFrame {
             if (sb.length() > 0) sb.append(", ");
             sb.append(n);
         }
-        return sb.toString();   // 예) "ss, ff, dd"
+        return sb.toString(); 
     }
 
-    /**
-     * 채팅방 열기 (외부에서 new 대신 이걸 호출)
-     * 이미 같은 roomId 방이 열려 있으면 그 창만 앞으로 가져옴.
-     */
+    // 채팅방 열기 (외부에서 new 대신 이걸 호출)
     public static void openRoom(ClientMenuFrame parentFrame,
                                 String username,
                                 String roomId,
                                 String groupMembers,
                                 String creatorName) {
 
-        String key = roomId; // key = roomId
+        String key = roomId;
 
         ChattingFrame existing = OPENROOMS.get(key);
         if (existing != null && existing.isDisplayable()) {
@@ -50,7 +47,7 @@ public class ChattingFrame extends JFrame {
         OPENROOMS.put(key, frame);
         frame.setVisible(true);
 
-        // ★ 여기서 이전 로그 요청
+        // 이전 로그 요청
         parentFrame.sendToServer("/loadlog " + roomId);
     }
 
@@ -95,10 +92,7 @@ public class ChattingFrame extends JFrame {
         }
     }
 
-    /**
-     * 서버에서 받은 채팅 메시지 전달
-     * 형식: "/msg roomId 내용..."
-     */
+    // 서버에서 받은 채팅 메시지 전달
     public static void deliverChatMessage(String msg) {
 
         // 방 채팅 형식이면 roomId 기준으로 분배
@@ -117,7 +111,6 @@ public class ChattingFrame extends JFrame {
             return;
         }
 
-        // 그 외(예전 broadcast용 메시지)는 필요하다면 모든 창에 뿌릴 수도 있음
         for (ChattingFrame f : OPENROOMS.values()) {
             f.chatpanel.onReceiveChatMessage(msg);
         }

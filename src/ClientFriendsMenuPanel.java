@@ -1,3 +1,4 @@
+// 친구 목록 보여주는 패널
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -138,7 +139,7 @@ public class ClientFriendsMenuPanel extends JPanel {
         }
     }
 
-    // 내 프로필(이름, 상태메시지) 변경 시 – 상단 헤더/UI용
+    // 내 프로필(이름, 상태메시지) 변경 시
     public void updateMyProfileName(String newName, String newStatus) {
         if (newName != null && !newName.isEmpty()) {
             this.myCurrentName = newName.trim();

@@ -1,6 +1,4 @@
 //말풍선 위치, 스크롤 디자인 패널
-
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -19,8 +17,7 @@ public class MessageContainerPanel extends JPanel{
         
         // 메시지를 위에서 아래로 쌓기 위해 BoxLayout 사용
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        
-        // 배경색 설정
+
         setBackground(Color.decode("#F9F9F9"));
     }
     
@@ -28,12 +25,12 @@ public class MessageContainerPanel extends JPanel{
     	
     	MessagePanel messagepanel = new MessagePanel(messageText, isSent, customFont); //말풍선 생성
     	
-    	// 좌우 정렬 컨테이너 (여기서도 최대 높이를 고정해줌)
+    	// 좌우 정렬 컨테이너
         JPanel alignPanel = new JPanel() {
             @Override
             public Dimension getMaximumSize() {
                 Dimension d = getPreferredSize();
-                d.width = Integer.MAX_VALUE; // 가로는 늘어나도 됨
+                d.width = Integer.MAX_VALUE;
                 return d;
             }
         };
@@ -46,14 +43,13 @@ public class MessageContainerPanel extends JPanel{
 
         alignPanel.add(messagepanel);
 
-        // alignPanel의 최대 높이를 현재 높이로 고정
+        // 최대 높이를 현재 높이로 고정
         alignPanel.setMaximumSize(
             new Dimension(Integer.MAX_VALUE, alignPanel.getPreferredSize().height)
         );
 
         add(alignPanel);
-        
-        //UI 갱신
+
         revalidate();
         repaint();		
     }

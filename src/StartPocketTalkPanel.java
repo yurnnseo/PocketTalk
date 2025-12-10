@@ -62,26 +62,6 @@ public class StartPocketTalkPanel extends JPanel {
         return field;
     }
 
-    
-//    // 버튼 생성 메소드 (이미지 크기를 버튼 크기에 맞게 스케일) -> 이렇게 했더니 이미지가 깨져서 주석처리함.
-//    private JButton createButton(String iconPath, int x, int y, ActionListener action) {
-//
-//        // 이미지 불러오기
-//        ImageIcon icon = new ImageIcon(iconPath);
-//        Image scaledImage = icon.getImage().getScaledInstance(275, 42, Image.SCALE_SMOOTH);
-//        ImageIcon scaledIcon = new ImageIcon(scaledImage);
-//
-//        JButton button = new JButton(scaledIcon);
-//        button.setBounds(x, y, bw, bh);  // 버튼 위치와 크기
-//        button.setContentAreaFilled(false);  // 배경 제거
-//        button.setBorderPainted(false);      // 테두리 제거
-//        button.setFocusPainted(false);       // 포커스 제거
-//        button.addActionListener(action);
-//        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)); // 마우스 손모양
-//
-//        return button;
-//    }
-    
     // 버튼 생성 메소드 (이미지 없이 완전 투명 버튼)
     private JButton createButton(int x, int y, ActionListener action) {
 

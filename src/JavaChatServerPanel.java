@@ -19,10 +19,10 @@ public class JavaChatServerPanel extends JPanel {
     private final Map<String, String> gameRequests = Collections.synchronizedMap(new HashMap<>()); // key:요청 클라, value:상대 클라
     private static final int BUF_LEN = 128;
 
-    // ---- 프로필 TXT 관리 ----
+    // 프로필 TXT 관리
     private Map<String, ClientProfile> clientProfiles = Collections.synchronizedMap(new HashMap<>());
 
-    // ---- 채팅방 TXT/로그 관리 ----
+    // 채팅방 TXT/로그 관리
     private static final String CLIENT_TXT_FILE = "./client_profiles.txt";
     private static final String CHATROOM_TXT_FILE = "./chat_rooms.txt";
     private static final String CHAT_LOG_DIR      = "./chat_logs";
@@ -63,12 +63,11 @@ public class JavaChatServerPanel extends JPanel {
         btnServerStart = new JButton("Server Start");
         btnServerStart.setBounds(17, 510, 450, 35);
         add(btnServerStart);
-
-        // “Server Start” 버튼 누르면 startServer() 호출
+  
         btnServerStart.addActionListener(e -> startServer());
     }
 
-    // ---- 공통 로그 함수 (한국어 카테고리, 시간 없음) ----
+    // 공통 로그 함수
     private void log(String category, String msg) {
         AppendText("[" + category + "]  " + msg);
     }
@@ -123,7 +122,7 @@ public class JavaChatServerPanel extends JPanel {
         }
     }
 
-    // ---- TXT 로드 / 저장 ----
+    // TXT 로드/저장
     private void loadProfilesFromTxt() {
         File file = new File(CLIENT_TXT_FILE);
         if (!file.exists()) {
@@ -274,7 +273,7 @@ public class JavaChatServerPanel extends JPanel {
         return "R" + System.currentTimeMillis();
     }
 
-    // ====== 각 유저 스레드 ======
+    // 각 유저 스레드
     class UserService extends Thread {
         private DataInputStream dis;
         private DataOutputStream dos;
@@ -511,7 +510,7 @@ public class JavaChatServerPanel extends JPanel {
                 String line;
                 while ((line = br.readLine()) != null) {
                     String sendMsg = "/msg " + roomId + " " + line;
-                    WriteOne(sendMsg);   // 이제 this.WriteOne(...) 가능
+                    WriteOne(sendMsg); 
                 }
             } catch (IOException e) {
                 log("채팅방", "로그 전송 오류(" + roomId + "): " + e.getMessage());
@@ -555,9 +554,9 @@ public class JavaChatServerPanel extends JPanel {
                             ", 이미지: " + clientProfile.getProfileImagePath());
 
                     // 모든 프로필 /list 전송
-                    broadcastAllProfilesToAllClients(); // /profile
-                    BroadcastUserList();                // /list
-
+                    broadcastAllProfilesToAllClients(); 
+                    BroadcastUserList();                
+                    
                     // 내가 들어있는 채팅방 목록 전송
                     sendMyChatRooms();
                     
@@ -632,17 +631,16 @@ public class JavaChatServerPanel extends JPanel {
                             String participantsLine = chat_msg.substring("/game_request ".length()).trim();
                             String[] participants = participantsLine.split("[,\\s]+");
                             
-                            // 1. 유효성 검사 (클라이언트가 1:1 요청을 보내지만, 서버에서도 재확인)
+                            // 1. 유효성 검사
                             if (participants.length != 2) {
                                 log("게임", "경고: " + UserName + " 님이 1:1이 아닌 게임 요청을 보냄: " + participantsLine);                            
                                 continue;
                             }
                             
                             String sender = participants[0]; // 요청자 (본인)
-                            String receiver = participants[1]; // 상대방
+                            String receiver = participants[1]; //상대방
                             
-                            if (!sender.equals(UserName)) {
-                                // 요청자와 메시지 보낸 UserName이 일치해야 함
+                            if (!sender.equals(UserName)) { // 2. 요청자 일치 확인
                                 log("게임", "경고: 요청자 불일치! " + UserName + " != " + sender);
                                 continue;
                             }
@@ -650,14 +648,13 @@ public class JavaChatServerPanel extends JPanel {
                             gameRequests.put(sender, receiver);
                             log("게임", sender + " -> " + receiver + " 게임 요청 (대기 중)");
                             
-                            // 3. 상대방도 나에게 요청했는지 확인 (쌍방 요청 확인)
-                            if (gameRequests.containsKey(receiver) && gameRequests.get(receiver).equals(sender)) {
-                                // 쌍방 요청이 확인되면 게임 시작                              
+                            // 3. 쌍방 요청 확인
+                            if (gameRequests.containsKey(receiver) && gameRequests.get(receiver).equals(sender)) {                                                    
                                 String gameStartCmd = "/game_start " + participantsLine;
                                   
                                 sendToSpecificUsers(gameStartCmd, sender, receiver);
                                 
-                                // 5. 요청 상태 초기화
+                                // 4. 요청 상태 초기화
                                 gameRequests.remove(sender);
                                 gameRequests.remove(receiver);
                                 log("게임", "=== " + sender + " & " + receiver + " 게임 시작! ===");
@@ -682,17 +679,17 @@ public class JavaChatServerPanel extends JPanel {
                                 target = participants[0].equals(canceler) ? participants[1] : participants[0];
                             }
                             
-                            // 요청자 (UserName)의 상태를 맵에서 제거
+                            // 요청자의 상태를 맵에서 제거
                             gameRequests.remove(canceler);
                             log("게임", canceler + " 님이 게임 요청을 취소했습니다. 상대: " + target);
                             
-                            // 상대방이 혹시 나에게 요청했던 상태라면 그것도 제거 (안전 장치)
+                            // 상대방이 혹시 나에게 요청했던 상태라면 그것도 제거
                             if (target != null && gameRequests.containsKey(target) && gameRequests.get(target).equals(canceler)) {
                                 gameRequests.remove(target);
                                 log("게임", "상대방(" + target + ")의 요청 대기 상태도 해제함.");
                             }
                             
-                            // 상대방에게 취소되었음을 알림
+                            // 상대방에게 취소 알림
                             if (!target.isEmpty()) {
                                 sendToSpecificUsers("/game_canceled " + canceler, target);
                             }
@@ -709,12 +706,12 @@ public class JavaChatServerPanel extends JPanel {
                             gameRequests.put(sender, opponentName);
                             log("게임", sender + " -> " + opponentName + " 준비 완료 (대기 중)");
 
-                            // 2. 상대방도 준비 완료했는지 확인
+                            // 상대방도 준비 완료했는지 확인
                             if (gameRequests.containsKey(opponentName) && gameRequests.get(opponentName).equals(sender)) {  	
-                            	// 포도 난수 생성 책임을 서버에게 옮김 (동일 배열을 받기 위함)
+                            	// 동일 배열을 받기 위해 포도 난수 생성 책임을 서버에게 옮김
                                 Random random = new Random();
                                 
-                                // 1.Left판에 할당할 포도 데이터
+                                // 1. Left판에 할당할 포도 데이터
                                 StringBuilder grapeData_for_sender = new StringBuilder();
                                 for (int r = 0; r < 9; r++) {
                                     for (int c = 0; c < 8; c++) {
@@ -728,7 +725,7 @@ public class JavaChatServerPanel extends JPanel {
                                 StringBuilder grapeData_for_opponent = new StringBuilder();
                                 for (int r = 0; r < 9; r++) {
                                     for (int c = 0; c < 8; c++) {
-                                        grapeData_for_opponent.append(random.nextInt(4) + 1).append(","); // 1~4 값
+                                        grapeData_for_opponent.append(random.nextInt(4) + 1).append(",");
                                     }
                                 }
                                 String finalGrapeData_OPPONENT = grapeData_for_opponent.substring(0, grapeData_for_opponent.length() - 1);
@@ -736,15 +733,15 @@ public class JavaChatServerPanel extends JPanel {
                                 // 3. 게임 시작 명령에 포도 데이터 포함
                                 String participantsLine = sender + "," + opponentName;
                                 
-                                // 1. LEFT를 할당
+                                // LEFT를 할당
                                 String senderCmd ="/game_start_command " + participantsLine + " LEFT " + finalGrapeData_SENDER + " " + finalGrapeData_OPPONENT;                              
                                 sendToSpecificUsers(senderCmd, sender);
 
-                                // 2. RIGHT를 할당
+                                //  RIGHT를 할당
                                 String receiverCmd = "/game_start_command " + participantsLine + " RIGHT " + finalGrapeData_OPPONENT + " " + finalGrapeData_SENDER;
                                 sendToSpecificUsers(receiverCmd, opponentName);
                                 
-                                // 3. 요청 상태 초기화
+                                // 요청 상태 초기화
                                 gameRequests.remove(sender);
                                 gameRequests.remove(opponentName);
                                 log("게임", "=== " + sender + " & " + opponentName + " 게임 동기화 시작 명령 전송! ===");
@@ -754,7 +751,7 @@ public class JavaChatServerPanel extends JPanel {
                             continue;
                         }
                         
-                        // ★ 포도 제거 동기화
+                        // 포도 제거 동기화
                         if (chat_msg.startsWith("/game_remove ")) {
                             // 형식: /game_remove ownerName opponentName r1,c1;r2,c2;...
                             String body = chat_msg.substring("/game_remove ".length()).trim();
@@ -778,7 +775,7 @@ public class JavaChatServerPanel extends JPanel {
                             continue;
                         }
                         
-                        // ★ 포도 리필 요청 처리
+                        // 포도 리필 요청 처리
                         if (chat_msg.startsWith("/game_refill_request ")) {
                             // 형식: /game_refill_request ownerName opponentName
                             String body = chat_msg.substring("/game_refill_request ".length()).trim();
@@ -788,10 +785,10 @@ public class JavaChatServerPanel extends JPanel {
                                 continue;
                             }
 
-                            String ownerName    = tokens[0].trim(); // 보드 주인 (요청자)
-                            String opponentName = tokens[1].trim(); // 상대
+                            String ownerName    = tokens[0].trim(); 
+                            String opponentName = tokens[1].trim();
 
-                            // 9x8 전체 셀 수 (서버는 보드 상태를 모르므로 넉넉하게 전부 생성)
+                            // 9x8 전체 셀 수
                             int totalCells = 9 * 8; // MiniGrapeGameManager.ROWS * COLS 과 같음
 
                             Random random = new Random();
@@ -806,7 +803,7 @@ public class JavaChatServerPanel extends JPanel {
                             // 형식: /game_refill ownerName v1,v2,v3,...,v72
                             String refillMsg = "/game_refill " + ownerName + " " + values;
 
-                            // ★ ownerName의 보드(오른쪽판 & 상대의 왼쪽판)에만 보내기
+                            // ownerName의 보드(오른쪽판 & 상대의 왼쪽판)에만 보내기
                             sendToSpecificUsers(refillMsg, ownerName, opponentName);
 
                             log("게임", "리필 명령 전송: " + refillMsg);
@@ -817,16 +814,16 @@ public class JavaChatServerPanel extends JPanel {
                         if (chat_msg.startsWith("/game_result ")) {
                             // 형식: /game_result roomId user1 user2 summary...
                             String body = chat_msg.substring("/game_result ".length()).trim();
-                            String[] parts = body.split(" ", 4); // roomId, user1, user2, summary...
+                            String[] parts = body.split(" ", 4); // roomId, user1, user2, summary
 
                             if (parts.length < 4) {
                                 log("게임", "잘못된 /game_result 포맷: " + chat_msg);
                                 continue;
                             }
 
-                            String roomId         = parts[0].trim(); // ⭐ 어느 방에 보낼지
-                            String user1          = parts[1].trim(); // 참가자 1
-                            String user2          = parts[2].trim(); // 참가자 2
+                            String roomId         = parts[0].trim(); // 어느 방에 보낼지
+                            String user1          = parts[1].trim(); 
+                            String user2          = parts[2].trim(); 
                             String summaryForChat = parts[3].trim(); // "[포도게임 결과] ..." 전체 문자열
 
                             // 로그 파일에 저장

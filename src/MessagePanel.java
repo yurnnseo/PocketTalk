@@ -19,7 +19,7 @@ public class MessagePanel extends JPanel {
     private static final int ARC = 20; // 둥근 모서리 반지름
     private Font customFont; //폰트 소스
 
-    // 한 줄에 허용할 최대 글자 수 (원하는 대로 조절)
+    // 한 줄에 허용할 최대 글자 수
     private static final int MAX_CHARS_PER_LINE = 20;
 
     public MessagePanel(String text, boolean isSent, Font font) {
@@ -33,7 +33,7 @@ public class MessagePanel extends JPanel {
         area.setEditable(false);
         area.setFocusable(false);
         area.setOpaque(false);      // 배경은 말풍선에서 그릴 거라 투명
-        area.setLineWrap(false);    // 우리는 직접 \n으로만 줄바꿈
+        area.setLineWrap(false);    // 직접 \n으로만 줄바꿈
         area.setBorder(null);
 
         if (customFont != null) {
@@ -48,7 +48,7 @@ public class MessagePanel extends JPanel {
         setOpaque(false);
     }
 
-    // 너무 어려운 계산 안 하고, 그냥 글자 수 기준으로 줄 나누기
+    // 글자 수 기준으로 줄 나누기
     private String wrapText(String text, int maxCharsPerLine) {
         if (text == null) return "";
         StringBuilder sb = new StringBuilder();
@@ -61,7 +61,6 @@ public class MessagePanel extends JPanel {
         return sb.toString();
     }
 
-    // (원래 있던 거 유지해도 되고, 아예 지워도 큰 문제 없음)
     @Override
     public Dimension getMaximumSize() {
         Dimension d = getPreferredSize();

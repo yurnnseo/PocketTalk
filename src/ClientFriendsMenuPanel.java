@@ -38,7 +38,7 @@ public class ClientFriendsMenuPanel extends JPanel {
             this.profileImagePath = profileImagePath;
         }
 
-        // ★ 딱 1개만 생성되는 FriendsListPanel
+        // 딱 1개만 생성되는 FriendsListPanel
         friendsListPanel = new FriendsListPanel(this.myCurrentName);
 
         JScrollPane scrollPane = new JScrollPane(friendsListPanel);

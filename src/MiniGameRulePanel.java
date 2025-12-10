@@ -8,12 +8,12 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class GameRulePanel extends JPanel{
+public class MiniGameRulePanel extends JPanel{
 	private Font title, text, font;
 	private JButton backbtn;
 	private MiniGamePanel parentPanel;
 	
-	public GameRulePanel(MiniGamePanel parent) {
+	public MiniGameRulePanel(MiniGamePanel parent) {
 		this.parentPanel = parent;
 		
 		setLayout(null);

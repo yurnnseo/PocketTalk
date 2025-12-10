@@ -81,9 +81,10 @@ public class MiniGrapeGameController {
         }
 
         // 점수 반영
-        if (owner.equals(userName)) myScore += 10;
-        else opponentScore += 10;
-
+        if (!owner.equals(userName)) {
+        	opponentScore += 10;
+        }
+        
         uiPanel.updateScore(myScore, opponentScore);
         uiPanel.repaint();
     }

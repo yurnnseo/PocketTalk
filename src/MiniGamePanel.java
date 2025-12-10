@@ -27,11 +27,11 @@ public class MiniGamePanel extends JPanel{
 	
 	private JButton startbtn, howtoplaybtn;
 	private Font font;
-	private JLabel title, playername;
+	private JLabel title, playername, centerimg, img2, img3;
 	private Image backgroundImg = null;
 	private String Background = "Images/gamebackground.png";
 	private JPanel startPanel; // 반투명 패널
-	private GameRulePanel rulepanel;
+	private MiniGameRulePanel rulepanel;
 	
 	private String userName; // 플레이어 이름 
     private String oppenetName; // 상대방 이름
@@ -130,13 +130,25 @@ public class MiniGamePanel extends JPanel{
 	    title.setBounds(312, 56, 770, 50);
 	    startPanel.add(title);
 	    
+	    centerimg = new JLabel(resizeIcon("/Images/metamong.png", 120, 120));
+	    centerimg.setBounds(325, 170, 120, 120);
+	    startPanel.add(centerimg);
+
+	    img2 = new JLabel(resizeIcon("/Images/minigrape.png", 100, 100));
+	    img2.setBounds(295, 255, 100, 100);
+	    startPanel.add(img2);
+
+	    img3 = new JLabel(resizeIcon("/Images/minigrape.png", 100, 100));
+	    img3.setBounds(365, 265, 100, 100);
+	    startPanel.add(img3);
+	    
 	    startbtn = UIComponentZip.createTextButton("게임 시작", 310,420, 150,50,font);
 	    howtoplaybtn = UIComponentZip.createTextButton("게임 방법", 310, 490,150,50,font);
 	    startPanel.add(startbtn);
 	    startPanel.add(howtoplaybtn);
 
 	    // 패널 변경 위한 선언
-	    rulepanel = new GameRulePanel(this);
+	    rulepanel = new MiniGameRulePanel(this);
 	    rulepanel.setBounds(0, 0, 770, 600);
 	    rulepanel.setVisible(false);
 	    add(rulepanel);
@@ -161,9 +173,9 @@ public class MiniGamePanel extends JPanel{
 	
 	// 이름과 점수를 한 줄로 표시하는 라벨 갱신
 	private void updateScoreTitle() {
-		String text = userName + " : " + myScore
+		String text = oppenetName + " : " + opponentScore
                 + "   VS   "
-                + oppenetName + " : " + opponentScore;
+                + userName + " : " + myScore;
 		playername.setText(text);
 	}
 	
@@ -387,6 +399,14 @@ public class MiniGamePanel extends JPanel{
         g.fillRect(380, 130, 1, getHeight() - 130);
     } 
     
+    //이미지 크기에 맞추기
+    private ImageIcon resizeIcon(String path, int w, int h) {
+        ImageIcon icon = new ImageIcon(getClass().getResource(path));
+        Image img = icon.getImage();
+        Image scaled = img.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaled);
+    }
+
     // 게임 시작 패널 호출
     public void showStartPanel() {
         startPanel.setVisible(true);  

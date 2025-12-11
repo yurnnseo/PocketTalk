@@ -1,4 +1,3 @@
-// 친구 목록 표시 패널
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -9,24 +8,25 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+//친구 목록 그려주는 패널
 public class FriendsListPanel extends JPanel {
 
-    private String myName; // 내 이름 (리스트에서 나를 빼기 위함)
+	private static final String DEFAULT_PROFILE_IMAGE = "/Images/defaultprofileimage.png";
+    private String myName; 
 
-    // 프로필 정보: name -> FriendProfile(이름, 상태메시지, 이미지경로)
+    // 이름으로 친구들의 프로필 정보를 map으로 저장
     private static final Map<String, FriendProfile> profiles = new HashMap<>();
 
-    // 현재 온라인인 친구 이름 순서 ( /list 결과 )
+    // 현재 온라인인 친구 이름을 저장 (중복없이)
     private final LinkedHashSet<String> onlineNames = new LinkedHashSet<>();
 
+    // 대화 상대를 선택할 때 선택된 친구들을 저장
     private final Set<String> selectedUsers = new LinkedHashSet<>();
 
-    private boolean isSelectionMode = false; //채팅 상대 선택 모드
-    
-    private static final String DEFAULT_PROFILE_IMAGE = "/Images/defaultprofileimage.png";
-    
+    private boolean isSelectionMode = false; //채팅 상대를 선택하는 모드인지, 아닌지
 
-    // 한 명의 친구 정보
+
+    // 한 명의 친구 정보를 담는 클래스
     private static class FriendProfile {
         String name;
         String statusMessage;
@@ -38,18 +38,19 @@ public class FriendsListPanel extends JPanel {
 
             if (imagePath == null || imagePath.isEmpty()) {
                 this.profileImagePath = DEFAULT_PROFILE_IMAGE;
-            } else {
+            } 
+            else {
                 this.profileImagePath = imagePath;
             }
         }
     }
 
-    // 기본
+    // 일반 친구 목록
     public FriendsListPanel(String myName) {
         this(myName, false); 
     }
     
-    //선택 모드
+    // 대화 상태 선택 목록 (ChoosePerson에서 사용)
     public FriendsListPanel(String myName, boolean isSelectionMode) {
         this.myName = myName;
         this.isSelectionMode = isSelectionMode;
@@ -57,7 +58,7 @@ public class FriendsListPanel extends JPanel {
         setOpaque(false);
     }
 
-    // 내 이름 변경 (리스트에서 나 자신 제외용)
+    // 내 이름 바뀌었을 때 업데이트
     public void setMyName(String newMyName) {
         if (newMyName != null) {
             this.myName = newMyName.trim();
@@ -65,12 +66,12 @@ public class FriendsListPanel extends JPanel {
         refreshView();
     }
 
-    // 온라인 목록 갱신
+    // 친구 목록 전체 업데이트
     public void updateList(List<String> users) {
         updateOnlineList(users);
     }
 
-    // 친구 프로필 정보 갱신/생성
+    // /profile로 온 친구 프로필 정보 저장
     public void updateFriendProfile(String name, String imagePath, String statusMessage) {
         if (name == null) return;
         name = name.trim();
@@ -79,12 +80,12 @@ public class FriendsListPanel extends JPanel {
         if (statusMessage != null) statusMessage = statusMessage.trim();
         if (imagePath != null) imagePath = imagePath.trim();
 
-
+        // 친구 프로필이 있으면 그 정보를 업데이트하고 없으면 새로 만듦
         FriendProfile fp = profiles.get(name);
         if (fp == null) {
-            // 처음 받는 경우는 그대로 사용
             fp = new FriendProfile(name, statusMessage, imagePath);
-        } else {
+        } 
+        else {
             fp.name = name;
 
             // 새로 받은 상태메시지가 "실제 내용"이 있을 때만 덮어씀
@@ -102,14 +103,16 @@ public class FriendsListPanel extends JPanel {
         refreshView();
     }
 
+    // /list로 온 친구 이름을 저장
     public void updateOnlineList(List<String> onlineList) {
         if (onlineList == null) return;
 
         onlineNames.clear(); //초기화
 
-        // /list 와 /profile 엇갈리지 않기 위함
+        // 새 친구 목록 넣음
         for (String raw : onlineList) {
             if (raw == null) continue;
+            
             String name = raw.trim();
             if (!name.isEmpty()) {
                 onlineNames.add(name);
@@ -119,8 +122,9 @@ public class FriendsListPanel extends JPanel {
         refreshView();
     }
 
+    // 화면 다시 그려주는 함수
     private void refreshView() {
-        removeAll();
+        removeAll(); // 기존 친구 목록을 싹 다 지움
 
         int y = 15;
 
@@ -129,28 +133,18 @@ public class FriendsListPanel extends JPanel {
             if (name.equals(myName)) continue;
 
             FriendProfile fp = profiles.get(name);
+            
             if (fp == null) {
-                // 아직 프로필 정보 안 온 친구면 기본값으로 만들어둠
                 fp = new FriendProfile(name, "", DEFAULT_PROFILE_IMAGE);
                 profiles.put(name, fp);
             }
 
-            // 친구 한 명의 프로필을 표시하는 커스텀 컴포넌트
-            ProfileHeaderView header = new ProfileHeaderView(
-                    fp.name,
-                    fp.statusMessage,
-                    fp.profileImagePath,
-                    50, 50,
-                    ProfileHeaderView.Orientation.HORIZONTAL
-            );
-
-            header.setBounds(30, y,
-                    header.getPreferredSize().width,
-                    header.getPreferredSize().height);
+            ProfileHeaderView header = new ProfileHeaderView(fp.name, fp.statusMessage, fp.profileImagePath, 50, 50, ProfileHeaderView.Orientation.HORIZONTAL);
+            header.setBounds(30, y, header.getPreferredSize().width, header.getPreferredSize().height);
             add(header);
 
             
-            //선택 모드 -> 체크 표시 추가
+            // 선택 모드일 때 체크 표시 추가
             if(isSelectionMode) {
             	if(selectedUsers.contains(name)) {
             		
@@ -164,6 +158,7 @@ public class FriendsListPanel extends JPanel {
             	}
             }
             
+            // 친구 클릭하면 선택/해제 되게 함.
             final String userName = fp.name;
 
 	         MouseAdapter clickListener = new MouseAdapter() {
@@ -173,7 +168,8 @@ public class FriendsListPanel extends JPanel {
 	
 	                 if (selectedUsers.contains(userName)) {
 	                     selectedUsers.remove(userName);
-	                 } else {
+	                 } 
+	                 else {
 	                     selectedUsers.add(userName);
 	                 }
 	                 refreshView();
@@ -182,7 +178,7 @@ public class FriendsListPanel extends JPanel {
 
 	         header.addMouseListener(clickListener);
 	
-	         // header 안의 모든 자식 컴포넌트에도 동일 리스너 달기
+	         // header 안의 모든 자식 컴포넌트에도 클릭 이벤트를 붙임.
 	         for (Component c : header.getComponents()) {
 	             c.addMouseListener(clickListener);
 	         }
@@ -190,15 +186,13 @@ public class FriendsListPanel extends JPanel {
             y += header.getPreferredSize().height + 15;
         }
 
-        int friendslistpanelWidth = 260;
-        int friendslistpanelHeight = Math.max(y, 300);
-        setPreferredSize(new Dimension(friendslistpanelWidth, friendslistpanelHeight));
-
+        setPreferredSize(new Dimension(260, Math.max(y, 300)));
+        
         revalidate();
         repaint();
     }
     
-    //ChoosePerson에서 활용 할 선택된 사용자 목록 가져오는 메서드
+    // ChoosePerson에서 사용할 선택된 사용자 목록 가져오는 메서드
     public Set<String> getSelectedUsers() {
         return selectedUsers;
     }

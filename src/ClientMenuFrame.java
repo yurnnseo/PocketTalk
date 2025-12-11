@@ -1,26 +1,25 @@
 import javax.swing.*;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.Socket;
-import java.util.Arrays;
 import java.util.List;
 
-public class ClientMenuFrame extends JFrame {
+// 로그인 후 보여지는 메인 메뉴 프레임 (화면 전환과 패널 관리만 담당)
+// ClientNetworkInterface를 구현해서 서버에서 온 메시지를 실제 UI 쪽으로 넘김.
 
-    private String username, ip_addr, port_no;
-    private Socket socket;
-    private DataInputStream dis;
-    private DataOutputStream dos;
+public class ClientMenuFrame extends JFrame implements ClientNetworkInterface {
 
-    // 서버에게서 받은 최신 접속자 목록(/list 결과)
-    private String[] currentUserList;
+    private String username;
+    private String ip_addr;
+    private String port_no;
+
+    private ClientNetwork network;  // 서버 통신 담당 
+    private String[] currentUserList; // 최근에 받은 접속자 목록 (/list 결과 저장)
 
     private ClientFriendsMenuPanel friendsPanel;
     private ClientChatingMenuPanel chatPanel;
 
     public ClientMenuFrame(String username, String ip_addr, String port_no) {
-        this.username = (username == null) ? "" : username.trim();
+        
+    	this.username = (username == null) ? "" : username.trim();
         this.ip_addr = ip_addr;
         this.port_no = port_no;
 
@@ -32,150 +31,141 @@ public class ClientMenuFrame extends JFrame {
 
         String profileImagePath = "/Images/defaultprofileimage.png";
 
-        // 메인 패널들 먼저 생성
+        // 친구, 채팅 패널 생성
         friendsPanel = new ClientFriendsMenuPanel(this, this.username, ip_addr, port_no, profileImagePath);
-        chatPanel    = new ClientChatingMenuPanel(this, this.username, ip_addr, port_no);
+        chatPanel = new ClientChatingMenuPanel(this, this.username, ip_addr, port_no);
 
-        // 처음 화면은 친구 목록 화면
-        setContentPane(friendsPanel);
+        setContentPane(friendsPanel); // 처음 화면은 친구 목록 화면
         setVisible(true);
 
-        // 서버 연결
+        
+        // 서버 연결하고 로그인 요청 보냄
         try {
-            socket = new Socket(ip_addr, Integer.parseInt(port_no));
-            dis = new DataInputStream(socket.getInputStream());
-            dos = new DataOutputStream(socket.getOutputStream());
+        	
+        	// ClientNetwork 객체를 만들면서 this(현재 프레임)를 넘겨주면 
+        	// 서버에서 온 메시지를 콜백 함수들(ex. updateUserList 등)로 전달받게 됨.
+            network = new ClientNetwork(ip_addr, Integer.parseInt(port_no), this);
 
-            // 수신 스레드 먼저 시작
-            ListenNetwork net = new ListenNetwork();
-            net.start();
-
-            // 그 다음 로그인 메시지 전송
-            dos.writeUTF("/login " + this.username);
-            dos.flush();
+            // 접속 후 로그인 명령 전송
+            network.sendToServer("/login " + this.username);
 
         } catch (IOException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "서버 연결 실패!");
+            JOptionPane.showMessageDialog(this, "서버 연결 실패!", "오류", JOptionPane.ERROR_MESSAGE);
             System.exit(0);
         }
     }
 
-    class ListenNetwork extends Thread {
-        public void run() {
-            while (true) {
-                try {
-                    String msg = dis.readUTF();
-                    if (msg == null) continue;
-                    msg = msg.trim();
+    
+    // ClientNetworkInterface 구현
 
-                    if (msg.startsWith("/list ")) {
-                        String userListString = msg.substring(6).trim();
+    // 서버한테 받은 사용자 목록(/list)을 클라이언트에게 전달
+    public void updateUserList(final List<String> users) {
+    	
+        // 최근 목록을 배열로 저장해두고 싶으면 이렇게 저장
+        currentUserList = users.toArray(new String[0]);
 
-                        String[] users;
-                        if (userListString.isEmpty()) {
-                            users = new String[0];
-                        } else {
-                            users = userListString.split(" ");
-                        }
-           
-                        for (int i = 0; i < users.length; i++) {
-                            if (users[i] != null) users[i] = users[i].trim();
-                        }
-
-                        currentUserList = users;
-                        List<String> usernames = Arrays.asList(currentUserList);
-
-                        SwingUtilities.invokeLater(() -> {
-                            if (friendsPanel != null) {
-                                friendsPanel.updateFriendList(usernames);
-                            }
-                        });
-                    }
-                    else if (msg.startsWith("/profile ")) {
-
-                        String body = msg.substring("/profile ".length());
-                        String[] tokens = body.split(" ", 3);
-
-                        if (tokens.length >= 2) {
-                            String name      = tokens[0].trim();
-                            String imagePath = tokens[1].trim();
-                            String statusMsg = (tokens.length == 3) ? tokens[2].trim() : "";
-
-                            SwingUtilities.invokeLater(() -> {
-                                if (friendsPanel != null) {
-                                    friendsPanel.updateFriendProfileFromServer(name, imagePath, statusMsg);
-                                }
-                            });
-                        }
-                    }
-                    else if (msg.startsWith("/room ")) {
-                        String body = msg.substring("/room ".length()).trim();
-                        String[] tokens = body.split("\\s+");
-                        if (tokens.length >= 3) {
-                            String roomId       = tokens[0];
-                            String creatorName  = tokens[1];
-                            String membersString = String.join(" ",
-                                    Arrays.copyOfRange(tokens, 2, tokens.length));
-
-                            SwingUtilities.invokeLater(() -> {
-                                if (chatPanel != null) {
-                                    chatPanel.addChatRoom(roomId, creatorName, membersString);
-                                }
-                            });
-                        }
-                    }
-                    
-                    else if (msg.startsWith("/game_start_command ")) {
-                    	String messageBody = msg.substring("/game_start_command ".length()).trim();
-                       
-                        SwingUtilities.invokeLater(() -> {
-                            MiniGameFrame.receiveStartCommand(messageBody); 
-                        });
-                    }
-                    
-                    // 포도 제거 동기화 명령
-                    else if (msg.startsWith("/game_apply_remove ")) {
-                        String messageBody = msg.substring("/game_apply_remove ".length()).trim();
-
-                        SwingUtilities.invokeLater(() -> {
-                            MiniGameFrame.receiveRemoveCommand(messageBody);
-                        });
-                    }
-                    
-                    else if (msg.startsWith("/game_refill ")) {
-                        String body = msg.substring("/game_refill ".length()).trim();
-
-                        SwingUtilities.invokeLater(() -> {
-                            MiniGameFrame.receiveRefillCommand(body);
-                        });
-                    }
-
-                    
-                    else {
-                    	// 일반 채팅 메시지 -> 열려있는 채팅창들에 전달
-                        ChattingFrame.deliverChatMessage(msg);
-                    }
-
-                } catch (IOException e) {
-                    System.out.println("[클라 수신 스레드 종료] " + e.getMessage());
-                    break;
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (friendsPanel != null) {
+                    friendsPanel.updateFriendList(users);
                 }
             }
-        }
+        });
     }
-    
-    public synchronized void sendToServer(String msg) {
-        try {
-            if (dos != null) {
-                dos.writeUTF(msg);
-                dos.flush();
+
+    // 특정 클라이언트의 프로필 정보(/profile)을 클라이언트에게 전달
+    public void updateProfile(final String name, final String imagePath, final String statusMsg) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (friendsPanel != null) {
+                    friendsPanel.updateFriendProfileFromServer(name, imagePath, statusMsg);
+                }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        });
+    }
+
+    // 채팅방 정보(/room)을 클라이언트에게 전달
+    public void updateChatRoom(final String roomId, final String creatorName, final String members) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (chatPanel != null) {
+                    chatPanel.addChatRoom(roomId, creatorName, members);
+                }
+            }
+        });
+    }
+
+    // 미니게임 시작(/game_start_command)을 클라이언트에게 전달
+    public void startGame(final String body) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                MiniGameFrame.receiveStartCommand(body);
+            }
+        });
+    }
+
+    // 게임 내 포도 제거 명령(/game_apply_remove)을 클라이언트에게 전달
+    public void removeGameItem(final String body) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                MiniGameFrame.receiveRemoveCommand(body);
+            }
+        });
+    }
+
+    // 게임 내 포도 재배치 명령(/game_refill)을 클라이언트에게 전달
+    public void refillGameItems(final String body) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                MiniGameFrame.receiveRefillCommand(body);
+            }
+        });
+    }
+
+    // 채팅 메시지를 클라이언트의 채팅 패널에 전달
+    public void receiveChatMessage(final String msg) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                ChattingFrame.deliverChatMessage(msg);
+            }
+        });
+    }
+
+    // 서버 연결이 끊겼다는 정보를 클라이언트에게 전달
+    public void onDisconnected(final IOException e) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                System.out.println("[서버 연결 종료] " + e.getMessage());
+                JOptionPane.showMessageDialog(
+                        ClientMenuFrame.this,
+                        "서버와의 연결이 종료되었습니다.",
+                        "연결 종료",
+                        JOptionPane.WARNING_MESSAGE
+                );
+            }
+        });
+    }
+
+    // ClientNetworkInterface 구현 끝
+    
+
+    // 다른 패널(친구목록, 채팅창 등)에서 서버로 명령을 보내고 싶을 때 사용
+    public void sendToServer(String msg) {
+        if (network != null) {
+            network.sendToServer(msg);
         }
     }
     
+    // 현재 접속자 목록 반환 (채팅 패널에서 새 대화방 만들 때 사용)
+    public java.util.List<String> getCurrentUserList() {
+        if (currentUserList == null) {
+            return java.util.Collections.emptyList(); // 아직 /list를 한 번도 못 받았으면 빈 리스트를 돌려줌.
+        }
+        return java.util.Arrays.asList(currentUserList);
+    }
+
+
     // 화면 전환
     public void showFriendsMenu() {
         setContentPane(friendsPanel);
@@ -189,17 +179,6 @@ public class ClientMenuFrame extends JFrame {
         repaint();
     }
 
-    // getter
-    public DataOutputStream getDataOutputStream() {
-        return dos;
-    }
-
-    public List<String> getCurrentUserList() {
-        if (currentUserList != null) {
-            return Arrays.asList(currentUserList);
-        }
-        return null;
-    }
 
     public String getUsername() {
         return username;

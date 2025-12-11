@@ -10,31 +10,19 @@ public class StartPocketTalkPanel extends JPanel {
     private Image backgroundImg = null;
     private JTextField txtUserName, txtIpAddress, txtPortNumber = null;
     private JButton loginButton = null;
-    private ImageIcon customIcon = new ImageIcon("/Images/metamong.png"); // 사용자 정의 아이콘 (다이얼로그에서 사용)
+    private ImageIcon customIcon = new ImageIcon("/Images/metamong.png"); 
 
-    // 생성자
     public StartPocketTalkPanel(JFrame mainFrame, String initialBackground) {
-        // 로그인창 배경 이미지 불러오기
-    	// 클래스패스 기준으로 불러오기
     	this.backgroundImg = new ImageIcon(getClass().getResource("/" + initialBackground)).getImage();
 
         setLayout(null);
         
-        Font textFont = new Font("맑은 고딕", Font.PLAIN, 14); // 공통 폰트 설정 (일반체)
+        Font textFont = new Font("맑은 고딕", Font.PLAIN, 14); 
 
-        txtUserName = createTextField("", 175, 168, 130, 33, textFont); // 이름 입력 TextField 생성
-        txtIpAddress = createTextField("127.0.0.1", 175, 250, 130, 33, textFont); // IP주소 입력 TextField 생성
-        txtPortNumber = createTextField("30000", 175, 330, 130, 33, textFont); // Port번호 입력 TextField 생성
+        txtUserName = createTextField("", 175, 168, 130, 33, textFont); 
+        txtIpAddress = createTextField("127.0.0.1", 175, 250, 130, 33, textFont); 
+        txtPortNumber = createTextField("30000", 175, 330, 130, 33, textFont); 
         
-//        // 로그인 버튼 생성 -> 로그인 버튼이 눌리면 showClientPanel 함수 실행
-//        loginButton = createButton("loginButton.png", 42, 397, new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//            	showClientPanel(mainFrame); 
-//            }
-//        });
-        
-        // 로그인 버튼 생성 
         loginButton = createButton(42, 397, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -42,32 +30,29 @@ public class StartPocketTalkPanel extends JPanel {
             }
         });
         
-        // 텍스트 필드 3개와 로그인 버튼 패널에 추가
         add(txtUserName);
         add(txtIpAddress);
         add(txtPortNumber);
         add(loginButton);
     }
     
-    // 공통 텍스트필드 생성 함수
     private JTextField createTextField(String text, int x, int y, int w, int h, Font font) {
         JTextField field = new JTextField(text);
         field.setHorizontalAlignment(SwingConstants.CENTER);
         field.setBounds(x, y, w, h);
         field.setColumns(10);
-        field.setOpaque(false); // 배경 투명
+        field.setOpaque(false);
         field.setBorder(BorderFactory.createEmptyBorder()); // 테두리 제거
         field.setForeground(Color.BLACK);
         field.setFont(font);
         return field;
     }
 
-    // 버튼 생성 메소드 (이미지 없이 완전 투명 버튼)
     private JButton createButton(int x, int y, ActionListener action) {
 
-        JButton button = new JButton(); // 이미지 없이 버튼 생성
-        button.setBounds(x, y, 275, 42); // 위치와 크기 설정
-        button.setOpaque(false); // 완전 투명 (배경 없음)
+        JButton button = new JButton(); 
+        button.setBounds(x, y, 275, 42); 
+        button.setOpaque(false); 
         button.setContentAreaFilled(false);
         button.setBorderPainted(false);
         button.setFocusPainted(false);
@@ -106,7 +91,6 @@ public class StartPocketTalkPanel extends JPanel {
             return;
         }
 
-        // 입력값이 모두 제대로 입력되면 showClientPanel 함수를 실행해서 ClientFriendsMenu 실행
         showClientPanel(mainFrame, username, ip_adr, port_no);
     }
  

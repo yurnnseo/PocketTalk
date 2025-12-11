@@ -19,11 +19,8 @@ public class ChoosePerson extends JFrame {
     private JButton okbutton;
     private JLabel choiceLabel;
     
-
-    // ClientMenuFrame을 받아서 저장 (소켓은 거기에만 있음)
     private final ClientMenuFrame parentFrame;
 
-    // === 생성자 ===
     public ChoosePerson(ClientMenuFrame parentFrame, String username, List<String> users) {
         this.parentFrame = parentFrame;
         this.username = username; // 본인 이름
@@ -55,9 +52,9 @@ public class ChoosePerson extends JFrame {
 
         JScrollPane scrollPane = new JScrollPane(parentPanel);
         scrollPane.setBounds(10, 42, 238, 240);
-        scrollPane.getViewport().setOpaque(false); // 배경 투명
+        scrollPane.getViewport().setOpaque(false);
         scrollPane.setOpaque(false);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder()); // 테두리 없음
+        scrollPane.setBorder(BorderFactory.createEmptyBorder()); 
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         contentPane.add(scrollPane);
@@ -68,7 +65,6 @@ public class ChoosePerson extends JFrame {
         choiceLabel.setBounds(85, 5, 80, 30);
         contentPane.add(choiceLabel);
 
-        // 버튼 생성
         okbutton = UIComponentZip.createTextButton("선택 완료", 165, 290, 56, 28, FontSource.get(10f));
         contentPane.add(okbutton);
         
@@ -97,10 +93,9 @@ public class ChoosePerson extends JFrame {
 
                 String members = String.join(" ", membersList);
 
-                // 1) 서버에게 방 생성 요청
+                // 서버에게 방 생성 요청
                 parentFrame.sendToServer("/createroom " + members);
 
-                // 2) 창 닫기 (실제 방 열리는 건 /room 수신 후 사용자가 더블클릭할 때)
                 dispose();
             }
         });

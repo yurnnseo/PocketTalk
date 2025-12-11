@@ -126,16 +126,16 @@ public class MiniGamePanel extends JPanel{
 	    title.setBounds(312, 56, 770, 50);
 	    startPanel.add(title);
 	    
-	    centerimg = new JLabel(resizeIcon("/Images/metamong.png", 120, 120));
-	    centerimg.setBounds(325, 170, 120, 120);
+	    centerimg = new JLabel(resizeIcon("/Images/metamong.png", 100, 100));
+	    centerimg.setBounds(325, 150, 100, 100);
 	    startPanel.add(centerimg);
 
-	    img2 = new JLabel(resizeIcon("/Images/minigrape.png", 100, 100));
-	    img2.setBounds(295, 255, 100, 100);
+	    img2 = new JLabel(new ImageIcon(getClass().getResource("/Images/minigrape.png")));
+	    img2.setBounds(231, 256, 110, 120);  
 	    startPanel.add(img2);
 
-	    img3 = new JLabel(resizeIcon("/Images/minigrape.png", 100, 100));
-	    img3.setBounds(365, 265, 100, 100);
+	    img3 = new JLabel(new ImageIcon(getClass().getResource("/Images/minigrape.png")));
+	    img3.setBounds(390, 281, 110, 120);
 	    startPanel.add(img3);
 	    
 	    startbtn = UIComponentZip.createTextButton("게임 시작", 310,420, 150,50,font);

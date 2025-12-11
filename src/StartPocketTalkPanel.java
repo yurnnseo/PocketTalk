@@ -5,6 +5,9 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+// PocketTalk 시작 화면 패널 (로그인 화면)
+// 이름, IP 주소, 포트 입력 후 로그인 버튼 클릭 시 ClientMenuFrame으로 이동
+
 public class StartPocketTalkPanel extends JPanel {
 
     private Image backgroundImg = null;
@@ -13,20 +16,22 @@ public class StartPocketTalkPanel extends JPanel {
     private ImageIcon customIcon = new ImageIcon("/Images/metamong.png"); 
 
     public StartPocketTalkPanel(JFrame mainFrame, String initialBackground) {
+    	Font textFont = new Font("맑은 고딕", Font.PLAIN, 14); // 폰트 설정
+    	
+    	// 배경 이미지 설정
     	this.backgroundImg = new ImageIcon(getClass().getResource("/" + initialBackground)).getImage();
-
         setLayout(null);
-        
-        Font textFont = new Font("맑은 고딕", Font.PLAIN, 14); 
 
+        // 이름, IP 주소, 포트를 입력할 textField 생성
         txtUserName = createTextField("", 175, 168, 130, 33, textFont); 
         txtIpAddress = createTextField("127.0.0.1", 175, 250, 130, 33, textFont); 
         txtPortNumber = createTextField("30000", 175, 330, 130, 33, textFont); 
         
+        // 로그인 버튼 생성
         loginButton = createButton(42, 397, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                onLogin(mainFrame);
+                onLogin(mainFrame); // onLogin() 함수를 호출해서 로그인 처리, 화면 전환 처리함.
             }
         });
         
@@ -36,23 +41,24 @@ public class StartPocketTalkPanel extends JPanel {
         add(loginButton);
     }
     
+    // 투명 TextField 생성 메소드
     private JTextField createTextField(String text, int x, int y, int w, int h, Font font) {
         JTextField field = new JTextField(text);
         field.setHorizontalAlignment(SwingConstants.CENTER);
         field.setBounds(x, y, w, h);
         field.setColumns(10);
-        field.setOpaque(false);
+        field.setOpaque(false); // 배경 투명
         field.setBorder(BorderFactory.createEmptyBorder()); // 테두리 제거
         field.setForeground(Color.BLACK);
         field.setFont(font);
         return field;
     }
 
+    // 투명 버튼 생성 메소드
     private JButton createButton(int x, int y, ActionListener action) {
-
         JButton button = new JButton(); 
         button.setBounds(x, y, 275, 42); 
-        button.setOpaque(false); 
+        button.setOpaque(false); // 배경 투명
         button.setContentAreaFilled(false);
         button.setBorderPainted(false);
         button.setFocusPainted(false);
@@ -91,10 +97,11 @@ public class StartPocketTalkPanel extends JPanel {
             return;
         }
 
+        // 이름, IP주소, 포트 번호를 확인한 뒤 showClientPanel 메소드 실행
         showClientPanel(mainFrame, username, ip_adr, port_no);
     }
  
-    // 컨텐트팬을 ClientFriendsMenu으로 교체
+    // StartPocketTalkFrame을 닫고 ClientMenuFrame을 실행
     private void showClientPanel(JFrame mainFrame, String username, String ip_addr, String port_no) {
     	mainFrame.dispose();
     	ClientMenuFrame cmf = new ClientMenuFrame(username, ip_addr, port_no); // JFrame이어야 함

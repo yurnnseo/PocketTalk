@@ -1,3 +1,4 @@
+// GUI+서버 로직 담당 서버 패널
 import java.awt.event.*;
 import java.io.*;
 import java.net.*;
@@ -6,7 +7,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 public class JavaChatServerPanel extends JPanel {
-
     private static final long serialVersionUID = 1L;
 
     private JTextArea textArea;
@@ -27,8 +27,8 @@ public class JavaChatServerPanel extends JPanel {
     private static final String CHATROOM_TXT_FILE = "./chat_rooms.txt";
     private static final String CHAT_LOG_DIR      = "./chat_logs";
 
+    // 채팅방 정보 관리 맵
     private Map<String, ChatRoomInfo> chatRooms = Collections.synchronizedMap(new LinkedHashMap<>());
-
 
     public JavaChatServerPanel() {
         setLayout(null);
@@ -43,6 +43,7 @@ public class JavaChatServerPanel extends JPanel {
         textArea.setEditable(false);
         scrollPane.setViewportView(textArea);
         
+        // 채팅 로그 디렉토리 생성
         File logDir = new File(CHAT_LOG_DIR);
         if (!logDir.exists()) logDir.mkdir();
 
@@ -95,10 +96,38 @@ public class JavaChatServerPanel extends JPanel {
         btnServerStart.setEnabled(false);
         txtPortNumber.setEnabled(false);
 
+        // 클라이언트 접속 대기하는 스레드 시작
         AcceptServer accept_server = new AcceptServer();
         accept_server.start();
     }
 
+    // 창 종료 시 호출되어 서버 종료
+    public void shutdownServer() {
+        synchronized (UserVec) {
+            for (UserService u : UserVec) {
+                try {
+                    u.WriteOne("/server_shutdown");
+                } catch (Exception ignore) {}
+            }
+        }
+
+        try {
+            if (socket != null && !socket.isClosed()) socket.close();
+        } catch (IOException e) {
+            log("에러", "서버 소켓 종료 중 오류: " + e.getMessage());
+        }
+
+        synchronized (UserVec) {
+            for (UserService u : UserVec) {
+                u.closeConnection();
+            }
+            UserVec.clear();
+        }
+
+        saveProfilesToTxt();
+        log("시스템", "서버 및 클라이언트 연결 정리 완료.");
+    }
+    
     // 클라이언트 접속하면 클라이언트를 UserVec에 넣고 클라이언트 한 명당 스레드 생성
     class AcceptServer extends Thread {
         @Override
@@ -134,14 +163,14 @@ public class JavaChatServerPanel extends JPanel {
             String line;
             int count = 0;
 
-            while ((line = br.readLine()) != null) {
+            while ((line = br.readLine()) != null) { // 파일 한 줄씩 읽기
                 String[] tokens = line.split("\\|", 3);
                 if (tokens.length == 3) {
                     String name   = tokens[0].trim();
                     String status = tokens[1].trim();
                     String img    = tokens[2].trim();
 
-                    clientProfiles.put(name, new ClientProfile(name, status, img));
+                    clientProfiles.put(name, new ClientProfile(name, status, img)); // 맵에 저장
                     count++;
                 }
             }
@@ -151,12 +180,13 @@ public class JavaChatServerPanel extends JPanel {
         }
     }
 
+    // 맵의 데이터를 파일에 저장
     public void saveProfilesToTxt() {
         try {
             File f = new File(CLIENT_TXT_FILE);
             
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(f))) {
-                synchronized (clientProfiles) {
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(f))) { // 파일 쓰기 후 자동으로 닫히게
+                synchronized (clientProfiles) { // 데이터 무결성 위함
                 	
                 	log("프로필", "==============================");
                     log("프로필", "TXT로 저장할 프로필 목록 ↓");
@@ -184,34 +214,9 @@ public class JavaChatServerPanel extends JPanel {
         } catch (Exception e) {
             log("프로필", "TXT 저장 오류: " + e.getMessage());
         }
-    }
-
-    public void shutdownServer() {
-        synchronized (UserVec) {
-            for (UserService u : UserVec) {
-                try {
-                    u.WriteOne("/server_shutdown");
-                } catch (Exception ignore) {}
-            }
-        }
-
-        try {
-            if (socket != null && !socket.isClosed()) socket.close();
-        } catch (IOException e) {
-            log("에러", "서버 소켓 종료 중 오류: " + e.getMessage());
-        }
-
-        synchronized (UserVec) {
-            for (UserService u : UserVec) {
-                u.closeConnection();
-            }
-            UserVec.clear();
-        }
-
-        saveProfilesToTxt();
-        log("시스템", "서버 및 클라이언트 연결 정리 완료.");
-    }
+    }  
     
+    // txt파일에서 데이터 로드
     private void loadChatRoomsFromTxt() {
         File file = new File(CHATROOM_TXT_FILE);
         if (!file.exists()) {
@@ -224,14 +229,14 @@ public class JavaChatServerPanel extends JPanel {
             int count = 0;
 
             while ((line = br.readLine()) != null) {
-                // roomId|creator|member1,member2,member3
+                // 형식:roomId|creator|member1,member2,member3
                 String[] tokens = line.split("\\|", 3);
                 if (tokens.length == 3) {
                     String roomId   = tokens[0].trim();
                     String creator  = tokens[1].trim();
                     String membersStr = tokens[2].trim();
 
-                    List<String> members = new ArrayList<>();
+                    List<String> members = new ArrayList<>(); // 멤버 문자열을 List로 변환
                     if (!membersStr.isEmpty()) {
                         for (String m : membersStr.split(",")) {
                             String n = m.trim();
@@ -252,14 +257,15 @@ public class JavaChatServerPanel extends JPanel {
         }
     }
 
+    //  chatRooms 맵의 데이터를 파일에 저장
     private void saveChatRoomsToTxt() {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(CHATROOM_TXT_FILE))) {
             synchronized (chatRooms) {
                 for (ChatRoomInfo c : chatRooms.values()) {
-                    String membersStr = String.join(",", c.getMembers());
+                    String membersStr = String.join(",", c.getMembers()); // 멤버 리스트를 하나의 문자열로
                     String line = c.getRoomId() + "|" + c.getCreator() + "|" + membersStr;
                     bw.write(line);
-                    bw.newLine();
+                    bw.newLine(); //줄바꿈
                 }
             }
             log("채팅방", "TXT 채팅방 저장 완료: " + chatRooms.size() + "개");
@@ -268,7 +274,7 @@ public class JavaChatServerPanel extends JPanel {
         }
     }
 
-    
+    // 고유 채팅방 Id 생성/반환
     private synchronized String generateRoomId() {
         return "R" + System.currentTimeMillis();
     }
@@ -278,7 +284,8 @@ public class JavaChatServerPanel extends JPanel {
         private DataInputStream dis;
         private DataOutputStream dos;
         private Socket client_socket;
-        private Vector<UserService> user_vc;
+        private Vector<UserService> user_vc; // 서버 전체 접속자 목록
+        // 클라이언트 정보
         private String UserName = "";
         private ClientProfile clientProfile;
 
@@ -294,6 +301,7 @@ public class JavaChatServerPanel extends JPanel {
             }
         }
 
+        // 하나의 메시지 전송
         public void WriteOne(String msg) {
             try {
                 dos.writeUTF(msg);
@@ -305,18 +313,21 @@ public class JavaChatServerPanel extends JPanel {
             }
         }
 
+        // 접속 중인 모든 클라이언트에게 메시지 브로드캐스트
         public void WriteAll(String str) {
             for (UserService user : user_vc) {
                 user.WriteOne(str);
             }
         }
 
+        // 프로필 관리
         private void applyProfileChange(String newName, String newImagePath, String newStatus) {
             String oldName = UserName;
 
-            synchronized (clientProfiles) {
+            synchronized (clientProfiles) { // 프로필 맵 동시 접근 방지
                 ClientProfile p = clientProfiles.get(UserName);
 
+                // 프로필 객체 생성/업데이트
                 if (p == null) {
                     p = new ClientProfile(newName, newStatus, newImagePath);
                 } else {
@@ -326,6 +337,7 @@ public class JavaChatServerPanel extends JPanel {
                     p.setName(newName);
                 }
 
+                // 이름 변경
                 if (!newName.equals(UserName)) {
                     clientProfiles.remove(UserName);
                     clientProfiles.put(newName, p);
@@ -343,17 +355,15 @@ public class JavaChatServerPanel extends JPanel {
                     ", 상태: " + clientProfile.getStatusMessage() +
                     ", 이미지: " + clientProfile.getProfileImagePath());
 
-            saveProfilesToTxt();
+            saveProfilesToTxt(); // 변경 정보 파일에 저장
 
-            // 전체 프로필 다시 뿌리기
-            broadcastAllProfilesToAllClients();
-
-            // 접속자 목록도 다시 전송 (이름 바뀌었을 수도 있으니까)
+            // 변경사항 브로드캐스트
+            broadcastAllProfilesToAllClients();           
             BroadcastUserList();
         }
 
         // 이 유저에게 서버가 알고 있는 모든 프로필 정보 보내기
-        @SuppressWarnings("unused")
+        @SuppressWarnings("unused") // 추후에 쓸 메서드임을 알리기 위한 명령어
         private void sendAllProfilesToThisUser() {
             synchronized (clientProfiles) {
                 for (ClientProfile p : clientProfiles.values()) {
@@ -366,6 +376,7 @@ public class JavaChatServerPanel extends JPanel {
             }
         }
 
+        // 등록된 모든 클라이언트 이름을 전체에게 알림
         public void BroadcastUserList() {
             StringBuilder sb = new StringBuilder("/list ");
 
@@ -388,8 +399,7 @@ public class JavaChatServerPanel extends JPanel {
         }
 
 
-        // 한 명 변경 후 전체에게 변경분만 보내는 함수 쓰려면 여기 사용
-        @SuppressWarnings("unused")
+        // 한 명 변경 후 전체에게 변경분만 보내는 함수 쓰려면 여기 사용      
         private void broadcastProfileUpdate() {
             if (clientProfile == null) return;
             String msg = "/profile " + clientProfile.getName().trim() + " " +
@@ -415,6 +425,7 @@ public class JavaChatServerPanel extends JPanel {
             }
         }
 
+        // 연결 종료 시 호출
         public void closeConnection() {
             try {
                 if (dos != null) dos.close();
@@ -456,6 +467,7 @@ public class JavaChatServerPanel extends JPanel {
             return null;
         }
         
+        // 사용자가 참여하고 있는 채팅방 목록 정보를 개별적 전송
         private void sendMyChatRooms() {
             synchronized (chatRooms) {
                 for (ChatRoomInfo c : chatRooms.values()) {
@@ -469,7 +481,7 @@ public class JavaChatServerPanel extends JPanel {
             }
         }
 
-        
+        // 클라이언트로부터 특정 채팅방으로 메시지가 수신되었을 때
         private void handleRoomMessage(String roomId, String text) {
             ChatRoomInfo room;
             synchronized (chatRooms) {
@@ -484,6 +496,7 @@ public class JavaChatServerPanel extends JPanel {
 
             // 로그 파일에 저장
             File logFile = new File(CHAT_LOG_DIR, roomId + ".txt");
+            // true로 파일에 메시지 추가 기록
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(logFile, true))) {
                 bw.write(fullLine);
                 bw.newLine();
@@ -502,13 +515,14 @@ public class JavaChatServerPanel extends JPanel {
             }
         }
 
+        // 특정 채팅방의 저장된 채팅 기록을 사용자에게 전송
         private void sendRoomHistory(String roomId) {
             File logFile = new File(CHAT_LOG_DIR, roomId + ".txt");
             if (!logFile.exists()) return;
 
             try (BufferedReader br = new BufferedReader(new FileReader(logFile))) {
                 String line;
-                while ((line = br.readLine()) != null) {
+                while ((line = br.readLine()) != null) { // 각 줄을 메시지 형식으로 만들어서 전송
                     String sendMsg = "/msg " + roomId + " " + line;
                     WriteOne(sendMsg); 
                 }
@@ -522,7 +536,7 @@ public class JavaChatServerPanel extends JPanel {
         public void run() {
             while (true) {
                 try {
-                    // 첫 메시지: "/login username"
+                    // 첫 메시지 수신: "/login username"
                     String line1 = dis.readUTF();
                     String[] msg = line1.split(" ", 2);
 
@@ -534,6 +548,7 @@ public class JavaChatServerPanel extends JPanel {
                     UserName = msg[1].trim();
                     log("인증", "로그인 요청: " + UserName);
 
+                    // 프로필 로드/신규 생성
                     synchronized (clientProfiles) {
                         clientProfile = clientProfiles.get(UserName);
                         if (clientProfile == null) {
@@ -553,7 +568,7 @@ public class JavaChatServerPanel extends JPanel {
                             clientProfile.getStatusMessage() +
                             ", 이미지: " + clientProfile.getProfileImagePath());
 
-                    // 모든 프로필 /list 전송
+                    // 모든 프로필 초기 정보(/list) 전송
                     broadcastAllProfilesToAllClients(); 
                     BroadcastUserList();                
                     
@@ -675,7 +690,7 @@ public class JavaChatServerPanel extends JPanel {
                             String canceler = UserName; // 취소한 사람
                             String target = "";         // 상대방 이름
                             
-                            if (participants.length == 2) {
+                            if (participants.length == 2) { // 취소자가 아닌 쪽이 상대방
                                 target = participants[0].equals(canceler) ? participants[1] : participants[0];
                             }
                             
@@ -698,7 +713,8 @@ public class JavaChatServerPanel extends JPanel {
                         }
                                                
                         //게임 즉시 시작 요청 처리
-                        if (chat_msg.startsWith("/game_start_ready ")) {                          
+                        // /game_start명령 수신 후 실제 게임 시작 직전에 데이터 요청 
+                        if (chat_msg.startsWith("/game_start_ready ")) {                      	                        
                             String opponentName = chat_msg.substring("/game_start_ready ".length()).trim();
                             String sender = UserName;
 
@@ -733,11 +749,11 @@ public class JavaChatServerPanel extends JPanel {
                                 // 3. 게임 시작 명령에 포도 데이터 포함
                                 String participantsLine = sender + "," + opponentName;
                                 
-                                // LEFT를 할당
+                                // sender에게 전송
                                 String senderCmd ="/game_start_command " + participantsLine + " LEFT " + finalGrapeData_SENDER + " " + finalGrapeData_OPPONENT;                              
                                 sendToSpecificUsers(senderCmd, sender);
 
-                                //  RIGHT를 할당
+                                // opponentName에게 전송
                                 String receiverCmd = "/game_start_command " + participantsLine + " RIGHT " + finalGrapeData_OPPONENT + " " + finalGrapeData_SENDER;
                                 sendToSpecificUsers(receiverCmd, opponentName);
                                 
@@ -765,7 +781,7 @@ public class JavaChatServerPanel extends JPanel {
                                 // 클라이언트들에게 보낼 명령
                                 String forward = "/game_apply_remove " + ownerName + " " + coordString;
 
-                                // 두 명에게만 전송 (본인 + 상대)
+                                // 두 명에게만 전송 (본인 + 상대), 보드 동기화
                                 sendToSpecificUsers(forward, ownerName, opponentName);
 
                                 log("게임", "포도 제거 브로드캐스트: " + forward);
@@ -810,7 +826,7 @@ public class JavaChatServerPanel extends JPanel {
                             continue;
                         }
                         
-                    	// 포도게임 결과 처리 (roomId를 포함해서 받음)
+                    	// 포도게임 결과 처리/채팅방 로그 기록
                         if (chat_msg.startsWith("/game_result ")) {
                             // 형식: /game_result roomId user1 user2 summary...
                             String body = chat_msg.substring("/game_result ".length()).trim();
@@ -860,7 +876,7 @@ public class JavaChatServerPanel extends JPanel {
                         }
 
 
-                        // 방 메시지: /msg roomId 내용
+                        // 채팅방 메시지 전송 (/msg roomId 내용)
                         if (chat_msg.startsWith("/msg ")) {
                             String body = chat_msg.substring("/msg ".length()).trim();
                             int firstSpace = body.indexOf(' ');
@@ -872,8 +888,7 @@ public class JavaChatServerPanel extends JPanel {
                             handleRoomMessage(roomId, text);
                             continue;
                         }
-
-                        
+                       
                         // 일반 채팅
                         log("메시지", UserName + " : " + chat_msg);
                         WriteAll(UserName + " : " + chat_msg + "\n");
@@ -884,6 +899,7 @@ public class JavaChatServerPanel extends JPanel {
                     closeConnection();
                     UserVec.removeElement(this);
                     log("접속", UserName + " 님 퇴장. 현재 접속자 수: " + UserVec.size() + "명");
+                    
                     BroadcastUserList();
                     break;
                 }

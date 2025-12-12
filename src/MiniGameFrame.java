@@ -1,12 +1,10 @@
+// 게임 창 + 서버 명령 수신 프레임
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 
-// 창 + 서버 명령 수신
-
 public class MiniGameFrame extends JFrame {
-	
 	private MiniGamePanel gamestartpanel;
 	private ClientMenuFrame parentFrame;
 	private static MiniGameFrame activeInstance;
@@ -30,7 +28,6 @@ public class MiniGameFrame extends JFrame {
                 // 이 프레임이 닫힐 때, activeInstance를 해제
                 if (activeInstance == MiniGameFrame.this) {
                     activeInstance = null;
-                    //System.out.println("MiniGameFrame이 닫혔습니다. activeInstance 해제됨.");
                 }
             }
         });
@@ -40,6 +37,7 @@ public class MiniGameFrame extends JFrame {
         setVisible(true);
     }
 	
+	// 서버에게서 받은 /game_start 명령 처리
 	public static void receiveStartCommand(String messageBody) {
 		if (activeInstance != null) {
 	        
@@ -50,6 +48,7 @@ public class MiniGameFrame extends JFrame {
 	            System.err.println("오류: 포도 데이터가 누락되었습니다: " + messageBody);
 	            return;
 	        }
+	        
 	        String mySide = parts[1].trim(); 
 	        String myGrapeDataPart = parts[2].trim();
 	    	String opponentGrapeDataPart = parts[3].trim();
@@ -62,7 +61,7 @@ public class MiniGameFrame extends JFrame {
 	    	int[] opponentGrapeValues = parseGrapeData(opponentGrapeDataPart, "상대방 포도 데이터");
 	    	if (opponentGrapeValues == null) return;
 	    	
-	    	// 4. 파싱된 데이터로 게임 시작
+	    	// 4. 포도 초기화&파싱된 데이터로 게임 시작
 	    	activeInstance.gamestartpanel.initializeGrapes(myGrapeValues, opponentGrapeValues, mySide); 
 	    	activeInstance.gamestartpanel.startSynchronizedGame();
 	        
@@ -71,9 +70,9 @@ public class MiniGameFrame extends JFrame {
         }
     }
 	
-	// 서버에서 받은 /game_apply_remove 처리
+	// 서버에게서 받은 /game_apply_remove 명령 처리
+	// messageBody 형식: "ownerName r1,c1;r2,c2;..."
 	public static void receiveRemoveCommand(String messageBody) {
-	    // messageBody 형식: "ownerName r1,c1;r2,c2;..."
 	    if (activeInstance == null) {
 	        System.err.println("MiniGameFrame 활성 인스턴스 없음 (/game_apply_remove 무시)");
 	        return;
@@ -86,12 +85,12 @@ public class MiniGameFrame extends JFrame {
 	    }
 
 	    String ownerName   = parts[0].trim();
-	    String coordString = parts[1].trim();
+	    String coordString = parts[1].trim(); // 제거 좌표 목룍
 
 	    activeInstance.gamestartpanel.handleRemoteRemoveMessage(ownerName, coordString);
 	}
 	
-	// 서버에서 받은 /game_refill 처리
+	// 서버에게서 받은 /game_refill 명령 처리
 	public static void receiveRefillCommand(String messageBody) {
 	    if (activeInstance == null) {
 	        System.err.println("MiniGameFrame 활성 인스턴스 없음 (/game_refill 무시)");
@@ -109,6 +108,7 @@ public class MiniGameFrame extends JFrame {
 
 	    String[] valueStrings = valuesPart.split(",");
 	    int[] grapeValues = new int[valueStrings.length];
+	    
 	    try {
 	        for (int i = 0; i < valueStrings.length; i++) {
 	            grapeValues[i] = Integer.parseInt(valueStrings[i].trim());
@@ -121,6 +121,7 @@ public class MiniGameFrame extends JFrame {
 	    activeInstance.gamestartpanel.handleRefillMessage(ownerName, grapeValues);
 	}
 
+	// 포도 데이터 문자열을 int배열로 파싱
 	private static int[] parseGrapeData(String grapeDataPart, String label) {
 	    String[] valueStrings = grapeDataPart.split(",");
 	    int[] grapeValues = new int[valueStrings.length];

@@ -1,4 +1,4 @@
-// UI/타이머/이름 + 마우스 이벤트만
+// UI 전담/타이머/서버 통신/마우스 드래그 담당 메인 패널
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -42,7 +42,7 @@ public class MiniGamePanel extends JPanel{
     
 	private ImageIcon[] grapeIcons; // 4가지 포도 이미지 아이콘
 	
-	// 게임판/선택/로직
+	// 게임 핵심 로직(보드/선택/로직 관리)
     private MiniGrapeGrid leftGrid;
     private MiniGrapeGrid rightGrid;
     private MiniGrapeSelectionController selectionController;
@@ -59,11 +59,11 @@ public class MiniGamePanel extends JPanel{
     private final int START_X_LEFT = 30;  // 왼쪽 영역 시작 X 좌표
     private final int START_X_RIGHT = 410;
     
-    // 드래그 관련
+    // 드래그 위치 기록
     private Point dragStartPoint = null;
     private Point dragCurrentPoint = null;
     
-    // 타이머 + 게임 종료 여부 + 점수 관련 필드 추가
+    // 타이머 + 게임 종료 여부
     private MiniGrapeTimerPanel timerPanel;
     private boolean gameOver = false;
     
@@ -92,16 +92,16 @@ public class MiniGamePanel extends JPanel{
         grapeIcons[2] = new ImageIcon(getClass().getResource("/Images/grape3.png"));
         grapeIcons[3] = new ImageIcon(getClass().getResource("/Images/grape4.png"));
 
-        // 그리드 / 선택컨트롤러 / 매니저 생성
+        // 보드 초기화
         leftGrid = new MiniGrapeGrid(this, START_X_LEFT, START_Y, GRAPE_WIDTH, GRAPE_HEIGHT, X_GAP, Y_GAP, grapeIcons, true);
         rightGrid = new MiniGrapeGrid(this, START_X_RIGHT, START_Y, GRAPE_WIDTH, GRAPE_HEIGHT, X_GAP, Y_GAP, grapeIcons, false);
 
+        // 선택/로직 컨트롤러 초기화
         selectionController = new MiniGrapeSelectionController();
         grapeGameManager = new MiniGrapeGameManager(
                 leftGrid.getBoard(),
                 rightGrid.getBoard()
         );
-
         gameController = new MiniGrapeGameController(
                 this,
                 leftGrid,
@@ -112,6 +112,8 @@ public class MiniGamePanel extends JPanel{
                 oppenetName
         );
 
+        
+        // 게임 시작 UI
 		//첫 번째 패널
         startPanel = new JPanel();
         startPanel.setLayout(null);
@@ -126,6 +128,7 @@ public class MiniGamePanel extends JPanel{
 	    title.setBounds(312, 56, 770, 50);
 	    startPanel.add(title);
 	    
+	    // 중앙 이미지
 	    centerimg = new JLabel(resizeIcon("/Images/metamong.png", 100, 100));
 	    centerimg.setBounds(325, 150, 100, 100);
 	    startPanel.add(centerimg);
@@ -143,7 +146,7 @@ public class MiniGamePanel extends JPanel{
 	    startPanel.add(startbtn);
 	    startPanel.add(howtoplaybtn);
 
-	    // 패널 변경 위한 선언
+	    // 게임 방법 패널 변경
 	    rulepanel = new MiniGameRulePanel(this);
 	    rulepanel.setBounds(0, 0, 770, 600);
 	    rulepanel.setVisible(false);
@@ -167,7 +170,7 @@ public class MiniGamePanel extends JPanel{
         }); 	
 	}
 	
-	// 이름과 점수를 한 줄로 표시하는 라벨 갱신
+	// 이름과 점수 표시 라벨
 	private void updateScoreTitle() {
 		String text = oppenetName + " : " + opponentScore
                 + "   VS   "
@@ -183,7 +186,7 @@ public class MiniGamePanel extends JPanel{
 	    updateScoreTitle(); 
 	}
 	
-	
+	// 서버로 메시지 전송
 	public void sendRemoveToServer(String ownerName, String opponentName, String coordString) {
 	    parentFrame.sendToServer(
 	            "/game_remove " + ownerName + " " + opponentName + " " + coordString
@@ -194,25 +197,24 @@ public class MiniGamePanel extends JPanel{
 	    parentFrame.sendToServer("/game_refill_request " + ownerName + " " + opponentName);
 	}
 	
+	// 서버에게서 상대가 제거한 포도 정보 수신
 	public void handleRemoteRemoveMessage(String ownerName, String coordString) {
 	    if (gameOver) return;
-
-	    // 1. 점수/제거 로직을 Controller에게 위임
 	    gameController.applyRemoteRemove(ownerName, coordString);
 	  
 	    revalidate();
 	    repaint();
 	}
 
+	// 서버에게서 보드 리필 정보 수신
 	public void handleRefillMessage(String ownerName, int[] grapeValues) {
-	    // 로직을 Controller에게 위임
 	    gameController.applyRefill(ownerName, grapeValues);
 	    
 	    revalidate();
 	    repaint();
 	}
 	
-	// 서버에서 포도 숫자들을 받았을 때 호출됨
+	// 게임 시작 시 서버에서 포도 숫자들을 받았을 때 호출됨
 	public void initializeGrapes(int[] myGrapeValues, int[] opponentGrapeValues, String mySide) {       
 		this.mySide = mySide;
 
@@ -221,21 +223,21 @@ public class MiniGamePanel extends JPanel{
 
 	    int index = 0;
 
-	    rightGrid.fillFromValues(myGrapeValues, index, mouseListener, motionListener);
+	    rightGrid.fillFromValues(myGrapeValues, index, mouseListener, motionListener); // 오른쪽 내 보드로 고정
 	    leftGrid.fillFromValues(opponentGrapeValues, index, mouseListener, motionListener);
 	    
-	    updateScoreTitle(); // 점수/이름 표시 갱신
+	    updateScoreTitle();
 	    
 	    revalidate();
 	    repaint();
     }
 
-    // 선택된 포도 계산해서 제거
+    // 드래그된 포도 계산해서 제거
     class GrapeMouseMotionListener extends MouseMotionAdapter {
         @Override
         public void mouseDragged(MouseEvent e) {
         	
-        	if (gameOver) return; // 시간 끝나면 드래그 무시
+        	if (gameOver) return;
         	
             if (dragStartPoint != null) {
                 dragCurrentPoint = e.getLocationOnScreen();
@@ -250,6 +252,7 @@ public class MiniGamePanel extends JPanel{
                     dragCurrentPoint.y - getLocationOnScreen().y
                 );
                 
+                // 영역 생성
                 int x = Math.min(startPanelPoint.x, currentPanelPoint.x);
                 int y = Math.min(startPanelPoint.y, currentPanelPoint.y);
                 int w = Math.abs(startPanelPoint.x - currentPanelPoint.x);
@@ -258,7 +261,6 @@ public class MiniGamePanel extends JPanel{
                 
                 // 항상 "오른쪽 보드(나)"만 드래그의 대상
                 JLabel[][] myBoard = rightGrid.getBoard();
-
                 // 드래그 영역에 포함된 포도 선택/테두리 표시
                 selectionController.updateSelection(myBoard, dragRect);
 
@@ -284,7 +286,7 @@ public class MiniGamePanel extends JPanel{
         public void mouseReleased(MouseEvent e) {
         	
         	if (gameOver) return; 
-        	gameController.tryRemoveSelected();
+        	gameController.tryRemoveSelected(); // 선택된 포도 묶음 제거
             
             resetSelectionAndDrag();
             revalidate();
@@ -299,7 +301,7 @@ public class MiniGamePanel extends JPanel{
     }
 	 
 
-    // 서버에게 명령 받아 양쪽 클라이언트가 동시에 게임 시작
+    // 서버 신호로 양쪽 클라이언트가 동시에 게임 시작
     public void startSynchronizedGame() {
         startPanel.setVisible(false); 
 
@@ -309,16 +311,15 @@ public class MiniGamePanel extends JPanel{
         opponentScore = 0;
         updateScoreTitle();
 
-        // 이전 타이머가 있으면 제거
+        // 기존 타이머 제거
         if (timerPanel != null) {
             timerPanel.stopTimer();
             remove(timerPanel);
             timerPanel = null;
         }
 
-        // 60초짜리 타이머 패널 생성 + 콜백 (시간 끝났을 때)
+        // 60초짜리 타이머 패널 생성 + 콜백
         timerPanel = new MiniGrapeTimerPanel(60, () -> onTimeOver());
-
         timerPanel.setBounds(0, 0, 780, 30);
         add(timerPanel);
 
@@ -326,7 +327,7 @@ public class MiniGamePanel extends JPanel{
         repaint();
     }
     
-    // 시간이 끝났을 때 호출되는 메서드
+    // 시간 종료 시 호출되는 메서드
     private void onTimeOver() {
         gameOver = true;
 
@@ -362,7 +363,7 @@ public class MiniGamePanel extends JPanel{
             // 2. 서버로 결과 전송
             parentFrame.sendToServer(
                     "/game_result " 
-                    + roomId + " "          // ⭐ 가장 먼저 roomId
+                    + roomId + " "          // 가장 먼저 roomId
                     + userName + " " 
                     + oppenetName + " " 
                     + summaryForChat + "\n"
@@ -385,12 +386,12 @@ public class MiniGamePanel extends JPanel{
             g.drawImage(backgroundImg, 0, 0, getWidth(), getHeight(), this);
         }
 
-        // 화면 분할 선
+        // 가운데 분할 선
         g.setColor(Color.LIGHT_GRAY);
         g.fillRect(380, 130, 1, getHeight() - 130);
     } 
     
-    //이미지 크기에 맞추기
+    //이미지 크기 조절
     private ImageIcon resizeIcon(String path, int w, int h) {
         ImageIcon icon = new ImageIcon(getClass().getResource(path));
         Image img = icon.getImage();
@@ -398,6 +399,7 @@ public class MiniGamePanel extends JPanel{
         return new ImageIcon(scaled);
     }
 
+    // 패널 전환
     // 게임 시작 패널 호출
     public void showStartPanel() {
         startPanel.setVisible(true);  

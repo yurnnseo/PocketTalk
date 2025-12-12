@@ -21,19 +21,6 @@ public class ChatRoomListPanel extends JPanel {
         setLayout(null);
         setOpaque(false);
     }
-
-    // ,를 넣어서 채팅방 이름을 만드는 메소드
-    private String makeRoomTitle(String membersString) {
-        String[] names = membersString.trim().split("\\s+");
-
-        if (names.length == 1) return names[0];
-
-        if (names.length == 2) {
-            return names[0] + ", " + names[1];
-        }
-
-        return String.join(", ", names);
-    }
     
     // 새 채팅방을 채팅 목록에 추가할 때 호출
     public void addRoom(String roomId, String creatorName, String membersString) {
@@ -62,7 +49,7 @@ public class ChatRoomListPanel extends JPanel {
 
             String membersString = String.join(" ", room.getMembers());
 
-            String roomTitle = makeRoomTitle(membersString);
+            String roomTitle = UIComponentZip.makeChatRoomTitle(membersString);
 
             // 프로필 + 채팅방 멤버로 붙임.
             ProfileHeaderView header = new ProfileHeaderView(roomTitle, "", DEFAULT_PROFILE_IMAGE, 50, 50, ProfileHeaderView.Orientation.HORIZONTAL);

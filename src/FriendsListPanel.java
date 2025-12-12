@@ -88,12 +88,12 @@ public class FriendsListPanel extends JPanel {
         else {
             fp.name = name;
 
-            // 새로 받은 상태메시지가 "실제 내용"이 있을 때만 덮어씀
+            // 새로 받은 상태메시지가 내용이 있을 때만 덮어씀.
             if (statusMessage != null && !statusMessage.isEmpty()) {
                 fp.statusMessage = statusMessage;
             }
+            
             // 비어있으면 기존 fp.statusMessage 그대로 유지
-
             if (imagePath != null && !imagePath.isEmpty()) {
                 fp.profileImagePath = imagePath;
             }

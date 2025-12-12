@@ -19,7 +19,7 @@ public class ClientFriendsMenuPanel extends JPanel {
     private String myCurrentName;
     private String myCurrentStatusMessage = "";
 
-    public ClientFriendsMenuPanel(ClientMenuFrame parentFrame, String username, String ip_addr, String port_no, String profileImagePath) {
+    public ClientFriendsMenuPanel(ClientMenuFrame parentFrame, String username, String profileImagePath) {
         this.parentFrame = parentFrame;
         this.myCurrentName = username;
 
@@ -72,15 +72,7 @@ public class ClientFriendsMenuPanel extends JPanel {
         myHeader.getProfileButton().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            	MyProfileViewFrame pef = new MyProfileViewFrame(
-                        ClientFriendsMenuPanel.this,             
-                        parentFrame,                             
-                        myCurrentName,                            
-                        ip_addr,                                  
-                        port_no,                                  
-                        ClientFriendsMenuPanel.this.profileImagePath, 
-                        myCurrentStatusMessage                    
-                );
+            	MyProfileViewFrame pef = new MyProfileViewFrame(ClientFriendsMenuPanel.this, parentFrame, myCurrentName, ClientFriendsMenuPanel.this.profileImagePath, myCurrentStatusMessage);
                 pef.setVisible(true);
             }
         });

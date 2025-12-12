@@ -1,6 +1,9 @@
 import javax.swing.*;
 import java.io.IOException;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+
 
 // 로그인 후 보여지는 메인 메뉴 프레임 (화면 전환과 패널 관리만 담당)
 // ClientNetworkInterface를 구현해서 서버에서 온 메시지를 실제 UI 쪽으로 넘김.
@@ -11,8 +14,8 @@ public class ClientMenuFrame extends JFrame implements ClientNetworkInterface {
     private String ip_addr;
     private String port_no;
 
-    private ClientNetwork network;  // 서버 통신 담당 
-    private String[] currentUserList; // 최근에 받은 접속자 목록 (/list 결과 저장)
+    private ClientNetwork network; // 서버 통신 담당 
+    private List<String> currentUserList = new ArrayList<String>(); // 최근에 받은 접속자 목록 (/list 결과 저장)
 
     private ClientFriendsMenuPanel friendsPanel;
     private ClientChatingMenuPanel chatPanel;
@@ -32,8 +35,8 @@ public class ClientMenuFrame extends JFrame implements ClientNetworkInterface {
         String profileImagePath = "/Images/defaultprofileimage.png";
 
         // 친구, 채팅 패널 생성
-        friendsPanel = new ClientFriendsMenuPanel(this, this.username, ip_addr, port_no, profileImagePath);
-        chatPanel = new ClientChatingMenuPanel(this, this.username, ip_addr, port_no);
+        friendsPanel = new ClientFriendsMenuPanel(this, this.username, profileImagePath);
+        chatPanel = new ClientChatingMenuPanel(this, this.username);
 
         setContentPane(friendsPanel); // 처음 화면은 친구 목록 화면
         setVisible(true);
@@ -62,8 +65,11 @@ public class ClientMenuFrame extends JFrame implements ClientNetworkInterface {
     // 서버한테 받은 사용자 목록(/list)을 클라이언트에게 전달
     public void updateUserList(final List<String> users) {
     	
-        // 최근 목록을 배열로 저장해두고 싶으면 이렇게 저장
-        currentUserList = users.toArray(new String[0]);
+        // 최근 목록을 리스트로 저장해두고 싶으면 이렇게 저장
+    	currentUserList.clear();
+    	if (users != null) {
+    	    currentUserList.addAll(users);
+    	}
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -158,11 +164,8 @@ public class ClientMenuFrame extends JFrame implements ClientNetworkInterface {
     }
     
     // 현재 접속자 목록 반환 (채팅 패널에서 새 대화방 만들 때 사용)
-    public java.util.List<String> getCurrentUserList() {
-        if (currentUserList == null) {
-            return java.util.Collections.emptyList(); // 아직 /list를 한 번도 못 받았으면 빈 리스트를 돌려줌.
-        }
-        return java.util.Arrays.asList(currentUserList);
+    public List<String> getCurrentUserList() {
+        return Collections.unmodifiableList(currentUserList);
     }
 
 
@@ -180,7 +183,8 @@ public class ClientMenuFrame extends JFrame implements ClientNetworkInterface {
     }
 
 
-    public String getUsername() {
-        return username;
-    }
+    public String getUsername() { return username; }
+    public String getIp() { return ip_addr; }
+    public String getPort() { return port_no; }
+
 }

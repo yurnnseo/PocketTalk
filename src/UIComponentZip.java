@@ -11,6 +11,7 @@ public class UIComponentZip {
     private static final Color BUTTON_HOVER  = Color.decode("#E3D6F0");
 
     private UIComponentZip() {} 
+    
     // 텍스트 버튼
     public static JButton createTextButton(String text, int x, int y, int width, int height, Font font) {
         JButton btn = new JButton(text);
@@ -65,5 +66,18 @@ public class UIComponentZip {
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         return btn;
+    }
+    
+    // ,를 넣어서 채팅방 이름을 만드는 메소드
+    public static String makeChatRoomTitle(String membersString) {
+    	if (membersString == null || membersString.trim().isEmpty()) {
+            return "";
+        }
+    	
+        String[] names = membersString.trim().split("\\s+");
+
+        if (names.length == 1) return names[0];
+
+        return String.join(", ", names);
     }
 }

@@ -7,16 +7,24 @@ import javax.swing.border.LineBorder;
 import java.awt.Image;
 import java.io.File; 
 
+// 프로필 수정 내용을 입력하는 패널
 public class ProfileEditPanel extends JPanel {
+	
     private JButton okbutton, cancelbutton;
     private JTextField name, message;
 
     // 부모는 ProfileEditFrame
     private final ProfileEditFrame parentFrame;
+    
     private JLabel editProfileLabel;
    
     private String selectedImagePath;
     private JButton imageButton;
+    
+    // 텍스트 색상 정리
+    private static final Color TEXT_COLOR = Color.BLACK; // 실제 입력 텍스트
+    private static final Color PLACEHOLDER_COLOR = Color.GRAY; // placeholder
+
     
     public ProfileEditPanel(ProfileEditFrame parentFrame, String username, String ip_addr, String port_no, String currentStatusMessage, String currentProfileImagePath) {
         this.parentFrame = parentFrame;
@@ -45,13 +53,16 @@ public class ProfileEditPanel extends JPanel {
 
                 String newName = name.getText().trim();
                 String text = message.getText().trim();
+                
+                // placeholder면 빈 문자열로 처리
                 String statusToSend = (text.equals(placeholder) || text.isEmpty()) ? "" : text;
 
-                // 이미지 경로(selectedImagePath)도 같이 넘김
+                // 프레임에 저장 요청
                 parentFrame.onProfileSaved(newName, statusToSend, selectedImagePath);
             }
         });
 
+        // 취소 버튼 누르면 창을 닫음
         cancelbutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -61,16 +72,17 @@ public class ProfileEditPanel extends JPanel {
 
         // 이름 입력 필드
         name = new JTextField(username);
-        name.setForeground(Color.BLACK);
         name.setBorder(null);
         name.setOpaque(false);
         name.setBounds(33, 168, 150, 50);
+        name.setForeground(TEXT_COLOR);
         
         name.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
                 if (name.getText().equals(username)) {
                     name.setText("");
+                    name.setForeground(TEXT_COLOR);
                 }
             }
 
@@ -78,6 +90,7 @@ public class ProfileEditPanel extends JPanel {
             public void focusLost(FocusEvent e) {
                 if (name.getText().isEmpty()) {
                     name.setText(username);
+                    name.setForeground(TEXT_COLOR);
                 }
             }
         });
@@ -85,16 +98,15 @@ public class ProfileEditPanel extends JPanel {
         // 상태메시지 입력 필드 초기화
         if (currentStatusMessage == null || currentStatusMessage.isEmpty()) {
             message = new JTextField(placeholder);
-            message.setForeground(Color.GRAY);
-        } 
-        else {
+            message.setForeground(PLACEHOLDER_COLOR);
+        } else {
             message = new JTextField(currentStatusMessage);
-            message.setForeground(Color.BLACK);
+            message.setForeground(TEXT_COLOR);
         }
 
+        message.setBounds(33, 235, 150, 30);
         message.setBorder(null);
         message.setOpaque(false);
-        message.setBounds(33, 235, 150, 30);
         
         // 상태메시지 포커스 이벤트
         message.addFocusListener(new FocusAdapter() {
@@ -102,7 +114,7 @@ public class ProfileEditPanel extends JPanel {
             public void focusGained(FocusEvent e) {
                 if (message.getText().equals(placeholder)) {
                     message.setText("");
-                    message.setForeground(Color.BLACK);
+                    message.setForeground(TEXT_COLOR);
                 }
             }
 
@@ -110,56 +122,42 @@ public class ProfileEditPanel extends JPanel {
             public void focusLost(FocusEvent e) {
                 if (message.getText().isEmpty()) {
                     message.setText(placeholder);
-                    message.setForeground(Color.GRAY);
+                    message.setForeground(PLACEHOLDER_COLOR);
                 }
             }
         });
         
-        String initialPath;
         
-        if (currentProfileImagePath == null || currentProfileImagePath.isEmpty()) {
-            initialPath = "/Images/defaultprofileimage.png";
-        } 
-        else {
-            initialPath = currentProfileImagePath;
-        }
-        
-        selectedImagePath = initialPath;
+        selectedImagePath = (currentProfileImagePath == null || currentProfileImagePath.isEmpty()) ? "/Images/defaultprofileimage.png" : currentProfileImagePath;
 
-        Image img;
-        
-        if (initialPath.startsWith("/")) {
-            img = new ImageIcon(getClass().getResource(initialPath)).getImage();
-        } 
-        else {
-            img = new ImageIcon(initialPath).getImage();
-        }
-        
-        ImageIcon profileIcon = new ImageIcon(img.getScaledInstance(80, 80, Image.SCALE_SMOOTH));
+        Image img = selectedImagePath.startsWith("/") ? new ImageIcon(getClass().getResource(selectedImagePath)).getImage() : new ImageIcon(selectedImagePath).getImage();
 
-        imageButton = new JButton(profileIcon);
+        imageButton = new JButton(new ImageIcon(img.getScaledInstance(80, 80, Image.SCALE_SMOOTH)));
+
         imageButton.setContentAreaFilled(false);
         imageButton.setBorderPainted(false);
-        imageButton.setFocusPainted(false);
         imageButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         imageButton.setBounds(120, 70, 80, 80);
 
+    	// 이미지 선택
         imageButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 	            JFileChooser chooser = new JFileChooser();
 	            int result = chooser.showOpenDialog(ProfileEditPanel.this);
-	            
+	
 	            if (result == JFileChooser.APPROVE_OPTION) {
 	                File f = chooser.getSelectedFile();
 	                selectedImagePath = f.getAbsolutePath();
 	
 	                Image selImg = new ImageIcon(selectedImagePath).getImage();
-	                ImageIcon selIcon = new ImageIcon(selImg.getScaledInstance(80, 80, Image.SCALE_SMOOTH));
-	                imageButton.setIcon(selIcon);
+	                imageButton.setIcon(
+	                        new ImageIcon(selImg.getScaledInstance(80, 80, Image.SCALE_SMOOTH))
+	                );
 	            }
             }
         });
+        
 
         add(name);
         add(message);

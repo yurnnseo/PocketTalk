@@ -3,22 +3,24 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+// 내 프로필 내용을 실제로 그리는 패널
 public class MyProfileViewPanel extends JPanel {
 
     private final MyProfileViewFrame parentFrame;
+    
     private JButton editButton;
     
     private String username;          
     private String statusMessage = ""; 
     private String profileImagePath;  
 
-    private ProfileHeaderView header;  
-    private JLabel statusLabel; 
+    private ProfileHeaderView header; // 내 프로필 헤더
     
     public MyProfileViewPanel(MyProfileViewFrame parentFrame, String username, String ip_addr, String port_no, String profileImagePath, String currentStatusMessage) {
         this.parentFrame = parentFrame;
         this.username = username;         
 
+        // 상태메시지 null 방지
         if (currentStatusMessage != null) {
             this.statusMessage = currentStatusMessage;
         } 
@@ -30,7 +32,6 @@ public class MyProfileViewPanel extends JPanel {
         setOpaque(true);
         setBackground(Color.decode("#F9F9F9"));
 
-        // 프로필 헤더 (친구목록과 동일)
         if (profileImagePath == null || profileImagePath.isEmpty()) {
             this.profileImagePath = "/Images/defaultprofileimage.png";
         } 
@@ -38,12 +39,11 @@ public class MyProfileViewPanel extends JPanel {
             this.profileImagePath = profileImagePath;
         }
         
-        // 프로필 헤더 (친구목록과 동일)
+        // 프로필 헤더 (사진 + 이름 + 상태메시지)
         header = new ProfileHeaderView(this.username, this.statusMessage, this.profileImagePath, 60, 60, ProfileHeaderView.Orientation.VERTICAL);
+        
         Dimension hSize = header.getPreferredSize();
-        int headerX = 66;
-        int headerY = 230;
-        header.setBounds(headerX, headerY, hSize.width, hSize.height);
+        header.setBounds(66, 230, hSize.width, hSize.height);
         add(header);
 
         // 편집 버튼 
@@ -84,11 +84,14 @@ public class MyProfileViewPanel extends JPanel {
              header.setMessage(newStatus); // 상태메시지 라벨 갱신
         }
 
+        // 상단 친구 목록 헤더도 갱신
         parentFrame.onMyProfileUpdated(newName, newStatus);
+        
         revalidate();
         repaint();
     }
     
+    // 이미지까지 같이 변경하는 경우
     public void updateProfile(String newName, String newStatus, String newImagePath) {
         if (newImagePath != null && !newImagePath.isEmpty()) {
             this.profileImagePath = newImagePath;

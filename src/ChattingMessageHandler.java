@@ -1,128 +1,157 @@
-// 채팅패널 내 메시지 파싱, 요청 처리 분리
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 
 public class ChattingMessageHandler {
- private static final String EMOTICON_HAPPY = "/Images/Emoticon_happy.png";
- private static final String EMOTICON_HELLO = "/Images/Emoticon_hello.png";
- private static final String EMOTICON_REST = "/Images/Emoticon_rest.png";
- private static final String EMOTICON_SAD = "/Images/Emoticon_sad.png";
 
- private final ChattingPanel chattingPanel;
- private final String currentUserName;
+    // 이모티콘 PNG 경로
+    private static final String EMOTICON_HAPPY = "/Images/Emoticon_happy.png";
+    private static final String EMOTICON_HELLO = "/Images/Emoticon_hello.png";
+    private static final String EMOTICON_REST  = "/Images/Emoticon_rest.png";
+    private static final String EMOTICON_SAD   = "/Images/Emoticon_sad.png";
 
- public ChattingMessageHandler(ChattingPanel panel, String userName) {
-     this.chattingPanel = panel;
-     this.currentUserName = userName;
- }
+    private final ChattingPanel panel; // 이 핸들러를 통해 실제로 패널에 출력
+    private final String myName;
 
+    public ChattingMessageHandler(ChattingPanel panel, String myName) {
+        this.panel = panel;
+        this.myName = myName;
+    }
 
- public void processMessage(String fullMessage) {
-     if (fullMessage == null) return;
-     String msg = fullMessage.trim();
-     if (msg.isEmpty()) return;
+    // 서버에서 받은 "한 줄 메시지" 분석
+    public void processMessage(String fullMessage) {
+        if (fullMessage == null) return;
 
-     String sender = null;
-     String content = msg;
-     boolean isMine = false;
+        String msg = fullMessage.trim();
+        if (msg.isEmpty()) return;
 
-     // 1. 발신자 및 내용 분리 (예: "UserA : /msg content")
-     int idx = msg.indexOf(" : ");
-     if (idx > 0) {
-         sender = msg.substring(0, idx).trim();
-         content = msg.substring(idx + 3).trim();
-         isMine = sender.equals(currentUserName);
-     }
+        // 기본값
+        String sender = null;
+        String content = msg;
+        boolean isMine = false; // 내가 보낸 메시지인지, 아닌지 결정
 
-     // 2. 커맨드 처리 (이모티콘, 이미지, 게임 관련)
-     if (content.startsWith("/")) {
-         // 커맨드 문자열 (예: "/emoji happy")
-         String[] parts = content.split("\\s+", 2);
-         String command = parts[0];
-         String commandData = parts.length > 1 ? parts[1].trim() : "";
-         
-         // 각 커맨드별 처리 메서드 호출
-         if (command.equals("/emoji")) {
-             handleEmojiMessage(commandData, sender, isMine);
-         } else if (command.equals("/image")) {
-             handleImageMessage(commandData, sender, isMine);
-         } else if (command.equals("/game_start")) {
-             handleGameStart(commandData);
-         } else if (command.equals("/game_prompt")) {
-             handleGamePrompt(commandData);
-         } else if (command.equals("/game_canceled")) {
-             handleGameCanceled(commandData);
-         } else {
-             // 알 수 없는 커맨드는 일반 텍스트로 처리
-             displayTextMessage((sender != null ? sender + " : " : "") + content, isMine);
-         }
-     } else {
-         // 3. 일반 텍스트 메시지 처리
-         String bubbleText;
-         if (sender != null) bubbleText = sender + " : " + content;
-         else bubbleText = content;
-         
-         displayTextMessage(bubbleText, isMine);
-     }
- }
- 
- // 커맨드별 처리 메서드
+        // "발신자 : 내용" 형태면 발신자와 내용을 분리
+        int idx = msg.indexOf(" : ");
+        if (idx > 0) {
+            sender = msg.substring(0, idx).trim();
+            content = msg.substring(idx + 3).trim();
+            isMine = sender.equals(myName);
+        }
 
- private void handleEmojiMessage(String code, String sender, boolean isMine) {
-     String path;
-     switch (code) {
-         case "happy": path = EMOTICON_HAPPY; break;
-         case "hello": path = EMOTICON_HELLO; break;
-         case "rest":  path = EMOTICON_REST;  break;
-         case "sad":   path = EMOTICON_SAD;   break;
-         default:
-             // 알 수 없는 코드는 텍스트로 표시
-             displayTextMessage((sender != null ? sender + " : " : "") + "/emoji " + code, isMine);
-             return;
-     }
+        // "/"로 시작하면 커맨드라고 판단
+        if (content.startsWith("/")) {
+            handleCommand(sender, content, isMine);
+            return;
+        }
 
-     ImageIcon icon = chattingPanel.loadScaledIcon(path, 90, 90);
-     if (icon != null) {
-         chattingPanel.addImageMessage(icon, isMine); 
-     } else {
-         displayTextMessage((sender != null ? sender + " : " : "") + "[이모티콘 로드 실패: " + code + "]", isMine);
-     }
- }
+        // 일반 텍스트
+        String bubbleText = (sender != null) ? (sender + " : " + content) : content;
+        showText(bubbleText, isMine);
+    }
 
- private void handleImageMessage(String filePath, String sender, boolean isMine) {
-     ImageIcon icon = chattingPanel.loadScaledIconFromFile(filePath, 180, 180);
-     if (icon != null) {
-         chattingPanel.addImageMessage(icon, isMine);
-     } else {
-         displayTextMessage((sender != null ? sender + " : " : "") + "[이미지 로드 실패: " + filePath + "]", isMine);
-     }
- }
+    // "/emoji happy" 같은 커맨드 처리 메소드
+    private void handleCommand(String sender, String content, boolean isMine) {
+        
+    	String[] parts = content.split("\\s+", 2);
+    	
+        String command = parts[0]; // 명령어 종류
+        String data = (parts.length > 1) ? parts[1].trim() : "";
 
- private void handleGameStart(String gameData) {
-     // 대기 다이얼로그 닫기 및 게임 프레임 열기
-     chattingPanel.closeLoadingDialog(); 
-     chattingPanel.openGameFrame(gameData);
- }
- 
- private void handleGamePrompt(String senderName) {
-     // 상대방에게 게임 요청 알림 메시지 출력
-     displayTextMessage(
-         "[" + senderName + "] 님이 게임을 요청했습니다. 게임을 시작하려면 [게임 버튼]을 다시 눌러주세요.",
-         false
-     );
- }
- 
- private void handleGameCanceled(String canceledName) {
-     // 대기 다이얼로그 닫기 및 취소 메시지 출력
-     chattingPanel.closeLoadingDialog(); 
-     displayTextMessage(
-         canceledName + " 님이 게임 요청을 취소했습니다.",
-         false
-     );
- }
- 
- //UI 업데이트 (ChattingPanel의 메서드를 래핑)
- private void displayTextMessage(String text, boolean isMine) {
-     chattingPanel.addTextMessage(text, isMine); // ChattingPanel의 public 메서드 호출
- }
+        // 명령어 종류에 따라 처리함.
+        switch (command) {
+            case "/emoji":
+                handleEmoji(data, sender, isMine);
+                break;
+
+            case "/image":
+                handleImage(data, sender, isMine);
+                break;
+
+            case "/game_start":
+                handleGameStart(data);
+                break;
+
+            case "/game_prompt":
+                handleGamePrompt(data); // data는 요청한 사람 이름
+                break;
+
+            case "/game_canceled":
+                handleGameCanceled(data); // data는 취소한 사람 이름
+                break;
+
+            default:
+                // 모르는 커맨드는 텍스트로 보여줌
+                String text = (sender != null) ? (sender + " : " + content) : content;
+                showText(text, isMine);
+        }
+    }
+
+    // 이모티콘 메시지 처리
+    private void handleEmoji(String code, String sender, boolean isMine) {
+        String path = null;
+        if (code.equals("happy")) path = EMOTICON_HAPPY;
+        else if (code.equals("hello")) path = EMOTICON_HELLO;
+        else if (code.equals("rest")) path = EMOTICON_REST;
+        else if (code.equals("sad")) path = EMOTICON_SAD;
+
+        if (path == null) {
+            String text = (sender != null) ? (sender + " : " + "/emoji " + code) : ("/emoji " + code);
+            showText(text, isMine);
+            return;
+        }
+
+        ImageIcon icon = UIComponentZip.loadScaledIcon(path, 90, 90);
+        
+        if (icon != null) {
+            showImage(icon, isMine);
+        } 
+        else {
+            showText("[이모티콘 로드 실패: " + code + "]", isMine);
+        }
+    }
+
+    // 이미지 메시지 처리
+    private void handleImage(String filePath, String sender, boolean isMine) {
+        
+    	ImageIcon icon = panel.loadScaledIconFromFile(filePath, 180, 180);
+        
+    	if (icon != null) {
+            showImage(icon, isMine);
+        } 
+        else {
+            String text = (sender != null) ? (sender + " : [이미지 로드 실패: " + filePath + "]") : ("[이미지 로드 실패: " + filePath + "]");
+            showText(text, isMine);
+        }
+    }
+
+    // 게임 시작 처리
+    private void handleGameStart(String gameData) {
+        // 게임 시작하면 대기창 닫고 게임 프레임 열기
+        SwingUtilities.invokeLater(() -> {
+            panel.closeLoadingDialog();
+            panel.openGameFrame(gameData);
+        });
+    }
+
+    // 상대방이 게임을 요청했다는 알림 처리
+    private void handleGamePrompt(String senderName) {
+        showText("[" + senderName + "] 님이 게임을 요청했습니다.", false); // 게임 요청 왔다는 안내 메시지
+    }
+
+    // 게임 요청 취소 처리
+    private void handleGameCanceled(String canceledName) {
+        SwingUtilities.invokeLater(() -> {
+            panel.closeLoadingDialog();
+            panel.addTextMessage(canceledName + " 님이 게임 요청을 취소했습니다.", false);
+        });
+    }
+
+    // 텍스트 말풍선 출력
+    private void showText(String text, boolean isMine) {
+        SwingUtilities.invokeLater(() -> panel.addTextMessage(text, isMine));
+    }
+
+    // 이미지 말풍선 출력
+    private void showImage(ImageIcon icon, boolean isMine) {
+        SwingUtilities.invokeLater(() -> panel.addImageMessage(icon, isMine));
+    }
 }

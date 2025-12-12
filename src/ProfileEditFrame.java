@@ -1,11 +1,12 @@
-// 프로필 수정 프레임
 import java.awt.Window;
 import javax.swing.JFrame;
 
+// 프로필 수정 화면을 띄우는 프레임
 public class ProfileEditFrame extends JFrame {
 
     private final MyProfileViewPanel parentPanel;
     private final MyProfileViewFrame parentFrame;
+    
     private final String currentProfileImagePath;
 
     public ProfileEditFrame(MyProfileViewFrame parentFrame, MyProfileViewPanel parentPanel, String username, String ip_addr, String port_no, String profileImagePath, String currentStatusMessage) {
@@ -19,6 +20,7 @@ public class ProfileEditFrame extends JFrame {
         
         // ProfileEditPanel의 부모는 이 프레임
         setContentPane(new ProfileEditPanel(this, username, ip_addr, port_no, currentStatusMessage, currentProfileImagePath));
+        
         setSize(330, 490);
     }
 

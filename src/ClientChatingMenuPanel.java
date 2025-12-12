@@ -15,15 +15,11 @@ public class ClientChatingMenuPanel extends JPanel {
     
     // 내 정보
     private final String username;
-    private final String ip_addr;
-    private final String port_no;
 
     
-    public ClientChatingMenuPanel(ClientMenuFrame parentFrame, String username, String ip_addr, String port_no) {
+    public ClientChatingMenuPanel(ClientMenuFrame parentFrame, String username) {
     	this.parentFrame = parentFrame;
         this.username = username;
-        this.ip_addr = ip_addr;
-        this.port_no = port_no;
     	
     	setLayout(null);
         setBackground(Color.decode("#F9F9F9"));

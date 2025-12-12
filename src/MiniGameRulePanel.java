@@ -37,20 +37,21 @@ public class MiniGameRulePanel extends JPanel{
 	    
 	}
 	
+	// 배경 그리기
 	@Override
 	    protected void paintComponent(Graphics g) {
 	        super.paintComponent(g);
 	        
-	        //제목 배경
+	        // 제목 배경
 	        g.setColor(Color.decode("#D7C6E9"));
 	        g.fillRect(0, 0, getWidth(), 130);
 	        
-	        //타이틀 텍스트
+	        // 타이틀 텍스트
 	        g.setColor(Color.BLACK);
 	        g.setFont(title);
 	        g.drawString("게임 방법", 265, 85);
 	        
-	        //설명 텍스트
+	        // 설명 텍스트
 	        g.setFont(text);
 	        g.drawString("자신의 게임 보드는 항상 오른쪽", 80, 220);
 
@@ -70,7 +71,7 @@ public class MiniGameRulePanel extends JPanel{
 	        int targetWidth = g.getFontMetrics().stringWidth(target);
 	        int textHeight = g.getFontMetrics().getHeight();
 
-	        // 동그라미 치기
+	        // 동그라미 그리기
 	        int circleX = baseX + preWidth - 5;
 	        int circleY = baseY - textHeight + 5;
 	        int circleW = targetWidth + 10;
@@ -85,7 +86,7 @@ public class MiniGameRulePanel extends JPanel{
 	        
 	        g.drawString(rule, 80, 430);
 
-	        //밑줄 강조
+	        // 밑줄 강조
 	        int underlineX = 80;
 	        int underlineY = 435;
 	        int underlineWidth = g.getFontMetrics().stringWidth("제한시간 30초");

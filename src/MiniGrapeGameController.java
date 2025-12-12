@@ -38,7 +38,7 @@ public class MiniGrapeGameController {
 
     // 선택된 포도 제거 시도
     public void tryRemoveSelected() {
-        List<JLabel> selected = selectionController.getSelected();
+        List<JLabel> selected = selectionController.getSelected(); // 선택 레이블들
         int total = gameManager.removeIfSumIsFive(selected);
 
         if (total == 5 && !selected.isEmpty()) {
@@ -48,7 +48,7 @@ public class MiniGrapeGameController {
 
             // 서버로 전달할 좌표 문자열 생성
             String coordString = makeCoordString(selected);
-
+            
             uiPanel.sendRemoveToServer(userName, opponentName, coordString);
 
             // 더 이상 지울 수 있는 조합 없으면 리필 요청
@@ -58,11 +58,12 @@ public class MiniGrapeGameController {
             }
         }
 
+        // 선택 초기화
         selectionController.clearSelection();
         uiPanel.repaint();
     }
 
-    // 서버에서 상대가 지운 정보를 반영
+    // 서버에서 상대/내가 지운 정보를 반영
     public void applyRemoteRemove(String owner, String coordString) {
         JLabel[][] board = owner.equals(userName)
                 ? rightGrid.getBoard()
@@ -99,6 +100,7 @@ public class MiniGrapeGameController {
         for (int r = 0; r < MiniGrapeGameManager.ROWS; r++) {
             for (int c = 0; c < MiniGrapeGameManager.COLS; c++) {
                 JLabel g = board[r][c];
+                
                 if (g == null) continue;
                 g.putClientProperty("value", values[idx]);
 
@@ -111,6 +113,7 @@ public class MiniGrapeGameController {
         uiPanel.repaint();
     }
 
+    // 선택된 JLabel들 좌표 문자열로 변환
     private String makeCoordString(List<JLabel> selected) {
         StringBuilder sb = new StringBuilder();
         for (JLabel grape : selected) {

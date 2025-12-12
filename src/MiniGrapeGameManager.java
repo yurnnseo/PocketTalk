@@ -19,12 +19,15 @@ public class MiniGrapeGameManager {
     // 선택된 포도들의 합 계산 후, 합이 5이면 제거
     public int removeIfSumIsFive(List<JLabel> selected) {
         int total = 0;
+        
         for (JLabel grape : selected) {
             Object v = grape.getClientProperty("value");
             if (v instanceof Integer) {
                 total += (Integer) v;
             }
         }
+        
+  
         if (total == 5 && !selected.isEmpty()) {
             for (JLabel grape : selected) {
                 removeGrape(grape);
@@ -37,13 +40,16 @@ public class MiniGrapeGameManager {
     public void removeGrape(JLabel grape) {
         if (grape == null) return;
 
+        // 위치 정보 가져옴
         int r = (int) grape.getClientProperty("row");
         int c = (int) grape.getClientProperty("col");
         boolean isLeft = (boolean) grape.getClientProperty("isLeft");
 
+        // ui에서 제거
         Container parent = grape.getParent();
         if (parent != null) parent.remove(grape);
 
+        // 보드 데이터에서 제거
         if (isLeft) {
             leftBoard[r][c] = null;
         } else {
@@ -51,7 +57,7 @@ public class MiniGrapeGameManager {
         }
     }
 
-    // 오른쪽 보드(내 판)에 "합이 5가 되는 사각형 선택"이 실제로 가능한지 확인
+    // 오른쪽 보드(내 판)에 "합이 5가 되는 사각형 선택"이 실제로 가능한지 확인(없으면 리필)
     public boolean hasAnyMoveOnGameBoard() {
         if (rightBoard == null) return false;
 
@@ -59,18 +65,18 @@ public class MiniGrapeGameManager {
         for (int r1 = 0; r1 < ROWS; r1++) {
             for (int c1 = 0; c1 < COLS; c1++) {
 
-                // 모든 끝점 (r2, c2) - r2 >= r1, c2 >= c1 인 직사각형
+                // 끝점 (r2, c2) : r2 >= r1, c2 >= c1 이면 직사각형 영역
                 for (int r2 = r1; r2 < ROWS; r2++) {
                     for (int c2 = c1; c2 < COLS; c2++) {
 
                         int sum = 0;
                         int count = 0;
 
-                        // (r1, c1) ~ (r2, c2) 사각형 안의 포도들 합 계산
+                        // 사각형 내부의 포도 값들 합 계산
                         for (int r = r1; r <= r2; r++) {
                             for (int c = c1; c <= c2; c++) {
                                 JLabel g = rightBoard[r][c];
-                                if (g == null) continue; // 빈 칸은 선택 안 된다고 보고 무시
+                                if (g == null) continue; // 빈 칸은 선택 불가로 제외
 
                                 Object v = g.getClientProperty("value");
                                 if (!(v instanceof Integer)) continue;
@@ -89,7 +95,7 @@ public class MiniGrapeGameManager {
             }
         }
 
-        // 위 모든 사각형 중 합이 5인 경우가 하나도 없으면 → 더 이상 지울 수 없음
+        // 합이 5인 경우가 하나도 없으면 리필 필요함
         return false;
     }
 

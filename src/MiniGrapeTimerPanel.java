@@ -1,4 +1,4 @@
-// 미니게임 타이머 시간 계산
+// 미니게임 타이머 시간 계산, 표시 ui
 import javax.swing.*;
 import java.awt.*;
 
@@ -6,7 +6,7 @@ public class MiniGrapeTimerPanel extends JPanel {
 
     private int timeRemaining;      // 남은 시간
     private final int totalTime;    // 전체 시간
-    private JProgressBar progressBar;
+    private JProgressBar progressBar; // 화면 상단에 표시할 시간 표시 바
     private Timer timer;
     private Runnable onTimeEnd;
 
@@ -18,6 +18,7 @@ public class MiniGrapeTimerPanel extends JPanel {
         setLayout(new BorderLayout());
         setOpaque(false);
 
+        // 기본 설정
         progressBar = new JProgressBar(0, totalTime);
         progressBar.setValue(totalTime);
         progressBar.setForeground(Color.decode("#e3d6f0"));
@@ -29,35 +30,38 @@ public class MiniGrapeTimerPanel extends JPanel {
         updateProgressBarText();
         add(progressBar, BorderLayout.CENTER);
 
-        startTimer();   // 생성되면 바로 1초씩 줄어듦
+        startTimer();   // 생성 시 자동 시작
     }
 
+    // 스윙타이머
     private void startTimer() {
-        timer = new Timer(1000, e -> {
+        timer = new Timer(1000, e -> { // 1초 간격
             if (timeRemaining > 0) {
                 timeRemaining--;
                 progressBar.setValue(timeRemaining);
                 updateProgressBarText();
-            } else {
-                timer.stop();
+            } else { // 종료
+                timer.stop(); 
                 progressBar.setValue(0);
                 progressBar.setString("시간 종료!");
 
                 if (onTimeEnd != null) {
-                    onTimeEnd.run();   // 시간이 끝났을 때 외부에서 전달한 작업 실행
+                    onTimeEnd.run();   // 시간이 끝났을 때 외부에서 전달된 콜백
                 }
             }
         });
+        
         timer.start();
     }
 
-    // 필요하면 중간에 멈출 때 사용
+    // 임의 중단 시
     public void stopTimer() {
         if (timer != null) {
             timer.stop();
         }
     }
 
+    // 바에 시간 텍스트 출력
     private void updateProgressBarText() {
         int minutes = timeRemaining / 60;
         int seconds = timeRemaining % 60;

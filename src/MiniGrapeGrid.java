@@ -19,7 +19,7 @@ public class MiniGrapeGrid {
     private int gapY;
 
     private ImageIcon[] icons;
-    private boolean isLeftBoard;
+    private boolean isLeftBoard; // 보드 위치 구분
 
     public MiniGrapeGrid(
             JPanel parent,
@@ -51,7 +51,7 @@ public class MiniGrapeGrid {
         if (index >= 0 && index < icons.length) {
             return icons[index];
         }
-        // 인덱스가 잘못된 경우 방어적으로 처리
+        // 인덱스가 잘못된 경우 기본 아이콘 반환
         return icons[0]; 
     }
     
@@ -67,6 +67,7 @@ public class MiniGrapeGrid {
         }
     }
 
+    // valuse 배열의 값 읽어서 그리드 그리기
     public int fillFromValues(int[] values, int startIndex,
                               MouseAdapter clickListener,
                               MouseMotionAdapter motionListener) {
@@ -77,14 +78,13 @@ public class MiniGrapeGrid {
 
         for (int r = 0; r < ROWS; r++) {
             for (int c = 0; c < COLS; c++) {
-                if (index >= values.length) {
-                    // 값이 부족하면 그냥 종료
+                if (index >= values.length) { // 길이 초과시 종료             
                     return index;
                 }
                 int grapeValue = values[index++];
                 int iconIndex = grapeValue - 1;
                 if (iconIndex < 0 || iconIndex >= icons.length) {
-                    iconIndex = 0; // 방어코드
+                    iconIndex = 0;
                 }
 
                 ImageIcon icon = icons[iconIndex];
@@ -97,11 +97,13 @@ public class MiniGrapeGrid {
                         height
                 );
 
-                grapeLabel.putClientProperty("value", grapeValue);
+                // 게임 정보 저장
+                grapeLabel.putClientProperty("value", grapeValue); // 포도 숫자
                 grapeLabel.putClientProperty("row", r);
                 grapeLabel.putClientProperty("col", c);
                 grapeLabel.putClientProperty("isLeft", isLeftBoard);
 
+                // 마우스 이벤트
                 if (clickListener != null) {
                     grapeLabel.addMouseListener(clickListener);
                 }

@@ -189,12 +189,18 @@ public class ChattingPanel extends JPanel {
 
     // 이모티콘 버튼 눌렀을 때 선택 창 띄우기
     private void onClickSendEmoji() {
-        ChatEmoticonDialog dialog = new ChatEmoticonDialog(parentFrame, roomId);
+    	
+    	JFrame owner = (JFrame) SwingUtilities.getWindowAncestor(this);
+    	
+        ChatEmoticonDialog dialog = new ChatEmoticonDialog(owner, parentFrame, roomId);
 
+        dialog.pack(); // 크기 먼저 계산
+        
         // 채팅창 오른쪽 아래에 뜨도록 위치 계산
         Point p = this.getLocationOnScreen();
-        int x = p.x + this.getWidth() - dialog.getWidth();
-        int y = p.y + this.getHeight() - dialog.getHeight();
+
+        int x = p.x + this.getWidth() - dialog.getWidth() - 10;  
+        int y = p.y + this.getHeight() - dialog.getHeight() - 10; 
 
         dialog.setLocation(x, y);
         dialog.setVisible(true);
@@ -204,7 +210,8 @@ public class ChattingPanel extends JPanel {
     private void onClickPlayGame() {
         int memberCount = getGroupMemberCount();
         if (memberCount != 2) {
-            JOptionPane.showMessageDialog(parentFrame, "현재 채팅방은 " + memberCount + "명으로, 1:1 게임만 가능합니다.", "게임 참가 불가", JOptionPane.WARNING_MESSAGE);
+        	JFrame owner = (JFrame) SwingUtilities.getWindowAncestor(this);
+            JOptionPane.showMessageDialog(owner, "현재 채팅방은 " + memberCount + "명으로, 1:1 게임만 가능합니다.", "게임 참가 불가", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -240,8 +247,9 @@ public class ChattingPanel extends JPanel {
 
     // 게임 대기창 띄우기
     private void showLoadingDialog(String participants) {
+    	JFrame owner = (JFrame) SwingUtilities.getWindowAncestor(this);
     	
-        loadingDialog = new JDialog(parentFrame, "잠시 대기", false);
+        loadingDialog = new JDialog(owner, "잠시 대기", false);
         loadingDialog.add(new JLabel("참가자를 기다리는 중...", SwingConstants.CENTER));
         loadingDialog.setSize(200, 150);
         

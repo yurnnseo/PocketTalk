@@ -1,3 +1,4 @@
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -26,8 +27,10 @@ public class MessageContainerPanel extends JPanel{
     
     // 텍스트 말풍선 추가
     public void addMessage(String messageText, boolean isSent) {
+    	int maxBubbleWidth = (int)(getWidth() * 0.65); // 원하는 비율
+        if (maxBubbleWidth <= 0) maxBubbleWidth = 260; // 초기 보호값
     	
-    	MessagePanel messagepanel = new MessagePanel(messageText, isSent, customFont); //말풍선 생성
+        MessagePanel messagepanel = new MessagePanel(messageText, isSent, customFont, maxBubbleWidth); //말풍선 생성
     	
     	add(createAlignPanel(isSent, messagepanel));
 
@@ -49,7 +52,7 @@ public class MessageContainerPanel extends JPanel{
     
     // 좌/우 정렬용 컨테이너 만들기
     private JPanel createAlignPanel(boolean isSent, JComponent message) {
-        JPanel alignPanel = new JPanel() {
+    	JPanel alignPanel = new JPanel(new BorderLayout()) {
             @Override
             public Dimension getMaximumSize() {
                 Dimension d = getPreferredSize();
@@ -58,12 +61,14 @@ public class MessageContainerPanel extends JPanel{
             }
         };
 
-        alignPanel.setLayout(new FlowLayout(isSent ? FlowLayout.RIGHT : FlowLayout.LEFT, 0, 3));
+        alignPanel.setOpaque(true);
         alignPanel.setBackground(Color.decode("#F9F9F9"));
-        alignPanel.setBorder(new EmptyBorder(2, 0, 2, 0));
+        alignPanel.setBorder(new EmptyBorder(2, 8, 2, 8));
 
-        alignPanel.add(message);
-        alignPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, alignPanel.getPreferredSize().height));
+        message.setMaximumSize(message.getPreferredSize());
+
+        if (isSent) alignPanel.add(message, BorderLayout.EAST); // 오른쪽 붙이기
+        else        alignPanel.add(message, BorderLayout.WEST); // 왼쪽 붙이기
 
         return alignPanel;
     }

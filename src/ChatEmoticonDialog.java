@@ -3,7 +3,7 @@ import javax.swing.*;
 
 public class ChatEmoticonDialog extends JDialog {
 
-    private final ClientMenuFrame parentFrame;
+	private final ClientMenuFrame sender;
     private final String roomId;
 
     // 이모티콘 PNG 경로 
@@ -12,12 +12,14 @@ public class ChatEmoticonDialog extends JDialog {
     private static final String EMOTICON_REST  = "/Images/Emoticon_rest.png";
     private static final String EMOTICON_SAD   = "/Images/Emoticon_sad.png";
 
-    public ChatEmoticonDialog(ClientMenuFrame parentFrame, String roomId) {
+    public ChatEmoticonDialog(Window owner, ClientMenuFrame sender, String roomId) {
     	
-        super(parentFrame, "이모티콘", true); 
-        this.parentFrame = parentFrame;
+    	super(owner); 
+    	this.sender = sender;
         this.roomId = roomId;
-
+        
+        setTitle("이모티콘");
+        setModal(false); // 앞으로 뜨는 걸 막음    
         setLayout(new BorderLayout());
 
         JPanel emojiPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 20));
@@ -46,7 +48,7 @@ public class ChatEmoticonDialog extends JDialog {
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         btn.addActionListener(e -> {
-            parentFrame.sendToServer("/msg " + roomId + " /emoji " + code + "\n");
+            sender.sendToServer("/msg " + roomId + " /emoji " + code + "\n");
             dispose();
         });
 

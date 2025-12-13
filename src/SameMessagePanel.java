@@ -20,14 +20,6 @@ public abstract class SameMessagePanel extends JPanel {
         setBorder(new EmptyBorder(8, 12, 8, 12)); // 말풍선 안쪽 여백
     }
 
-    // 메시지 패널이 가로로 꽉 차게
-    @Override
-    public Dimension getMaximumSize() {
-        Dimension d = getPreferredSize();
-        d.width = Integer.MAX_VALUE; // 가로는 컨테이너가 늘릴 수 있게
-        return d;
-    }
-
     // 말풍선 배경을 그림
     @Override
     protected void paintComponent(Graphics g) {

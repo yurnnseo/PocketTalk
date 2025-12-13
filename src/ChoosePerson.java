@@ -103,6 +103,8 @@ public class ChoosePerson extends JFrame {
                 dispose();
             }
         });
+        
+        setLocationRelativeTo(parentFrame);
 
     }
 }

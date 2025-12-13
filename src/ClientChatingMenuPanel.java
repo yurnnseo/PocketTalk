@@ -110,7 +110,5 @@ public class ClientChatingMenuPanel extends JPanel {
         g.setColor(Color.decode("#E3D6F0"));
         g.fillRect(0, 0, 75, getHeight());
 
-        g.setColor(Color.LIGHT_GRAY);
-        g.fillRect(75, 150, getWidth() - 60, 1);
     }
 }

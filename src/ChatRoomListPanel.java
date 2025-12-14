@@ -22,6 +22,17 @@ public class ChatRoomListPanel extends JPanel {
         setOpaque(false);
     }
     
+    // roomId 기준으로 채팅방 정보 업데이트
+    public void updateRoomMembers(String roomId, List<String> newMembers) {
+        for (ChatRoomInfo room : rooms) {
+            if (room.getRoomId().equals(roomId)) {
+                room.setMembers(newMembers);
+                break;
+            }
+        }
+        refreshView();
+    }
+
     // 새 채팅방을 채팅 목록에 추가할 때 호출
     public void addRoom(String roomId, String creatorName, String membersString) {
 
